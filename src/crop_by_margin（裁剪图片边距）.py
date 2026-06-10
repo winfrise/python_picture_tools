@@ -72,8 +72,8 @@ def batch_crop_by_margins(input_dir, output_dir, margin_params):
 
 # --- 测试调用示例 ---
 if __name__ == "__main__":
-    input_path="/Users/teacher/Desktop/《临床基础检验技术》复习要点/《临床基础检验技术》复习要点_extracted_images"
-    output_path="/Users/teacher/Desktop/《临床基础检验技术》复习要点/222"
+    input_path="/Users/teacher/Desktop/《临床基础检验技术》复习要点/222/page1_img1.jpeg"
+    output_path="/Users/teacher/Desktop/《临床基础检验技术》复习要点/222/page1111333444.jpeg"
 
     params = {
         "top": 50,      # 从顶部裁剪掉 50px
@@ -83,14 +83,15 @@ if __name__ == "__main__":
     }
 
     # 1. 单个裁剪
-    # crop_by_margins(
-    #     input_path = input_path,
-    #     output_path=output_path,
+    crop_by_margins(
+        input_path = input_path,
+        margin_params=params,
+        output_path = output_path
+    )
+
+    # 2. 批量裁剪
+    # batch_crop_by_margins(
+    #     input_dir=input_path,
+    #     output_dir=output_path,
     #     margin_params=params
     # )
-    # 2. 批量裁剪
-    batch_crop_by_margins(
-        input_dir=input_path,
-        output_dir=output_path,
-        margin_params=params
-    )

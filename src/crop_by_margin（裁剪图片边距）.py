@@ -2,12 +2,12 @@ import os
 from PIL import Image, UnidentifiedImageError
 
 
-def crop_by_margins(image_path, margin_params, output_path):
+def crop_by_margins(input_path, margin_params, output_path):
     """
     核心功能：根据四周边缘的裁剪厚度来裁剪单张图片（保持不变）
     """
     try:
-        original_img = Image.open(image_path)
+        original_img = Image.open(input_path)
         width, height = original_img.size
 
         # 提取参数
@@ -27,10 +27,10 @@ def crop_by_margins(image_path, margin_params, output_path):
         # 执行裁剪并保存
         cropped_img = original_img.crop(bbox)
         cropped_img.save(output_path)
-        print(f"✅ 成功裁剪: {os.path.basename(image_path)}")
+        print(f"✅ 成功裁剪: {os.path.basename(input_path)}")
 
     except Exception as e:
-        print(f"❌ 处理失败 {os.path.basename(image_path)}: {e}")
+        print(f"❌ 处理失败 {os.path.basename(input_path)}: {e}")
 
 
 def batch_crop_by_margins(input_dir, output_dir, margin_params):
@@ -62,7 +62,7 @@ def batch_crop_by_margins(input_dir, output_dir, margin_params):
 
             # --- 关键：直接调用核心函数，不重复实现逻辑 ---
             crop_by_margins(
-                image_path=input_path,
+                input_path=input_path,
                 margin_params=margin_params,
                 output_path=output_path
             )
@@ -72,8 +72,8 @@ def batch_crop_by_margins(input_dir, output_dir, margin_params):
 
 # --- 测试调用示例 ---
 if __name__ == "__main__":
-    input_path="/Users/teacher/Desktop/Input_Folder",
-    output_path="/Users/teacher/Desktop/Output_Folder",
+    input_path="/Users/teacher/Desktop/《临床基础检验技术》复习要点/《临床基础检验技术》复习要点_extracted_images"
+    output_path="/Users/teacher/Desktop/《临床基础检验技术》复习要点/222"
 
     params = {
         "top": 50,      # 从顶部裁剪掉 50px
@@ -83,14 +83,14 @@ if __name__ == "__main__":
     }
 
     # 1. 单个裁剪
-    crop_by_margins(
-        input_path = input_path,
-        output_path=output_path,
-        margin_params=params
-    )
+    # crop_by_margins(
+    #     input_path = input_path,
+    #     output_path=output_path,
+    #     margin_params=params
+    # )
     # 2. 批量裁剪
     batch_crop_by_margins(
-        input_dir="/Users/teacher/Desktop/Input_Folder",
-        output_dir="/Users/teacher/Desktop/Output_Folder",
+        input_dir=input_path,
+        output_dir=output_path,
         margin_params=params
     )

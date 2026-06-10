@@ -77,8 +77,8 @@ if __name__ == "__main__":
 
     # 单张图片处理
     add_margins(
-        input_dir=input_path,
-        output_dir=output_path,
+        image_path=input_path,
+        output_path=output_path,
         margin_params=params,
         fill_color=color
     )

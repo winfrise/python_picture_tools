@@ -1,12 +1,12 @@
 import os
 from PIL import Image, UnidentifiedImageError
 
-def add_margins(image_path, margin_params, output_path, fill_color=(255, 255, 255)):
+def add_margins(input_path, margin_params, output_path, fill_color=(255, 255, 255)):
     """
     核心功能：给单张图片增加边距（保持不变）
     """
     try:
-        original_img = Image.open(image_path)
+        original_img = Image.open(input_path)
         orig_width, orig_height = original_img.size
 
         # 提取参数
@@ -25,9 +25,10 @@ def add_margins(image_path, margin_params, output_path, fill_color=(255, 255, 25
 
         # 保存
         new_img.save(output_path)
+        print(f"✅ 成功处理: {os.path.basename(input_path)}")
         return True
     except Exception as e:
-        print(f"处理失败 {os.path.basename(image_path)}: {e}")
+        print(f"处理失败 {os.path.basename(input_path)}: {e}")
         return False
 
 
@@ -65,8 +66,8 @@ def batch_add_margins(input_dir, output_dir, margin_params, fill_color=(255, 255
 # --- 测试调用示例 ---
 if __name__ == "__main__":
 
-    input_path="/path/to/input_folder",
-    output_path="/path/to/output_folder",
+    input_path="/Users/teacher/Desktop/《临床基础检验技术》复习要点/《临床基础检验技术》复习要点_extracted_images"
+    output_path="/Users/teacher/Desktop/《临床基础检验技术》复习要点/666"
     color = (0, 0, 0)
     params = {
         "top": 50,
@@ -76,12 +77,12 @@ if __name__ == "__main__":
     }
 
     # 单张图片处理
-    add_margins(
-        image_path=input_path,
-        output_path=output_path,
-        margin_params=params,
-        fill_color=color
-    )
+    # add_margins(
+    #     input_path=input_path,
+    #     margin_params=params,
+    #     output_path=output_path,
+    #     fill_color=color
+    # )
 
     # 批量处理
     batch_add_margins(

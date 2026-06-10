@@ -13,6 +13,9 @@ source venv/bin/activate
 # 安装 Pillow（图片处理）
 pip install Pillow
 
+# 安装 opencv
+pip install opencv-python
+
 # 导出依赖列表
 pip freeze > requirements.txt
 ```

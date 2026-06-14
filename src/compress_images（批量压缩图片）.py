@@ -25,7 +25,7 @@ def process_image(input_path, output_path, quality=85, max_size=None, dpi=None):
                 img.thumbnail(max_size, Image.LANCZOS)
 
             # --- 3. 保存配置 ---
-            save_kwargs = {"quality": quality, "optimize": True}
+            save_kwargs = {"quality": quality, "optimize": True} # optimize： True 表示无损压缩
             
             # 设置分辨率 (DPI)
             if dpi:
@@ -68,7 +68,7 @@ def compress_images(input_dir, output_dir, quality=85, max_size=None, dpi=None):
             if success:
                 count += 1
 
-    return count
+    print(f"\n处理完成！共处理 {count} 张图片。")
 
 def process_single_file(input_file, output_file, quality=85, max_size=None, dpi=None):
     """
@@ -89,11 +89,11 @@ def process_single_file(input_file, output_file, quality=85, max_size=None, dpi=
 
     success, msg = process_image(input_file, output_file, quality, max_size, dpi)
     print(msg)
-    return 1 if success else 0
+    print(f"\n单文件处理完成。")
 
 if __name__ == "__main__":
 
-    input_path = "/Users/teacher/Desktop/111"   # 可以是文件路径或文件夹路径
+    input_path = "/Users/teacher/Desktop/111xxx/1.jpeg"   # 可以是文件路径或文件夹路径
     output_path = "/Users/teacher/Desktop/1112" # 对应的输出文件或文件夹路径
     quality = 30
     max_size = (700, 1754)
@@ -101,17 +101,15 @@ if __name__ == "__main__":
 
     # 判断输入是文件还是目录
     if os.path.isfile(input_path):
-        count = process_single_file(
+        process_single_file(
             input_file = input_path, 
             output_file = None, 
             quality = quality, 
             max_size = max_size, 
             dpi = dpi
         )
-        print(f"\n单文件处理完成。")
     elif os.path.isdir(input_path):
-        count = compress_images(input_path, output_path, quality, max_size, dpi)
-        print(f"\n处理完成！共处理 {count} 张图片。")
+        compress_images(input_path, output_path, quality, max_size, dpi)
     else:
         print(f"错误：输入路径既不是文件也不是目录 -> {input_path}")
 

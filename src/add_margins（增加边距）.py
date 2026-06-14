@@ -76,18 +76,19 @@ if __name__ == "__main__":
         "right": 100
     }
 
-    # 单张图片处理
-    # add_margins(
-    #     input_path=input_path,
-    #     margin_params=params,
-    #     output_path=output_path,
-    #     fill_color=color
-    # )
-
-    # 批量处理
-    batch_add_margins(
-        input_dir=input_path,
-        output_dir=output_path,
-        margin_params=params,
-        fill_color=color
-    )
+    if os.path.isfile(input_path):
+        # 单张图片处理
+        add_margins(
+            input_path=input_path,
+            margin_params=params,
+            output_path=output_path,
+            fill_color=color
+        )
+    else:
+        # 批量处理
+        batch_add_margins(
+            input_dir=input_path,
+            output_dir=output_path,
+            margin_params=params,
+            fill_color=color
+        )

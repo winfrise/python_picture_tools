@@ -82,16 +82,17 @@ if __name__ == "__main__":
         "right": 100    # 从右侧裁剪掉 100px
     }
 
-    # 1. 单个裁剪
-    crop_by_margins(
-        input_path = input_path,
-        margin_params=params,
-        output_path = output_path
-    )
-
-    # 2. 批量裁剪
-    # batch_crop_by_margins(
-    #     input_dir=input_path,
-    #     output_dir=output_path,
-    #     margin_params=params
-    # )
+    if os.path.isfile(input_path):
+        # 1. 单个裁剪
+        crop_by_margins(
+            input_path = input_path,
+            margin_params=params,
+            output_path = output_path
+        )
+    else:
+        # 2. 批量裁剪
+        batch_crop_by_margins(
+            input_dir=input_path,
+            output_dir=output_path,
+            margin_params=params
+        )

@@ -52,12 +52,11 @@ def batch_sharpen_image(input_dir, output_dir):
 
 # --- 测试调用示例 ---
 if __name__ == "__main__":
-    is_batch = True
 
     input_path="/Users/teacher/Desktop/《临床基础检验技术》复习要点/《临床基础检验技术》复习要点_extracted_images"
     output_path="/Users/teacher/Desktop/《临床基础检验技术》复习要点/《临床基础检验技术》复习要点_extracted_images333"
 
-    if is_batch:
+    if os.path.isfile(input_path):
         batch_sharpen_image(
             input_dir=input_path,
             output_dir=output_path

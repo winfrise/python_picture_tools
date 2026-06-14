@@ -79,7 +79,6 @@ adjust_brightness_contrast(
 
 # --- 测试调用示例 ---
 if __name__ == "__main__":
-    is_batch = True
 
     input_path="/Users/teacher/Desktop/《临床基础检验技术》复习要点/《临床基础检验技术》复习要点_extracted_images"
     output_path="/Users/teacher/Desktop/《临床基础检验技术》复习要点/333555"
@@ -88,7 +87,7 @@ if __name__ == "__main__":
     # 对比度因子，1.0为原始对比度，>1增强，<1减弱
     contrast=1.5
 
-    if is_batch:
+    if os.path.isfile(input_path):
         batch_adjust_brightness_contrast(
             input_dir=input_path,
             output_dir=output_path,

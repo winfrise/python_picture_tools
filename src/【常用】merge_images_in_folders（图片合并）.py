@@ -1,16 +1,31 @@
 import os
 import glob
+import re
 from PIL import Image
 
-def merge_images_in_folders(input_dir, output_dir):
+def natural_sort_key(s):
     """
-    遍历输入目录下的所有文件夹，将每个文件夹内的图片按文件名排序后纵向拼接，
-    并以文件夹名称命名输出到指定目录。
+    用于自然排序的键生成函数。
+    它将字符串分割为文本和数字块，并将数字转换为整数进行比较。
+    例如: 'img2.jpg' -> ['img', 2, '.jpg']
+          'img10.jpg' -> ['img', 10, '.jpg']
+    这样 2 < 10，排序就正确了。
     """
+    return [int(text) if text.isdigit() else text.lower() for text in re.split(r'(\d+)', s)]
+
+def merge_images_in_folders(input_dir, output_dir = None):
+
+
+    if output_dir == None:
+        parent_dir = os.path.dirname(input_dir)
+        output_dir_name = f"{os.path.basename(input_dir)}_图片合并"
+        output_dir = os.path.join(parent_dir, output_dir_name)
+
     # 如果输出目录不存在，则创建
     if not os.path.exists(output_dir):
         os.makedirs(output_dir)
         print(f"[信息] 已创建输出目录: {output_dir}")
+
 
     # 获取输入目录下的所有子文件夹
     subfolders = [f.path for f in os.scandir(input_dir) if f.is_dir()]
@@ -33,7 +48,7 @@ def merge_images_in_folders(input_dir, output_dir):
             image_files.extend(glob.glob(os.path.join(folder_path, ext.upper()))) # 兼容大写后缀
         
         # 核心：按文件名排序
-        image_files.sort(key=lambda x: os.path.basename(x))
+        image_files.sort(key=natural_sort_key)
 
         if not image_files:
             print(f"  [跳过] 文件夹 '{folder_name}' 中没有找到图片。")
@@ -77,7 +92,6 @@ def merge_images_in_folders(input_dir, output_dir):
 
 # ================= 运行示例 =================
 if __name__ == "__main__":
-    INPUT_DIRECTORY = "./input_images"   # 替换为你的输入目录路径
-    OUTPUT_DIRECTORY = "./output_merged" # 替换为你的输出目录路径
-
-    merge_images_in_folders(INPUT_DIRECTORY, OUTPUT_DIRECTORY)
+    INPUT_DIRECTORY = "/Users/teacher/Desktop/未命名文件夹 2/2.5氟碳漆铝单板-金奥维_提取的图片"   # 替换为你的输入目录路径
+  
+    merge_images_in_folders(INPUT_DIRECTORY)

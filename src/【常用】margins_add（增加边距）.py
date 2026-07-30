@@ -66,14 +66,14 @@ def batch_add_margins(input_dir, output_dir, margin_params, fill_color=(255, 255
 # --- 测试调用示例 ---
 if __name__ == "__main__":
 
-    input_path="/Users/teacher/Desktop/《临床基础检验技术》复习要点/《临床基础检验技术》复习要点_extracted_images"
-    output_path="/Users/teacher/Desktop/《临床基础检验技术》复习要点/666"
-    color = (0, 0, 0)
+    input_path="/Users/teacher/Downloads/百度网盘Download/新建文件夹 (2)"
+    output_path="/Users/teacher/Downloads/百度网盘Download/新建文件夹 (2)-2"
+    color = (255, 255, 0)
     params = {
-        "top": 50,
-        "bottom": 50,
-        "left": 100,
-        "right": 100
+        "top": 0,
+        "bottom": 300,
+        "left": 0,
+        "right": 0
     }
 
     if os.path.isfile(input_path):

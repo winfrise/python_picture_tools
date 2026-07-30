@@ -72,14 +72,14 @@ def batch_crop_by_margins(input_dir, output_dir, margin_params):
 
 # --- 测试调用示例 ---
 if __name__ == "__main__":
-    input_path="/Users/teacher/Desktop/《临床基础检验技术》复习要点/222/page1_img1.jpeg"
-    output_path="/Users/teacher/Desktop/《临床基础检验技术》复习要点/222/page1111333444.jpeg"
+    input_path="/Users/teacher/Downloads/百度网盘Download/新建文件夹 (2)-3"
+    output_path="/Users/teacher/Downloads/百度网盘Download/新建文件夹 (2)-4"
 
     params = {
-        "top": 50,      # 从顶部裁剪掉 50px
-        "bottom": 50,   # 从底部裁剪掉 50px
-        "left": 100,    # 从左侧裁剪掉 100px
-        "right": 100    # 从右侧裁剪掉 100px
+        "top": 0,      # 从顶部裁剪掉 50px
+        "bottom": 290,   # 从底部裁剪掉 50px
+        "left": 0,    # 从左侧裁剪掉 100px
+        "right": 0    # 从右侧裁剪掉 100px
     }
 
     if os.path.isfile(input_path):

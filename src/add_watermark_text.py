@@ -79,7 +79,7 @@ def add_precise_watermark(
             # 这里演示最稳健的“单字旋转粘贴法”：
             
             # A. 创建单字透明小图 (尺寸略大于文字以防切边)
-            single_txt_img = Image.new('RGBA', (text_w, text_h), (0,0,0,128))
+            single_txt_img = Image.new('RGBA', (text_w, text_h), (255, 255, 255, 0))
             single_draw = ImageDraw.Draw(single_txt_img)
             
             # B. 在小图中心画正字
@@ -119,8 +119,8 @@ if __name__ == "__main__":
     ANGLE = 45
     FONT_SIZE = 40
     COLOR = (0, 0, 0)      # RGB颜色
-    OPACITY = 200          # 透明度 0-255
-    SPACING = 10            # 【关键】间距系数。0表示无缝拼接，>0表示增加间隙
+    OPACITY = 128          # 透明度 0-255
+    SPACING = 20            # 【关键】间距系数。0表示无缝拼接，>0表示增加间隙
 
     # 假设你有一张 test.jpg
     # spacing=0 表示紧密排列

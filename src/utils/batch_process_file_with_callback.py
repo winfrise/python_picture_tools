@@ -11,8 +11,9 @@ def batch_process_file_with_callback(input_dir, output_dir,  callback_func,  **k
 
     if not output_dir:
         output_dir = input_dir + "_output"
-    
-    os.makedirs(output_dir, exist_ok=True)
+
+    if output_dir != 'NOT_SAVE':
+        os.makedirs(output_dir, exist_ok=True)
 
     print(f"开始扫描目录: {input_dir} -> {output_dir}")
     
@@ -24,12 +25,14 @@ def batch_process_file_with_callback(input_dir, output_dir,  callback_func,  **k
             if filename.lower().endswith(valid_extensions) and not filename.startswith('.'):
                 # 构建原图和目标图的完整路径
                 full_input_file = os.path.join(dirpath, filename)
-                
-                # 计算当前遍历到的文件夹相对于 input_dir 的路径
-                relative_path = os.path.relpath(full_input_file, input_dir)
 
-                # 拼接出目标文件夹的完整路径
-                full_output_file = os.path.join(output_dir, relative_path)
+                full_output_file = ""
+                if output_dir != 'NOT_SAVE':
+                    # 计算当前遍历到的文件夹相对于 input_dir 的路径
+                    relative_path = os.path.relpath(full_input_file, input_dir)
+
+                    # 拼接出目标文件夹的完整路径
+                    full_output_file = os.path.join(output_dir, relative_path)
 
                 try:
                     callback_func(

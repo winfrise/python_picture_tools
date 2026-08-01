@@ -1,5 +1,5 @@
 import os
-from PIL import Image, UnidentifiedImageError
+from PIL import Image
 
 def add_margins(input_path, margin_params, output_path, fill_color=(255, 255, 255)):
     """

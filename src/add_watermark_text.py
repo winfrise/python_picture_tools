@@ -39,23 +39,32 @@ def add_precise_watermark(
     text_w = text_bbox[2] - text_bbox[0]
     text_h = text_bbox[3] - text_bbox[1]
 
-    # 5. 核心数学计算：计算旋转后的占用空间
-    rad = math.radians(angle)
-    cos_val = abs(math.cos(rad))
-    sin_val = abs(math.sin(rad))
 
-    # 旋转后的新宽高 (这是文字旋转后实际占据的矩形空间)
-    rotated_w = int(text_w * cos_val + text_h * sin_val)
-    rotated_h = int(text_w * sin_val + text_h * cos_val)
+    step_x = text_w + spacing
+    step_y = text_h + spacing
+    rotated_w = text_w
+    rotated_h = text_h
 
-    # 6. 计算平铺步长 (支持 spacing=0)
-    # 逻辑：基础步长是旋转后的尺寸，spacing 是额外的比例
-    step_x = rotated_w + spacing
-    step_y = rotated_h + spacing
-    
+
+
+    if angle % 360 != 0:
+        # 5. 核心数学计算：计算旋转后的占用空间
+        rad = math.radians(angle)
+        cos_val = abs(math.cos(rad))
+        sin_val = abs(math.sin(rad))
+
+        # 旋转后的新宽高 (这是文字旋转后实际占据的矩形空间)
+        rotated_w = int(text_w * cos_val + text_h * sin_val)
+        rotated_h = int(text_w * sin_val + text_h * cos_val)
+
+        # 6. 计算平铺步长 (支持 spacing=0)
+        # 逻辑：基础步长是旋转后的尺寸，spacing 是额外的比例
+        step_x = rotated_w + spacing
+        step_y = rotated_h + spacing
+        
     # 防止步长为0或负数导致死循环（极端情况保护）
-    if step_x <= 0: step_x = rotated_w
-    if step_y <= 0: step_y = rotated_h
+    if step_x <= 0: step_x = text_w
+    if step_y <= 0: step_y = text_h
 
     # 7. 开始平铺绘制
     # 关键点：从负坐标开始画，保证旋转中心对齐，解决边缘被切问题
@@ -116,7 +125,7 @@ if __name__ == "__main__":
     IMAGE_PATH = "/Volumes/西数4T外置/拼多多图片/图文速改（通用详情页）/白鲨详情页.png" 
     OUTPUT_PATH = None
     TEXT = "白鲨图文快改"
-    ANGLE = 45
+    ANGLE = 0
     FONT_SIZE = 40
     COLOR = (0, 0, 0)      # RGB颜色
     OPACITY = 128          # 透明度 0-255

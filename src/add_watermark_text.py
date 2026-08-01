@@ -35,12 +35,11 @@ def add_precise_watermark(
         font = ImageFont.load_default()
     
     # 获取文字的包围盒 (left, top, right, bottom)
-    bbox = draw.textbbox((0, 0), text, font=font)
-    text_w = bbox[2] - bbox[0]
-    text_h = bbox[3] - bbox[1]
+    text_bbox = draw.textbbox((0, 0), text, font=font)
+    text_w = text_bbox[2] - text_bbox[0]
+    text_h = text_bbox[3] - text_bbox[1]
 
     # 5. 核心数学计算：计算旋转后的占用空间
-    # 将角度转换为弧度
     rad = math.radians(angle)
     cos_val = abs(math.cos(rad))
     sin_val = abs(math.sin(rad))
@@ -80,31 +79,26 @@ def add_precise_watermark(
             # 这里演示最稳健的“单字旋转粘贴法”：
             
             # A. 创建单字透明小图 (尺寸略大于文字以防切边)
-            single_txt_img = Image.new('RGBA', (rotated_w + 10, rotated_h + 10), (255,255,255,0))
+            single_txt_img = Image.new('RGBA', (text_w, text_h), (0,0,0,128))
             single_draw = ImageDraw.Draw(single_txt_img)
             
             # B. 在小图中心画正字
-            # 计算小图中心
-            center_x = (rotated_w + 10) // 2
-            center_y = (rotated_h + 10) // 2
             
             # 绘制文字（需根据bbox微调居中）
             single_draw.text(
-                (center_x - text_w//2, center_y - text_h//2), 
+                (-text_bbox[0], -text_bbox[1]), 
                 text, 
                 font=font, 
                 fill=(*color, opacity)
             )
-            
-            # C. 旋转单字小图
-            rotated_single = single_txt_img.rotate(angle, expand=False, center=(center_x, center_y))
-            
+            rotated_single = single_txt_img.rotate(angle, expand=True, resample=Image.BICUBIC)
+        
             # D. 粘贴到水印层
             # 计算粘贴位置（需要补偿 small image 的 padding）
-            paste_x = x - 5 
-            paste_y = y - 5
+            paste_x = x + 1
+            paste_y = y + 1
             
-            watermark_layer.paste(rotated_single, (paste_x, paste_y), rotated_single)
+            watermark_layer.paste(rotated_single, (paste_x, paste_y), mask = rotated_single)
 
             y += step_y
         x += step_x
@@ -121,12 +115,12 @@ def add_precise_watermark(
 if __name__ == "__main__":
     IMAGE_PATH = "/Volumes/西数4T外置/拼多多图片/图文速改（通用详情页）/白鲨详情页.png" 
     OUTPUT_PATH = None
-    TEXT = "内部资料"
+    TEXT = "白鲨图文快改"
     ANGLE = 45
     FONT_SIZE = 40
     COLOR = (0, 0, 0)      # RGB颜色
-    OPACITY = 128          # 透明度 0-255
-    SPACING = 0            # 【关键】间距系数。0表示无缝拼接，>0表示增加间隙
+    OPACITY = 200          # 透明度 0-255
+    SPACING = 10            # 【关键】间距系数。0表示无缝拼接，>0表示增加间隙
 
     # 假设你有一张 test.jpg
     # spacing=0 表示紧密排列

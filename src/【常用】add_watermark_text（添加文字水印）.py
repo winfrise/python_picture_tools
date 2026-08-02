@@ -122,10 +122,10 @@ def add_precise_watermark(
 
 # --- 使用示例 ---
 if __name__ == "__main__":
-    IMAGE_PATH = "/Volumes/西数4T外置/拼多多图片/图文速改（通用详情页）/白鲨详情页.png" 
+    IMAGE_PATH = "/Volumes/西数4T外置/拼多多图片/图文速改（通用详情页）/未命名文件夹/白鲨详情页.png" 
     OUTPUT_PATH = None
     TEXT = "白鲨图文快改"
-    ANGLE = 0
+    ANGLE = 45
     FONT_SIZE = 40
     COLOR = (0, 0, 0)      # RGB颜色
     OPACITY = 128          # 透明度 0-255

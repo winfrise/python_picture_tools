@@ -62,6 +62,7 @@ def create_icns(png_path, icns_name="MyAppIcon"):
     except FileNotFoundError:
         print("错误：找不到 iconutil 命令，此脚本仅支持在 macOS 上运行。")
 
+
 if __name__ == "__main__":
     png_path = "/Users/teacher/Desktop/未命名文件夹 2/微信_图标.png"
     icns_name = "WeChatIcon"

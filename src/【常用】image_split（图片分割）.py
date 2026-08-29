@@ -85,7 +85,7 @@ def batch_split_image(input_dir):
 # ================= 使用示例 =================
 if __name__ == "__main__":
 
-    IMAGE_PATH = "/Volumes/西数4T外置/拼多多图片/图文速改（通用详情页）/海龟详情页.png" # 替换成你的图片路径
+    IMAGE_PATH = "/Volumes/西数4T外置/拼多多图片/图文速改（通用详情页）/北极狼详情页.png" # 替换成你的图片路径
     DIRECTION = "horizontal" #  ("vertical" 垂直分割, "horizontal" 水平分割)
     MODE = "count" # 分割模式 ("count" 按数量, "size" 按宽度/高度像素值)
     VALUE = 12 # 具体数值 (如果是count模式就是切几块，如果是size模式就是每块的像素宽/高)

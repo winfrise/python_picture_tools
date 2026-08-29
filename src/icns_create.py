@@ -64,7 +64,7 @@ def create_icns(png_path, icns_name="MyAppIcon"):
 
 
 if __name__ == "__main__":
-    png_path = "/Users/teacher/Desktop/未命名文件夹 2/微信_图标.png"
-    icns_name = "WeChatIcon"
+    png_path = "/Users/teacher/Desktop/未命名文件夹 2/icons_output/icon.png"
+    icns_name = "AppIcon"
     # 示例：传入你的图片路径（支持相对路径或绝对路径）
     create_icns(png_path, icns_name)

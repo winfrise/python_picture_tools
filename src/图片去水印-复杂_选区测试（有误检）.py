@@ -68,18 +68,14 @@ def debug_detect(image_path):
                 pt1 = (0, int(start_y * scale_ratio))
                 pt2 = (w, int(end_y * scale_ratio))
 
-                # 2. 创建一个临时的“红色遮罩层” (复制原图是为了保持尺寸一致)
-                overlay = img.copy()
+                # 一、框选
+                cv2.rectangle(img, pt1, pt2, (0, 0, 255), 2)
 
-                # 3. 在遮罩层上画【实心】的红色矩形 (-1 代表填充)
-                # 注意：这里是在 overlay 上画，不是直接在 img 上画
-                cv2.rectangle(overlay, pt1, pt2, (0, 0, 255), -1)
-
-                # 4. 将原图(img)和遮罩层(overlay)进行加权混合
-                # 公式: dst = img * (1-alpha) + overlay * alpha
-                # alpha = 0.3 表示红色区域的不透明度为 30% (数值越大越不透明)
-                alpha = 0.3 
-                cv2.addWeighted(overlay, alpha, img, 1 - alpha, 0, img)
+                # 二、使用选区
+                # overlay = img.copy()
+                # cv2.rectangle(overlay, pt1, pt2, (0, 0, 255), -1)
+                # alpha = 0.3 
+                # cv2.addWeighted(overlay, alpha, img, 1 - alpha, 0, img)
 
 
             else:

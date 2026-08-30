@@ -12,7 +12,7 @@ def debug_detect(image_path):
     h, w = gray.shape
     
     # --- 第一步：降采样 (宽度压到 500px) ---
-    target_width = 500
+    target_width = 800
     scale_ratio = w / target_width
     small_h = int(h / scale_ratio)
     
@@ -66,7 +66,21 @@ def debug_detect(image_path):
                 # 注意：这里只是画个大概，因为我们是按行扫描的
                 pt1 = (0, int(start_y * scale_ratio))
                 pt2 = (w, int(end_y * scale_ratio))
-                cv2.rectangle(img, pt1, pt2, (0, 0, 255), 10)
+
+                # 2. 创建一个临时的“红色遮罩层” (复制原图是为了保持尺寸一致)
+                overlay = img.copy()
+
+                # 3. 在遮罩层上画【实心】的红色矩形 (-1 代表填充)
+                # 注意：这里是在 overlay 上画，不是直接在 img 上画
+                cv2.rectangle(overlay, pt1, pt2, (0, 0, 255), -1)
+
+                # 4. 将原图(img)和遮罩层(overlay)进行加权混合
+                # 公式: dst = img * (1-alpha) + overlay * alpha
+                # alpha = 0.3 表示红色区域的不透明度为 30% (数值越大越不透明)
+                alpha = 0.3 
+                cv2.addWeighted(overlay, alpha, img, 1 - alpha, 0, img)
+
+
             else:
                 print(f"   ❌ 高度不符 (要求50-80px)")
 

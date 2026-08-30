@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 import os
 
-def remove_watermark(image_path, watermark_path, exclusion_func, output_path = None):
+def remove_watermark(image_path, watermark_path, exclusion_func, output_path = None, debug_mode = False):
     """
     核心去水印函数，通过传入一个函数来动态决定排除区域。
     """
@@ -23,7 +23,7 @@ def remove_watermark(image_path, watermark_path, exclusion_func, output_path = N
 
     # 2. 核心变化：调用传入的函数，获取排除区域的掩码
     # exclusion_func 会接收原图和水印图，并返回一个单通道的掩码图像
-    exclusion_regions = exclusion_func(image_path, watermark_path)
+    exclusion_regions = exclusion_func(image_path, watermark_path, debug_mode = debug_mode)
 
     for exclusion_box in exclusion_regions:
         x, y, w, h = exclusion_box

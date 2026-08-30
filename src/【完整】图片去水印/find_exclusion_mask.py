@@ -132,7 +132,8 @@ def find_exclusion_mask(image_path, watermark_path=None, debug_mode=False):
 
     # --- 第五步：保存结果 ---
     if len(final_boxes) > 0:
-        print(f"\n🎉 检测完成！共找到 {len(final_boxes)} 个区域。")
+        if debug_mode:
+            print(f"\n🎉 检测完成！共找到 {len(final_boxes)} 个区域。")
         # 在图片上画框
         for box in final_boxes:
             x, y, bw, bh = box
@@ -146,6 +147,8 @@ def find_exclusion_mask(image_path, watermark_path=None, debug_mode=False):
         print(f"💾 结果图片已保存至: {output_name}")
         return final_boxes
     else:
-        print("\n😭 未找到任何匹配区域，图片未保存。")
+        if debug_mode:
+            print("\n😭 未找到任何匹配区域，图片未保存。")
+            
         return []
 

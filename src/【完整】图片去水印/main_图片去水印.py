@@ -19,12 +19,14 @@ from utils import batch_process_file_with_callback
 if __name__ == "__main__":
     image_path = "/Users/teacher/Desktop/test/test/page316_img1.png"
     watermark_path = "/Users/teacher/Desktop/test/mask.png"
+    debug_mode = False
 
     if os.path.isfile(image_path):
         remove_watermark(
             image_path=image_path, 
             watermark_path=watermark_path, 
-            exclusion_func=find_exclusion_mask 
+            exclusion_func=find_exclusion_mask,
+            debug_mode = debug_mode
         )
     elif os.path.isdir(image_path):
         def callback_func (input_file, output_file):

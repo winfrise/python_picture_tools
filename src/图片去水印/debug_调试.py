@@ -1,9 +1,10 @@
 from find_exclusion_mask import find_exclusion_mask
+
 if __name__ == "__main__":
-    # 替换为你的图片路径
+    # 1. 排除区域代码调试
     image_path = "/Users/teacher/Desktop/test/test.png"
     debug_mode = True
-    
+
     results = find_exclusion_mask(
         image_path = image_path,
         debug_mode = debug_mode,

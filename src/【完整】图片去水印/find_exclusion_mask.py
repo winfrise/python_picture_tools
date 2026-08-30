@@ -15,7 +15,7 @@ def find_exclusion_mask(image_path, watermark_path=None, debug_mode=False):
     REFINED_MIN_HEIGHT = 20   # 精细修剪后允许的最小高度（防止误删）
 
     WHITE_THRESHOLD = 255  # 设定白色的阈值（比如 > 240 算白）
-    MAX_WHITE_PIXELS = 800  # 设定容忍度：一行里允许有几个白点？设为 0 表示只要有白点就不行
+    MAX_WHITE_PIXELS = 80  # 设定容忍度：一行里允许有几个白点？设为 0 表示只要有白点就不行
     
 
     img = cv2.imread(image_path)
@@ -49,7 +49,7 @@ def find_exclusion_mask(image_path, watermark_path=None, debug_mode=False):
 
 
     # 计算每一行中，大于 WHITE_THRESHOLD 的像素个数
-    white_counts = np.sum(roi > WHITE_THRESHOLD, axis=1)
+    white_counts = np.sum(roi >= WHITE_THRESHOLD, axis=1)
 
     max_std = np.max(row_stds) # 计算标准差
     min_std = np.min(row_stds) # 计算标准差

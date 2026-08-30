@@ -11,7 +11,7 @@ def find_exclusion_mask(image_path, watermark_path=None, debug_mode=False):
     # --- 参数配置 ---
     THRESHOLD_MEAN = 240      # 判定为“暗色内容”的平均灰度阈值
     MIN_RECT_HEIGHT = 30      # 粗检测时的最小高度
-    MAX_RECT_HEIGHT = 140     # 粗检测时的最大高度
+    MAX_RECT_HEIGHT = 200     # 粗检测时的最大高度
     REFINED_MIN_HEIGHT = 20   # 精细修剪后允许的最小高度（防止误删）
 
     WHITE_THRESHOLD = 255  # 设定白色的阈值（比如 > 240 算白）

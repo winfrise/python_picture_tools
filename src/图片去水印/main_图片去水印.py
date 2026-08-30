@@ -17,7 +17,7 @@ from utils import batch_process_file_with_callback
 
 # ================= 运行测试 =================
 if __name__ == "__main__":
-    image_path = "/Users/teacher/Desktop/test/test.png"
+    image_path = "/Users/teacher/Desktop/test/《四川省建设工程工程量清单计价定额——房屋建筑更新改造工程》(1)__提取的图片"
     watermark_path = "/Users/teacher/Desktop/test/mask.png"
 
     if os.path.isfile(image_path):
@@ -31,10 +31,12 @@ if __name__ == "__main__":
             remove_watermark(
                 image_path= input_file,
                 output_path= output_file,
+                watermark_path=watermark_path, 
                 exclusion_func=find_exclusion_mask,
             )
         batch_process_file_with_callback(
             input_dir=image_path,
+            output_dir = None,
             callback_func= callback_func
         )
     else:

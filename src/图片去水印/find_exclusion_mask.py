@@ -1,57 +1,96 @@
 import cv2
 import numpy as np
+import os
 
-def find_exclusion_mask(img, wm):
+
+def find_exclusion_mask(image_path, debug_mode = False):
     """
-    实现你指定的逻辑：找出高度在50-70px之间，且内部有规律小点点的横向区域。
-    这个函数返回一个单通道的掩码图像，找到的区域为白色(255)，其余为黑色(0)。
+    检测图片中的目标区域。
+    :param image_path: 图片路径
+    :return: 包含检测到的区域坐标的列表 [(x, y, w, h), ...]，如果没有检测到则返回 []
     """
-    # 创建一个和原图一样大的黑色画布，用来画我们的“排除区域”
-    mask = np.zeros(img.shape[:2], dtype=np.uint8)
-    
-    # --- 方案A：基于形态学特征 ---
-    # 1. 转为灰度图，方便处理
+    img = cv2.imread(image_path)
+    if img is None:
+        print("❌ 无法读取图片，请检查路径")
+        return []
+
+    # 用于存储最终结果的列表
+    detected_boxes = []
+
+    # 转灰度
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    
-    # 2. 二值化，把小点点变成白色
-    # 这里用OTSU自动找阈值，效果通常不错
-    _, binary = cv2.threshold(gray, 0, 255, cv2.THRESH_BINARY_INV + cv2.THRESH_OTSU)
-    
-    # 3. 找轮廓
-    contours, _ = cv2.findContours(binary, cv2.RETR_EXTERNAL, cv2.CHAIN_APPROX_SIMPLE)
-    
-    # 4. 筛选符合条件的轮廓
-    candidate_rects = []
-    for cnt in contours:
-        x, y, w, h = cv2.boundingRect(cnt)
-        # 条件1：高度在50-70px之间
-        if 50 <= h <= 70:
-            # 条件2：宽高比接近1，说明是“点”而不是长条
-            if 0.5 < w / h < 2.0:
-                candidate_rects.append((x, y, w, h))
-    
-    # 5. 将筛选出的“点”合并成一个大的矩形区域
-    if candidate_rects:
-        # 获取所有点的y坐标，找到它们集中的那一行
-        y_coords = [y for x, y, w, h in candidate_rects]
-        # 简单处理：取y坐标的众数（或平均值）作为基准线
-        # 这里为了简化，我们直接找y坐标最密集的区域
-        y_hist, y_bins = np.histogram(y_coords, bins=img.shape[0])
-        if len(y_hist) > 0: # 防止没有点的情况
-            main_y_bin = np.argmax(y_hist)
-            target_y = int(y_bins[main_y_bin])
+    h, w = gray.shape
+
+    # --- 第一步：降采样 (宽度压到 800px) ---
+    target_width = 800
+    scale_ratio = w / target_width
+    small_h = int(h / scale_ratio)
+    small_gray = cv2.resize(gray, (target_width, small_h), interpolation=cv2.INTER_AREA)
+
+    # --- 第二步：分析缩略图的每一行 ---
+    row_means = np.mean(small_gray, axis=1)
+
+    # --- 第三步：寻找目标区域 ---
+    threshold = 240
+    is_pattern_row = row_means < threshold
+    in_region = False
+    start_y = 0
+
+    for i, is_match in enumerate(is_pattern_row):
+        if is_match and not in_region:
+            start_y = i
+            in_region = True
+        elif not is_match and in_region:
+            end_y = i
+            in_region = False
             
-            # 再次筛选，只保留在这一行的点
-            row_points = [p for p in candidate_rects if abs(p[1] - target_y) < 20] # 20px容差
+            # 计算原图的高度和坐标
+            raw_start_y = int(start_y * scale_ratio)
+            raw_end_y = int(end_y * scale_ratio)
+            raw_height = raw_end_y - raw_start_y
+
+            # 1. 先过高度筛选
+            if 40 < raw_height < 150:
+                # 2. 再过二次纹理密度筛选
+                # 注意：这里x设为0，w设为全宽
+                box = (0, raw_start_y, w, raw_height)
+                
+
+                print(f"✅ 发现有效区域: Y[{raw_start_y}-{raw_end_y}], 高度: {raw_height}")
+                detected_boxes.append(box)
+            else:
+                print(f"❌ 高度不符 (要求40-150px): 实际 {raw_height}px")
+
+    # 循环结束后，如果还在区域内，需要处理最后一段（防止图片底部截断）
+    if in_region:
+         end_y = len(is_pattern_row)
+         raw_start_y = int(start_y * scale_ratio)
+         raw_end_y = int(end_y * scale_ratio)
+         raw_height = raw_end_y - raw_start_y
+         if 40 < raw_height < 150:
+            box = (0, raw_start_y, w, raw_height)
+            detected_boxes.append(box)
+
+
+
+    if debug_mode:
+        print(f"\n🎉 检测完成！共找到 {len(detected_boxes)} 个区域。")
+        
+        # 2. 在图片上画框 (保存图片的功能放在这里)
+        for box in detected_boxes:
+            x, y, w, h = box
+            # 画红色矩形框，线宽2
+            cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
             
-            if len(row_points) >= 3: # 至少有3个点，才认为是“有规律”的
-                # 找到这一行点的边界框
-                x_coords = [x for x, y, w, h in row_points]
-                x_coords_end = [x+w for x, y, w, h in row_points]
-                min_x, max_x = min(x_coords), max(x_coords_end)
-                min_y, max_y = min([y for x, y, w, h in row_points]), max([y+h for x, y, w, h in row_points])
-                
-                # 在掩码上画出这个矩形区域
-                cv2.rectangle(mask, (min_x, min_y), (max_x, max_y), 255, -1)
-                
-    return mask
+        # 3. 保存图片
+        output_dir = os.path.dirname(image_path)
+        output_name = os.path.join(output_dir, "result_detected.jpg")
+        cv2.imwrite(output_name, img)
+        print(f"💾 结果图片已保存至: {output_name}")
+        
+    else:
+        print("\n😭 未找到任何匹配区域，图片未保存。")
+
+
+    return detected_boxes
+

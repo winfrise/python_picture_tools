@@ -1,5 +1,6 @@
 import cv2
 import numpy as np
+import os 
 
 def debug_detect(image_path):
     img = cv2.imread(image_path)
@@ -85,7 +86,10 @@ def debug_detect(image_path):
                 print(f"   ❌ 高度不符 (要求50-80px)")
 
     if found_count > 0:
-        output_name = "result_debug.jpg"
+        # 获取原图所在的文件夹路径
+        output_dir = os.path.dirname(image_path)
+        # 拼接生成新的保存路径 (例如: C:/Images/result_debug.jpg)
+        output_name = os.path.join(output_dir, "result_debug.jpg")
         cv2.imwrite(output_name, img)
         print(f"\n🎉 处理完成！已保存结果到: {output_name}")
     else:

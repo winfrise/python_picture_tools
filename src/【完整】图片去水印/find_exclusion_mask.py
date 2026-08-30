@@ -3,7 +3,7 @@ import numpy as np
 import os
 
 
-def find_exclusion_mask(image_path, watermark_path, debug_mode = False):
+def find_exclusion_mask(image_path, watermark_path=None, debug_mode = False):
     """
     检测图片中的目标区域。
     :param image_path: 图片路径
@@ -12,7 +12,7 @@ def find_exclusion_mask(image_path, watermark_path, debug_mode = False):
 
     THRESHOLD = 240
     MIN_RECT_HEIGHT = 55
-    MAX_RECT_HEIGHT = 65
+    MAX_RECT_HEIGHT = 140
     
 
     img = cv2.imread(image_path)
@@ -69,7 +69,7 @@ def find_exclusion_mask(image_path, watermark_path, debug_mode = False):
                     print(f"✅ 发现有效区域: Y[{raw_start_y}-{raw_end_y}], 高度: {raw_height}")
             else:
                 if debug_mode:
-                    print(f"❌ 高度不符 (要求40-150px): 实际 {raw_height}px")
+                    print(f"❌ 高度不符:实际 {raw_height}px")
 
     # 循环结束后，如果还在区域内，需要处理最后一段（防止图片底部截断）
     if in_region:

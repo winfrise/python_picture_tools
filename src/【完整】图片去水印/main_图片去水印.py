@@ -17,7 +17,7 @@ from utils import batch_process_file_with_callback
 
 # ================= 运行测试 =================
 if __name__ == "__main__":
-    image_path = "/Users/teacher/Desktop/test/test"
+    image_path = "/Users/teacher/Desktop/test/page323_img1.png"
     watermark_path = "/Users/teacher/Desktop/test/mask.png"
     debug_mode = True
 

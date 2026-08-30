@@ -9,17 +9,18 @@ def find_exclusion_mask(image_path, watermark_path=None, debug_mode=False):
     :return: 包含检测到的区域坐标的列表 [(x, y, w, h), ...]，如果没有检测到则返回 []
     """
     # --- 参数配置 ---
-    THRESHOLD = 240           # 判定为“暗色内容”的灰度阈值
+    THRESHOLD_MEAN = 240      # 判定为“暗色内容”的平均灰度阈值
     MIN_RECT_HEIGHT = 55      # 粗检测时的最小高度
     MAX_RECT_HEIGHT = 140     # 粗检测时的最大高度
     REFINED_MIN_HEIGHT = 20   # 精细修剪后允许的最小高度（防止误删）
+
+    WHITE_THRESHOLD = 255  # 设定白色的阈值（比如 > 240 算白）
+    MAX_WHITE_PIXELS = 800  # 设定容忍度：一行里允许有几个白点？设为 0 表示只要有白点就不行
 
     img = cv2.imread(image_path)
     if img is None:
         print("❌ 无法读取图片，请检查路径")
         return []
-
-    detected_boxes = []
     
     # 转灰度
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
@@ -43,8 +44,16 @@ def find_exclusion_mask(image_path, watermark_path=None, debug_mode=False):
     roi = small_gray[:, 100:-50] 
     row_means = np.mean(roi, axis=1) # 计算水平投影均值
 
+
+    # 计算每一行中，大于 WHITE_THRESHOLD 的像素个数
+    white_counts = np.sum(roi > WHITE_THRESHOLD, axis=1)
+
+
     # --- 第三步：寻找目标区域 (粗坐标) ---
-    is_pattern_row = row_means < THRESHOLD
+    # (修改) 新的判断逻辑：平均亮度要暗，且标准差要小（颜色均匀）
+    is_pattern_row = (row_means < THRESHOLD_MEAN)  & \
+                    (white_counts <= MAX_WHITE_PIXELS)
+
     in_region = False
     start_y = 0
     
@@ -95,14 +104,14 @@ def find_exclusion_mask(image_path, watermark_path=None, debug_mode=False):
         # 从上往下找：找到第一个“暗”像素的位置 (去除顶部空白)
         top_trim = 0
         for val in crop_row_means:
-            if val < THRESHOLD:
+            if val < THRESHOLD_MEAN:
                 break
             top_trim += 1
             
         # 从下往上找：找到第一个“暗”像素的位置 (去除底部空白)
         bottom_trim = 0
         for val in reversed(crop_row_means):
-            if val < THRESHOLD:
+            if val < THRESHOLD_MEAN:
                 break
             bottom_trim += 1
             

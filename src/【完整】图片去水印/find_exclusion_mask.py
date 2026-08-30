@@ -9,6 +9,12 @@ def find_exclusion_mask(image_path, watermark_path, debug_mode = False):
     :param image_path: 图片路径
     :return: 包含检测到的区域坐标的列表 [(x, y, w, h), ...]，如果没有检测到则返回 []
     """
+
+    THRESHOLD = 240
+    MIN_RECT_HEIGHT = 55
+    MAX_RECT_HEIGHT = 65
+    
+
     img = cv2.imread(image_path)
     if img is None:
         print("❌ 无法读取图片，请检查路径")
@@ -28,11 +34,13 @@ def find_exclusion_mask(image_path, watermark_path, debug_mode = False):
     small_gray = cv2.resize(gray, (target_width, small_h), interpolation=cv2.INTER_AREA)
 
     # --- 第二步：分析缩略图的每一行 ---
-    row_means = np.mean(small_gray, axis=1)
+    roi = small_gray[:, 100:-50] # 提取 ROI 区域：所有行，第 100 列 到 倒数第 200 列
+    row_means = np.mean(roi, axis=1) # 计算该区域的水平投影（均值）
+
+    # row_means = np.mean(small_gray, axis=1) # 计算整行的水平投影（均值）
 
     # --- 第三步：寻找目标区域 ---
-    threshold = 240
-    is_pattern_row = row_means < threshold
+    is_pattern_row = row_means < THRESHOLD
     in_region = False
     start_y = 0
 
@@ -50,7 +58,7 @@ def find_exclusion_mask(image_path, watermark_path, debug_mode = False):
             raw_height = raw_end_y - raw_start_y
 
             # 1. 先过高度筛选
-            if 40 < raw_height < 150:
+            if MIN_RECT_HEIGHT < raw_height < MAX_RECT_HEIGHT:
                 # 2. 再过二次纹理密度筛选
                 # 注意：这里x设为0，w设为全宽
                 box = (0, raw_start_y, w, raw_height)
@@ -69,7 +77,7 @@ def find_exclusion_mask(image_path, watermark_path, debug_mode = False):
         raw_start_y = int(start_y * scale_ratio)
         raw_end_y = int(end_y * scale_ratio)
         raw_height = raw_end_y - raw_start_y
-        if 40 < raw_height < 150:
+        if 55 < raw_height < 65:
             box = (0, raw_start_y, w, raw_height)
             detected_boxes.append(box)
 

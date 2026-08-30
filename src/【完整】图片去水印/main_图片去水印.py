@@ -17,9 +17,9 @@ from utils import batch_process_file_with_callback
 
 # ================= 运行测试 =================
 if __name__ == "__main__":
-    image_path = "/Users/teacher/Desktop/test/test/page316_img1.png"
+    image_path = "/Users/teacher/Desktop/test/single/page316_img1.png"
     watermark_path = "/Users/teacher/Desktop/test/mask.png"
-    debug_mode = False
+    debug_mode = True
 
     if os.path.isfile(image_path):
         remove_watermark(

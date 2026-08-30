@@ -139,16 +139,17 @@ def find_exclusion_mask(image_path, watermark_path=None, debug_mode=False):
             x, y, bw, bh = box
             # 画红色矩形框，线宽2
             cv2.rectangle(img, (x, y), (x + bw, y + bh), (0, 0, 255), 2)
-        
-        # 保存图片
-        output_dir = os.path.dirname(image_path)
-        output_name = os.path.join(output_dir, "result_detected.jpg")
-        cv2.imwrite(output_name, img)
-        print(f"💾 结果图片已保存至: {output_name}")
+
+        if debug_mode:
+            base_name, ext = os.path.splitext(image_path)
+            output_name = f"{base_name}_output_result_detected{ext}"
+            cv2.imwrite(output_name, img)
+            print(f"💾 结果图片已保存至: {output_name}")
+            
         return final_boxes
     else:
         if debug_mode:
             print("\n😭 未找到任何匹配区域，图片未保存。")
-            
+
         return []
 

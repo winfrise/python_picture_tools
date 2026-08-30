@@ -30,8 +30,20 @@ def remove_watermark(image_path, watermark_path, exclusion_func, output_path = N
         # 使用 thickness=-1 来填充矩形，颜色为白色 (255, 255, 255)
         cv2.rectangle(wm, (x, y), (x + w, y + h), (255, 255, 255), -1)
 
+
+    if debug_mode:
+        base_name, ext = os.path.splitext(image_path)
+        output_name = f"{base_name}_output_mask{ext}"
+        cv2.imwrite(output_name, wm)
+
     # 3. 模拟 PS 的 Ctrl+I (反向)
     inverted_wm = cv2.bitwise_not(wm)
+
+    if debug_mode:
+        base_name, ext = os.path.splitext(image_path)
+        output_name = f"{base_name}_output_mask2{ext}"
+        cv2.imwrite(output_name, inverted_wm)
+
 
     # 4. 执行“线性减淡” (基色 + 混合色 = 结果色)
     result = cv2.add(img, inverted_wm)

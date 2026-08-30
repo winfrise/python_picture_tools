@@ -17,7 +17,7 @@ from utils import batch_process_file_with_callback
 
 # ================= 运行测试 =================
 if __name__ == "__main__":
-    image_path = "/Users/teacher/Desktop/test/《四川省建设工程工程量清单计价定额——房屋建筑更新改造工程》(1)__提取的图片"
+    image_path = "/Users/teacher/Desktop/test/test"
     watermark_path = "/Users/teacher/Desktop/test/mask.png"
     debug_mode = True
 

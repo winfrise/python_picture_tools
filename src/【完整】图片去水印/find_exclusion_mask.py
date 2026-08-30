@@ -9,13 +9,14 @@ def find_exclusion_mask(image_path, watermark_path=None, debug_mode=False):
     :return: 包含检测到的区域坐标的列表 [(x, y, w, h), ...]，如果没有检测到则返回 []
     """
     # --- 参数配置 ---
-    THRESHOLD_MEAN = 240      # 判定为“暗色内容”的平均灰度阈值
+    THRESHOLD_MEAN = 250      # 判定为“暗色内容”的平均灰度阈值
     MIN_RECT_HEIGHT = 30      # 粗检测时的最小高度
     MAX_RECT_HEIGHT = 140     # 粗检测时的最大高度
     REFINED_MIN_HEIGHT = 20   # 精细修剪后允许的最小高度（防止误删）
 
     WHITE_THRESHOLD = 255  # 设定白色的阈值（比如 > 240 算白）
-    MAX_WHITE_PIXELS = 800  # 设定容忍度：一行里允许有几个白点？设为 0 表示只要有白点就不行
+    MAX_WHITE_PIXELS = 5000  # 设定容忍度：一行里允许有几个白点？设为 0 表示只要有白点就不行
+    
 
     img = cv2.imread(image_path)
     if img is None:
@@ -44,15 +45,20 @@ def find_exclusion_mask(image_path, watermark_path=None, debug_mode=False):
     roi = small_gray[:, 100:-50] 
     row_means = np.mean(roi, axis=1) # 计算水平投影均值
 
+    row_stds = np.std(roi, axis=1)
+
 
     # 计算每一行中，大于 WHITE_THRESHOLD 的像素个数
     white_counts = np.sum(roi > WHITE_THRESHOLD, axis=1)
 
+    max_std = np.max(row_stds) # 计算标准差
+    min_std = np.min(row_stds) # 计算标准差
 
     # --- 第三步：寻找目标区域 (粗坐标) ---
     # (修改) 新的判断逻辑：平均亮度要暗，且标准差要小（颜色均匀）
     is_pattern_row = (row_means < THRESHOLD_MEAN)  & \
-                    (white_counts <= MAX_WHITE_PIXELS)
+                    (white_counts <= MAX_WHITE_PIXELS) & \
+                    (max_std < 255)
 
     in_region = False
     start_y = 0

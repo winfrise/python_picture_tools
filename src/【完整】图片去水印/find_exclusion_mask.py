@@ -16,6 +16,10 @@ def find_exclusion_mask(image_path, watermark_path=None, debug_mode=False):
 
     WHITE_THRESHOLD = 255  # 设定白色的阈值（比如 > 240 算白）
     MAX_WHITE_PIXELS = 80  # 设定容忍度：一行里允许有几个白点？设为 0 表示只要有白点就不行
+
+    # 定义 ROI 区域的列范围参数
+    COL_START = 100   # 起始列索引
+    COL_END = -50     # 结束列索引（负数表示倒数）
     
 
     img = cv2.imread(image_path)
@@ -42,7 +46,7 @@ def find_exclusion_mask(image_path, watermark_path=None, debug_mode=False):
     # --- 第二步：分析缩略图的每一行 (粗定位) ---
     # 提取 ROI 区域：所有行，第 100 列 到 倒数第 50 列
     # 注意：原代码注释写的是-200，实际代码是-50，这里保持一致用-50
-    roi = small_gray[:, 100:-50] 
+    roi = small_gray[:, COL_START:COL_END]
     row_means = np.mean(roi, axis=1) # 计算水平投影均值
 
     row_stds = np.std(roi, axis=1)

@@ -176,7 +176,7 @@ if __name__ == "__main__":
     # 在这里修改你的路径
     
     # --- 批量处理模式 ---
-    input_path = r"/Users/teacher/Desktop/test/test"       # 输入文件夹路径
+    input_path = r"/Users/teacher/Desktop/test/《四川省建设工程工程量清单计价定额——房屋建筑更新改造工程》(1)__提取的图片"       # 输入文件夹路径
     
     if os.path.isdir(input_path):
         # 如果是文件夹，执行批量处理

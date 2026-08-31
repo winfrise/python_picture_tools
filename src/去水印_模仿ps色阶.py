@@ -18,6 +18,41 @@ def color_to_gray_level(r=None, g=None, b=None, hex_color=None):
     
     raise ValueError("请提供 RGB 值或 Hex 颜色代码")
 
+def hex_to_gray_level(hex_color):
+    """
+    将 16 进制颜色转换为 0-255 的灰度值
+    :param hex_color: 16进制颜色字符串 (例如 '#FF5733' 或 'FFF')
+    :return: 0-255 之间的整数灰度值
+    """
+    # 1. 数据清洗：去除 '#' 并转为大写，方便处理
+    if not isinstance(hex_color, str):
+        raise ValueError("输入必须是字符串类型")
+        
+    clean_hex = hex_color.lstrip('#').upper()
+    
+    # 2. 处理简写格式 (例如 'ABC' -> 'AABBCC')
+    if len(clean_hex) == 3:
+        clean_hex = ''.join([c * 2 for c in clean_hex])
+    
+    # 3. 格式校验 (必须是6位字符且都是合法的16进制数)
+    if len(clean_hex) != 6:
+        raise ValueError(f"无效的 Hex 颜色格式: {hex_color}")
+    
+    try:
+        # 4. 提取 R, G, B 分量 (逻辑同图片中的 tuple 解析)
+        r = int(clean_hex[0:2], 16)
+        g = int(clean_hex[2:4], 16)
+        b = int(clean_hex[4:6], 16)
+    except ValueError:
+        raise ValueError(f"包含非法字符的 Hex 颜色: {hex_color}")
+
+    # 5. 使用标准亮度公式计算灰度 (ITU-R BT.601 标准)
+    # 人眼对绿色最敏感(0.587)，红色次之(0.299)，蓝色最弱(0.114)
+    gray = 0.299 * r + 0.587 * g + 0.114 * b
+    
+    # 6. 四舍五入并返回整数
+    return int(round(gray))
+
 def ps_levels_watermark_removal(input_path, output_path = None, input_black=0, input_white=255, gamma=1.0):
     """
     模拟 PS 色阶调整去除水印
@@ -55,9 +90,10 @@ def ps_levels_watermark_removal(input_path, output_path = None, input_black=0, i
 # --- 使用示例 ---
 if __name__ == "__main__":
     # 你可以传入一个图片的路径，也可以传入一个文件夹的路径
-    input_path = "/Volumes/西数4T外置/Pdf修改资料/2026年8月/完成/试卷去水印ing/2026胡源 高二数学精讲精练·配套习题(1)__合成的图片"  # 例如: "photo.jpg" 或 "./my_photos/"
+    input_path = "/Users/teacher/Desktop/去水印" 
     input_black = 0
-    input_white =  color_to_gray_level(241, 243, 242)
+    # input_white = color_to_gray_level(241, 243, 242)
+    input_white = hex_to_gray_level("#dbdbdb")
 
     if os.path.isfile(input_path):
         ps_levels_watermark_removal(

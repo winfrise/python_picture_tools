@@ -1,6 +1,7 @@
 import os
 import numpy as np
 from PIL import Image
+from utils import batch_process_file_with_callback
 
 def color_to_gray_level(r=None, g=None, b=None, hex_color=None):
     """
@@ -31,7 +32,7 @@ def ps_levels_watermark_removal(input_path, output_path = None, input_black=0, i
 
         if not output_path:
             base_name, ext = os.path.splitext(input_path)
-            output_path = f"{base_name}_output{ext}"
+            output_path = f"{base_name}_output_去水印{ext}"
 
         img = Image.open(input_path).convert('RGB')
         img_array = np.array(img, dtype=np.float32)
@@ -51,49 +52,10 @@ def ps_levels_watermark_removal(input_path, output_path = None, input_black=0, i
     except Exception as e:
         print(f"[错误] 处理 {input_path} 时发生异常: {e}")
 
-def batch_process(input_path, output_dir, input_black=10, input_white=220, gamma=1.0):
-    """
-    批量处理入口：自动判断输入是单张图片还是文件夹
-    """
-    # 支持的图片格式
-    valid_extensions = {'.jpg', '.jpeg', '.png', '.bmp', '.tiff', '.webp'}
-    
-    # 确保输出目录存在
-    os.makedirs(output_dir, exist_ok=True)
-    
-    # 判断输入路径类型
-    if os.path.isfile(input_path):
-        # 1. 如果输入的是单个文件
-        _, ext = os.path.splitext(input_path)
-        if ext.lower() in valid_extensions:
-            filename = os.path.basename(input_path)
-            output_path = os.path.join(output_dir, f"no_wm_{filename}")
-            ps_levels_watermark_removal(input_path, output_path, input_black, input_white, gamma)
-        else:
-            print(f"[跳过] {input_path} 不是支持的图片格式。")
-            
-    elif os.path.isdir(input_path):
-        # 2. 如果输入的是文件夹
-        print(f"正在扫描文件夹: {input_path}")
-        file_list = [f for f in os.listdir(input_path) 
-                     if os.path.splitext(f)[1].lower() in valid_extensions]
-        
-        if not file_list:
-            print("[提示] 该文件夹下没有找到支持的图片文件。")
-            return
-            
-        for filename in file_list:
-            file_path = os.path.join(input_path, filename)
-            output_path = os.path.join(output_dir, f"no_wm_{filename}")
-            ps_levels_watermark_removal(file_path, output_path, input_black, input_white, gamma)
-            
-    else:
-        print(f"[错误] 路径不存在: {input_path}")
-
 # --- 使用示例 ---
 if __name__ == "__main__":
     # 你可以传入一个图片的路径，也可以传入一个文件夹的路径
-    input_path = "/Volumes/西数4T外置/Pdf修改资料/2026年8月/完成/试卷去水印ing/test/page_003.jpg"  # 例如: "photo.jpg" 或 "./my_photos/"
+    input_path = "/Volumes/西数4T外置/Pdf修改资料/2026年8月/完成/试卷去水印ing/2026胡源 高二数学精讲精练·配套习题(1)__合成的图片"  # 例如: "photo.jpg" 或 "./my_photos/"
     input_black = 0
     input_white =  color_to_gray_level(241, 243, 242)
 
@@ -104,11 +66,19 @@ if __name__ == "__main__":
             input_white=input_white, 
         )
     elif os.path.isdir(input_path):
-        batch_process(
-            input_path=input_path, 
-            input_black=input_black, 
-            input_white=input_white, 
-            gamma=1.0
+        def callback_func(input_file, output_file):
+            ps_levels_watermark_removal(
+                input_path = input_file,
+                output_path = output_file,
+                input_black=input_black,
+                input_white=input_white, 
+            )
+
+        output_dir = f'{input_path}_output_去水印'
+        batch_process_file_with_callback(
+            input_dir=input_path,
+            output_dir=output_dir,
+            callback_func=callback_func,
         )
     else:
         print(f"地址无效")

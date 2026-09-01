@@ -2,6 +2,10 @@ import cv2
 import numpy as np
 
 def fix_broken_table_lines(input_path, output_path):
+
+
+
+
     # 1. 读取图片
     img = cv2.imread(input_path)
     if img is None:
@@ -12,19 +16,36 @@ def fix_broken_table_lines(input_path, output_path):
     # 表格线通常是黑色的，背景是浅绿色。
     # THRESH_BINARY_INV 会将黑色线条变为白色(255)，背景变为黑色(0)
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-    _, binary = cv2.threshold(gray, 180, 255, cv2.THRESH_BINARY_INV)
+
+    BLACK_COLOR = 200
+    _, binary = cv2.threshold(gray, BLACK_COLOR, 255, cv2.THRESH_BINARY_INV)
 
     # --- 第一步：提取水平线骨架 ---
+
     # 获取图片宽度，用于设定核的大小
     h, w = binary.shape[:2]
+
+    # === 1.在这里自定义尺寸 (单位：像素) ===
+    # 水平线：宽度设为 50px，高度固定为 1px
+    CUSTOM_H_WIDTH = w // 5 
+    CUSTOM_H_HEIGHT = 1
+    
+    # 垂直线：宽度固定为 1px，高度设为 50px
+    CUSTOM_V_WIDTH = 1   
+    CUSTOM_V_HEIGHT = h // 5  
+    # ======================================
+
+
     # 定义一个“扁长”的核：宽度为图片宽度的1/30，高度固定为1
     # 这个操作会把断裂的水平线“吸”出来，同时过滤掉文字
-    horizontal_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (w // 30, 1))
+    horizontal_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (CUSTOM_H_WIDTH, CUSTOM_H_HEIGHT))
     horizontal_mask = cv2.morphologyEx(binary, cv2.MORPH_OPEN, horizontal_kernel, iterations=2)
+
+
 
     # --- 第二步：提取垂直线骨架 ---
     # 定义一个“细长”的核：宽度固定为1，高度为图片高度的1/30
-    vertical_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (1, h // 30))
+    vertical_kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (CUSTOM_V_WIDTH, CUSTOM_V_HEIGHT))
     vertical_mask = cv2.morphologyEx(binary, cv2.MORPH_OPEN, vertical_kernel, iterations=2)
 
     # --- 第三步：定向修补（关键步骤） ---

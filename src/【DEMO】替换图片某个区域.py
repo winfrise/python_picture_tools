@@ -90,11 +90,11 @@ def process_image(target_path, mask_path, bg_path, text_path, output_path, thres
 
 # ================= 使用示例 =================
 if __name__ == "__main__":
-    target_path="/Users/teacher/Desktop/20260830/项目图片去水印定金200/111/测试/页面_016.jpg"
+    target_path="/Users/teacher/Desktop/20260830/xxx/111/测试/页面_016.jpg"
 
-    mask_path="/Users/teacher/Desktop/20260830/项目图片去水印定金200/111/测试/mask.png"       # 选区图片
-    bg_path="/Users/teacher/Desktop/20260830/项目图片去水印定金200/111/测试/bg.png"   # 背景层
-    text_path="/Users/teacher/Desktop/20260830/项目图片去水印定金200/111/测试/文字.jpg" # 文字层
+    mask_path="/Users/teacher/Desktop/20260830/xxx/111/测试/mask.png"       # 选区图片
+    bg_path="/Users/teacher/Desktop/20260830/xxx/111/测试/bg.png"   # 背景层
+    text_path="/Users/teacher/Desktop/20260830/xxx/111/测试/文字.jpg" # 文字层
 
     base_name, ext = os.path.splitext(target_path)
     output_path = f"{base_name}_output{ext}"

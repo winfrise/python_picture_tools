@@ -1,5 +1,7 @@
 import cv2
 import numpy as np
+import os
+from utils import batch_process_file_with_callback
 
 def remove_watermark_with_exclusion(image_path, watermark_path, output_path, 
                                     exclude_color_bgr, exclude_threshold=30):
@@ -51,10 +53,33 @@ if __name__ == "__main__":
     # 参数配置示例
     # 假设你要排除的区域是纯蓝色 (BGR格式: 255, 0, 0)
     TARGET_EXCLUDE_COLOR = (0, 0, 0) 
+
+    input_path="/Users/teacher/Desktop/20260830/xx/111/xx"
+    watermark_path="/Users/teacher/Desktop/20260830/xx/111/mask.jpg"
     
-    remove_watermark_with_exclusion(
-        image_path="/Users/teacher/Desktop/test/page28_img1.png", 
-        watermark_path="/Users/teacher/Desktop/test/mask.png", 
-        output_path="/Users/teacher/Desktop/test/page28_img1_output.png",
-        exclude_color_bgr=TARGET_EXCLUDE_COLOR
-    )
+    if os.path.isfile(input_path):
+        base_name, ext = os.path.splitext(input_path)
+        output_path = f"{base_name}_去水印_线性渐变{ext}"
+        remove_watermark_with_exclusion(
+            image_path=input_path, 
+            watermark_path=watermark_path, 
+            output_path=output_path,
+            exclude_color_bgr=TARGET_EXCLUDE_COLOR
+        )
+    elif os.path.isdir(input_path):
+        def callback_func(input_file, output_file):
+            remove_watermark_with_exclusion(
+                image_path=input_file, 
+                watermark_path=watermark_path, 
+                output_path=output_file,
+                exclude_color_bgr=TARGET_EXCLUDE_COLOR
+            )
+
+        output_dir = f'{input_path}_output_去水印_线性渐变'
+        batch_process_file_with_callback(
+            input_dir=input_path,
+            output_dir=output_dir,
+            callback_func=callback_func,
+        )
+    else:
+        print(f"地址无效")

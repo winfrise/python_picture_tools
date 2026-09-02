@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 import os
 from collections import Counter
+from utils import batch_process_file_with_callback
 
 
 def smart_fill_watermark(
@@ -257,10 +258,8 @@ def remove_gray_watermark(
 
 
 if __name__ == "__main__":
-    input_path = "/Users/teacher/Desktop/20260830/0902钢板去水印/test/001.jpg"
+    input_path = "/Users/teacher/Desktop/20260830/0902钢板去水印/333"
 
-    base_name, ext = os.path.splitext(input_path)
-    output_path = f"{base_name}_output_智能填充22{ext}"
 
     watermark_area_img = None
 
@@ -270,19 +269,52 @@ if __name__ == "__main__":
     # 60 ~ 80（深灰/暗色）：如果你的背景是深灰色、暗色木纹等，建议设置在这个范围。
     # 100+（中灰偏暗）：不建议设置这么高，否则普通的阴影或中等深度的颜色都会被误判为黑色，导致大面积被强制填充为白色。
 
-    remove_gray_watermark(
-        input_path=input_path,
-        output_path=output_path,
-        watermark_area_img=watermark_area_img,
-        gray_range=(130, 220),
-        lower_val=160,
-        upper_val=230,
-        dilate_size=3,
-        smart_fill=True,
-        surround_radius=5,
-        white_threshold=200,
-        dark_threshold_min=0, 
-        dark_threshold_max = 150,            # 小于50算接近黑色
-        dark_surround_fill_white=True,  # 开启四周黑色强制填白
-        debug=True,
-    )
+    if os.path.isfile(input_path):
+        base_name, ext = os.path.splitext(input_path)
+        output_path = f"{base_name}_output_智能填充22{ext}"
+
+        remove_gray_watermark(
+            input_path=input_path,
+            output_path=output_path,
+            watermark_area_img=watermark_area_img,
+            gray_range=(130, 220),
+            lower_val=160,
+            upper_val=230,
+            dilate_size=3,
+            smart_fill=True,
+            surround_radius=5,
+            white_threshold=200,
+            dark_threshold_min=0, 
+            dark_threshold_max = 150,            # 小于50算接近黑色
+            dark_surround_fill_white=True,  # 开启四周黑色强制填白
+            debug=False,
+        )
+    elif os.path.isdir(input_path):
+        def callback_func(input_file, output_file):
+            remove_gray_watermark(
+                input_path=input_file,
+                output_path=output_file,
+                watermark_area_img=watermark_area_img,
+                gray_range=(130, 220),
+                lower_val=160,
+                upper_val=230,
+                dilate_size=3,
+                smart_fill=True,
+                surround_radius=5,
+                white_threshold=200,
+                dark_threshold_min=0, 
+                dark_threshold_max = 150,            # 小于50算接近黑色
+                dark_surround_fill_white=True,  # 开启四周黑色强制填白
+                debug=False,
+            )
+
+        output_dir = f"{input_path}_output_智能去水印"
+        batch_process_file_with_callback(
+            input_dir=input_path,
+            output_dir=output_dir,
+            callback_func=callback_func,
+        )
+    else:
+        print(f"路径错误: {input_path}")
+
+

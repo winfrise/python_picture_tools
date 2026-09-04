@@ -1,6 +1,8 @@
 
 import numpy as np
 
+FILL_COLOR = [255, 255, 255]
+FILL_COLOR = [0, 255, 0]
 
 def fill_watermark_white(img, final_mask):
     """
@@ -19,6 +21,6 @@ def fill_watermark_white(img, final_mask):
     ys, xs = np.where(final_mask > 0)
     
     for y, x in zip(ys, xs):
-        result[y, x] = [255, 255, 255]
+        result[y, x] = FILL_COLOR
     
     return result

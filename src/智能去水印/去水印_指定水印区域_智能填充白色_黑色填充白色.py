@@ -1,7 +1,10 @@
 import cv2
 import numpy as np
-import os
+import os,sys
 from collections import Counter
+
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from utils import batch_process_file_with_callback
 
 

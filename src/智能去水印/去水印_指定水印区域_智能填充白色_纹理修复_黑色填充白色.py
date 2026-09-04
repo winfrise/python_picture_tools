@@ -2,6 +2,7 @@ import cv2
 
 import os, sys
 import time
+import gc
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
@@ -48,7 +49,7 @@ def remove_gray_watermark(
 
 if __name__ == "__main__":
 
-    INPUT_PATH = "/Users/teacher/Desktop/20260830/0902钢板去水印/test/001.jpg"
+    INPUT_PATH = "/Users/teacher/Desktop/20260830/0902钢板去水印/333"
     WATERMARK_AREA_IMG = "/Users/teacher/Desktop/20260830/0902钢板去水印/test/mask.png"
     # WATERMARK_AREA_IMG = None
     IS_SMART_FILL = True
@@ -77,6 +78,7 @@ if __name__ == "__main__":
                 watermark_area_img=WATERMARK_AREA_IMG,
                 is_smart_fill=IS_SMART_FILL,
             )
+            gc.collect() # 垃圾回收
 
         output_dir = f"{INPUT_PATH}_output_智能去水印"
         batch_process_file_with_callback(

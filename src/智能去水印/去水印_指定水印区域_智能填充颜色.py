@@ -1,6 +1,7 @@
 import cv2
 import numpy as np
 import os
+import time
 
 
 def smart_fill_watermark(img, mask, surround_radius=5, white_threshold=200):
@@ -126,6 +127,11 @@ def remove_gray_watermark(
         white_threshold: 所有通道都大于此值则认为是"近白色"
         debug: 是否保存中间调试图片
     """
+
+    start_time = time.time()
+
+    print(f"正在处理图片:{input_path}")
+
     # 读取输入图片
     img = cv2.imread(input_path)
     if img is None:
@@ -194,9 +200,7 @@ def remove_gray_watermark(
         fill_white_count = cv2.countNonZero(final_mask)
         fill_surround_count = 0
 
-    # 保存结果
-    os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
-    cv2.imwrite(output_path, result)
+
 
     # 调试模式：保存中间图片
     if debug:
@@ -247,6 +251,17 @@ def remove_gray_watermark(
             print("  2. gray_range_mask 全为零 -> 调整 gray_range 参数")
             print("  3. range_mask 全为零 -> 调整 lower_val/upper_val 参数")
             print("  4. combined 和 range_mask 无交集 -> 检查参数是否匹配实际水印颜色")
+
+
+    # 保存结果
+    os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
+    cv2.imwrite(output_path, result)
+
+    print(f"处理完成，保存至:{output_path}")
+
+    end_time = time.time()
+    print(f"运行耗时: {end_time - start_time:.4f} 秒")
+
 
     return result
 

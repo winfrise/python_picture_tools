@@ -44,7 +44,9 @@ def fill_watermark_smart(img, final_mask):
         else:
             # 否则，找周围出现最多的颜色
 
-            fill_color = np.mean(surround_pixels, axis=0).astype(np.uint8)
+            fill_color = np.mean(surround_pixels, axis=0).astype(np.uint8) # 平均值
+            # fill_color_max = np.max(surround_pixels, axis=0).astype(np.uint8) # 最大值
+            # fill_color_min = np.min(surround_pixels, axis=0).astype(np.uint8) # 最小值
 
             # 4. 应用填充颜色
             result_img[y, x] = fill_color

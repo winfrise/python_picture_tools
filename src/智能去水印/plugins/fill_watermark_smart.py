@@ -1,91 +1,53 @@
 import numpy as np
-from collections import Counter
+from .get_surround_pixels import get_surround_pixels
+from .is_dark_environment import is_dark_environment
+from .is_white_environment import is_white_environment
 
-SURROUND_RADIUS = 5                   #向外采样扩展的半径
-WHITE_THRESHOLD = 200                 #填充白色的亮度判定阈值
+SURROUND_RADIUS = 5
 
-DARK_THRESHOLD_MIN = 0 #（深色阈值下限）
-DARK_THRESHOLD_MAX = 150 #（深色阈值上限）
-IS_DARK_SURROUND_FILL_WHITE = True # 是否开启黑色填充白色）
-
-def fill_watermark_smart(
-        img, 
-        final_mask, 
-        surround_radius=SURROUND_RADIUS, 
-        white_threshold=WHITE_THRESHOLD, 
-        dark_threshold_min=DARK_THRESHOLD_MIN, 
-        dark_threshold_max = DARK_THRESHOLD_MAX,
-        is_dark_surround_fill_white=IS_DARK_SURROUND_FILL_WHITE
-):
-    """
-    智能填充水印区域。
-    根据水印周围的像素颜色，决定填充为白色还是周围最多的颜色。
-    如果开启了 is_dark_surround_fill_white 且周围接近黑色较多，则强制填充白色。
-    """
-    result = img.copy()
-    img_h, img_w = img.shape[:2]
-    
-    # 颜色量化，让直方图统计更稳定（每32个颜色值合并为一个桶）
-    quantized_img = (img // 32) * 32
-    
-    # 获取所有需要填充的水印像素坐标
+def fill_watermark_smart(img, final_mask):
+    result_img = img.copy()
     ys, xs = np.where(final_mask > 0)
-    
-    
+
     for y, x in zip(ys, xs):
-        # 计算采样窗口边界
-        y_min = max(0, y - surround_radius)
-        y_max = min(img_h, y + surround_radius + 1)
-        x_min = max(0, x - surround_radius)
-        x_max = min(img_w, x + surround_radius + 1)
+        # 1. 获取周围邻域的掩码情况
+        region_mask = get_surround_pixels(final_mask, y, x, SURROUND_RADIUS)
         
-        # 提取周围区域
-        surround_patch = img[y_min:y_max, x_min:x_max]
-        surround_mask_patch = final_mask[y_min:y_max, x_min:x_max]
+        # 找出周围属于"背景"（非水印）的坐标
+        bg_coords = np.where(region_mask == 0)
         
-        # 只取非水印区域的像素作为背景参考
-        valid_pixels = surround_patch[surround_mask_patch == 0]
-        
-        if valid_pixels.size == 0:
-            # 如果周围全是水印，默认填白色
-            result[y, x] = [255, 255, 255]
+        # 如果没有背景像素（被水印包围），直接填白
+        if len(bg_coords[0]) == 0:
+            result_img[y, x] = [255, 255, 255]
             continue
             
-        # 判断周围是否有超过一半是接近黑色的
-        if is_dark_surround_fill_white:
-            is_dark_max = np.all(valid_pixels <= dark_threshold_max, axis=1)
-            is_dark_min = np.all(valid_pixels >= dark_threshold_min, axis=1)
-            is_dark = is_dark_max & is_dark_min
-            dark_ratio = np.sum(is_dark) / len(is_dark)
-            if dark_ratio > 0.5:
-                result[y, x] = [255, 255, 255]
-                continue
+        # 获取周围背景的实际像素颜色值
+        # 注意：这里需要利用 bg_coords 从原图中取值
+        # 为了性能，通常建议直接传切片给检测函数，这里简化演示逻辑
+        region_img = img[
+            max(0, y-SURROUND_RADIUS):min(img.shape[0], y+SURROUND_RADIUS+1),
+            max(0, x-SURROUND_RADIUS):min(img.shape[1], x+SURROUND_RADIUS+1)
+        ]
+        surround_pixels = region_img[bg_coords]
+
+        # 2. 调用抽离出的检测函数
         
-        # 判断周围是否有超过一半是接近白色的
-        is_white = np.all(valid_pixels > white_threshold, axis=1)
-        white_ratio = np.sum(is_white) / len(is_white)
-        
-        if white_ratio > 0.5:
-            # 周围主要是白色，填充白色
-            result[y, x] = [255, 255, 255]
+        # 优先判断深色环境
+        if is_dark_environment(surround_pixels):
+            result_img[y, x] = [255, 255, 255]
+            
+        # 判断白色环境
+        elif is_white_environment(surround_pixels):
+            result_img[y, x] = [255, 255, 255]
+            
+        # 其他情况（例如彩色环境，使用原来的多数投票逻辑）
         else:
             # 否则，找周围出现最多的颜色
-            quantized_patch = quantized_img[y_min:y_max, x_min:x_max]
-            valid_quantized = quantized_patch[surround_mask_patch == 0]
-            
-            if valid_quantized.size == 0:
-                result[y, x] = [255, 255, 255]
-                continue
-                
-            # 将颜色转为元组以便统计
-            colors = [tuple(c) for c in valid_quantized]
-            most_common_color = Counter(colors).most_common(1)[0][0]
-            
-            # 用原始图像中该颜色组的平均值填充（更平滑）
-            color_mask = np.all(valid_quantized == most_common_color, axis=1)
-            avg_color = np.mean(valid_pixels[color_mask], axis=0).astype(np.uint8)
-            
-            result[y, x] = avg_color
-            
-    return result
 
+            # 颜色量化，让直方图统计更稳定（每32个颜色值合并为一个桶）
+            quantized_img = (img // 32) * 32
+            
+
+            pass 
+            
+    return result_img

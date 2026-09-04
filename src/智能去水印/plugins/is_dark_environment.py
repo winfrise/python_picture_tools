@@ -1,7 +1,7 @@
 import numpy as np
 
 DARK_THRESHOLD_MIN = 0
-DARK_THRESHOLD_MAX = 150
+DARK_THRESHOLD_MAX = 200
 
 def is_dark_environment(surround_pixels):
     """
@@ -20,4 +20,4 @@ def is_dark_environment(surround_pixels):
     
     # 如果深色占比超过 50% (可调整)，则认为是深色环境
     # 注意：这里需要根据你的原代码逻辑确认比例阈值，通常是 > 0.5
-    return (dark_count / len(brightness)) > 0.5 
+    return (dark_count / len(brightness)) > 0.1 

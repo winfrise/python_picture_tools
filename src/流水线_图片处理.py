@@ -11,7 +11,7 @@ sys.path.append(parent_dir)
 
 from utils import batch_process_file_with_callback
 
-def process_image_actions(image_path, output_path, actions):
+def process_image_actions(image_path, output_path, action_factory):
     """
     根据动作列表对图片进行处理并保存。
     
@@ -25,6 +25,7 @@ def process_image_actions(image_path, output_path, actions):
         print(f"打开图片失败: {e}")
         return
 
+    actions = action_factory(image_path)
     for action in actions:
         action_type = action.get("type")
 
@@ -87,29 +88,30 @@ def process_image_actions(image_path, output_path, actions):
 # ================= 测试用例 =================
 if __name__ == "__main__":
     # 定义动作列表
-    my_actions = [
-        # 3. 在 (50, 50) 的位置，填充一个 100x100 的半透明蓝色矩形
-        {
-            "type": "fill", 
-            "x": 3573, "y": 391,
-            "width": 362, "height": 5365, 
-            "color": (255, 255, 255)
-        },
+    def my_actions (image_path):
+        return [
+            # 3. 在 (50, 50) 的位置，填充一个 100x100 的半透明蓝色矩形
+            {
+                "type": "fill", 
+                "x": 3573, "y": 391,
+                "width": 362, "height": 5365, 
+                "color": (255, 255, 255)
+            },
 
-        # 1. 向右移动 50 像素
-        {
-            "type": "move_horizontal", 
-            "distance": 181
-        },
-        
-        # 2. 裁剪：左边裁掉 10px，上边裁掉 20px，右边裁掉 10px，下边裁掉 20px
-        # {
-        #     "type": "crop", 
-        #     "left": 500, "top": 20, "right": 500, "bottom": 20
-        # },
-        
+            # 1. 向右移动 50 像素
+            {
+                "type": "move_horizontal", 
+                "distance": 181
+            },
+            
+            # 2. 裁剪：左边裁掉 10px，上边裁掉 20px，右边裁掉 10px，下边裁掉 20px
+            # {
+            #     "type": "crop", 
+            #     "left": 500, "top": 20, "right": 500, "bottom": 20
+            # },
+            
 
-    ]
+        ]
     image_path = "/Users/teacher/Desktop/不/111"
 
     if os.path.isfile(image_path):
@@ -119,14 +121,14 @@ if __name__ == "__main__":
         process_image_actions(
             image_path=image_path,      # 替换为你的输入图片路径
             output_path=output_path,    # 替换为你的输出图片路径
-            actions=my_actions
+            action_factory=my_actions
         )
     elif os.path.isdir(image_path):
         def callback_func(input_file, output_file):
             process_image_actions(
                 image_path=input_file,      # 替换为你的输入图片路径
                 output_path=output_file,    # 替换为你的输出图片路径
-                actions=my_actions
+                action_factory=my_actions
             )
 
         input_dir = image_path

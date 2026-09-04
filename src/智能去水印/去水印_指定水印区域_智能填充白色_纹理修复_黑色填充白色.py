@@ -7,8 +7,9 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from utils import batch_process_file_with_callback
 
-from plugins.smart_fill_watermark import smart_fill_watermark
 from plugins.calculate_watermark_mask import calculate_watermark_mask
+from plugins.fill_watermark_smart import fill_watermark_smart
+from plugins.fill_watermark_white import fill_watermark_white
 
 def remove_gray_watermark(
     input_path,
@@ -30,10 +31,10 @@ def remove_gray_watermark(
 
     # 填充
     if is_smart_fill:
-        result = smart_fill_watermark(img, final_mask)  # 智能填充
+        result = fill_watermark_smart(img, final_mask)  # 智能填充
     else:
         result = img.copy()
-        result[final_mask > 0] = [255, 255, 255]  # 填充白色
+        result = fill_watermark_white(result, final_mask)  # 智能填充
 
     # 保存结果
     os.makedirs(os.path.dirname(output_path) or ".", exist_ok=True)
@@ -47,9 +48,10 @@ def remove_gray_watermark(
 
 if __name__ == "__main__":
 
-    INPUT_PATH = "/Users/teacher/Desktop/20260830/0902钢板去水印/333/组合 1_页面_180.jpg"
-    WATERMARK_AREA_IMG = None
-    IS_SMART_FILL = True
+    INPUT_PATH = "/Users/teacher/Desktop/20260830/0902钢板去水印/test/001.jpg"
+    WATERMARK_AREA_IMG = "/Users/teacher/Desktop/20260830/0902钢板去水印/test/mask.png"
+    # WATERMARK_AREA_IMG = None
+    IS_SMART_FILL = False
 
     # dark_threshold
     # 20 ~ 40（极暗/纯黑）：只识别接近纯黑的颜色。如果你的背景是深灰、深蓝或深红，它们不会被判定为黑色。

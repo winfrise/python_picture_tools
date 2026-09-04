@@ -8,7 +8,7 @@ DARK_THRESHOLD_MIN = 0 #（深色阈值下限）
 DARK_THRESHOLD_MAX = 150 #（深色阈值上限）
 IS_DARK_SURROUND_FILL_WHITE = True # 是否开启黑色填充白色）
 
-def smart_fill_watermark(
+def fill_watermark_smart(
         img, 
         final_mask, 
         surround_radius=SURROUND_RADIUS, 
@@ -31,8 +31,6 @@ def smart_fill_watermark(
     # 获取所有需要填充的水印像素坐标
     ys, xs = np.where(final_mask > 0)
     
-    # 记录哪些位置是因为黑色被填充的（用于调试图）
-    dark_fill_mask = np.zeros((img_h, img_w), dtype=np.uint8)
     
     for y, x in zip(ys, xs):
         # 计算采样窗口边界
@@ -61,7 +59,6 @@ def smart_fill_watermark(
             dark_ratio = np.sum(is_dark) / len(is_dark)
             if dark_ratio > 0.5:
                 result[y, x] = [255, 255, 255]
-                dark_fill_mask[y, x] = 255
                 continue
         
         # 判断周围是否有超过一半是接近白色的

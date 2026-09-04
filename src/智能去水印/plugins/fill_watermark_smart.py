@@ -44,9 +44,10 @@ def fill_watermark_smart(img, final_mask):
         else:
             # 否则，找周围出现最多的颜色
 
-            # 颜色量化，让直方图统计更稳定（每32个颜色值合并为一个桶）
-            quantized_img = (img // 32) * 32
-            
+            fill_color = np.mean(surround_pixels, axis=0).astype(np.uint8)
+
+            # 4. 应用填充颜色
+            result_img[y, x] = fill_color
 
             pass 
             

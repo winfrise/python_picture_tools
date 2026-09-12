@@ -1,6 +1,9 @@
 import os
 import numpy as np
 from PIL import Image
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+
 from utils import batch_process_file_with_callback
 
 def color_to_gray_level(r=None, g=None, b=None, hex_color=None):
@@ -90,9 +93,9 @@ def ps_levels_watermark_removal(input_path, output_path = None, input_black=0, i
 # --- 使用示例 ---
 if __name__ == "__main__":
     # 你可以传入一个图片的路径，也可以传入一个文件夹的路径
-    input_path = "/Users/teacher/Desktop/20260830/xxx/111/xx" 
+    input_path = "/Users/teacher/Desktop/青岛大学附属医院总务设备采购项目002(二次)-1（产品原材料）/产品" 
     input_black = 0
-    input_white = color_to_gray_level(176, 176, 176)
+    input_white = color_to_gray_level(210, 210, 210)
     # input_white = hex_to_gray_level("#dadada")
 
     if os.path.isfile(input_path):

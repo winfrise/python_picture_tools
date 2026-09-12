@@ -7,6 +7,7 @@ WHITE_THRESHOLD = 200                 #填充白色的亮度判定阈值
 DARK_THRESHOLD_MIN = 0 #（深色阈值下限）
 DARK_THRESHOLD_MAX = 150 #（深色阈值上限）
 IS_DARK_SURROUND_FILL_WHITE = True # 是否开启黑色填充白色）
+FILL_COLOR = [212, 235, 219]
 
 def fill_watermark_smart(
         img, 
@@ -48,7 +49,7 @@ def fill_watermark_smart(
         
         if valid_pixels.size == 0:
             # 如果周围全是水印，默认填白色
-            result[y, x] = [255, 255, 255]
+            result[y, x] = FILL_COLOR
             continue
             
         # 判断周围是否有超过一半是接近黑色的
@@ -58,7 +59,7 @@ def fill_watermark_smart(
             is_dark = is_dark_max & is_dark_min
             dark_ratio = np.sum(is_dark) / len(is_dark)
             if dark_ratio > 0.5:
-                result[y, x] = [255, 255, 255]
+                result[y, x] = FILL_COLOR
                 continue
         
         # 判断周围是否有超过一半是接近白色的
@@ -67,14 +68,14 @@ def fill_watermark_smart(
         
         if white_ratio > 0.5:
             # 周围主要是白色，填充白色
-            result[y, x] = [255, 255, 255]
+            result[y, x] = FILL_COLOR
         else:
             # 否则，找周围出现最多的颜色
             quantized_patch = quantized_img[y_min:y_max, x_min:x_max]
             valid_quantized = quantized_patch[surround_mask_patch == 0]
             
             if valid_quantized.size == 0:
-                result[y, x] = [255, 255, 255]
+                result[y, x] = FILL_COLOR
                 continue
                 
             # 将颜色转为元组以便统计

@@ -1,10 +1,18 @@
 import cv2
 import numpy as np
+import sys
+import os
 
-GRAY_RANGE = (160, 230)  # 灰色通道
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from helpers.rgb_to_gray import rgb_to_gray
+
+WATERMARK_COLOR = "#c0c9c4" # 水印颜色, 使用时需修改
+WATERMARK_COLOR_GRAY = rgb_to_gray(WATERMARK_COLOR)
+GRAY_RANGE = (WATERMARK_COLOR_GRAY - 30, WATERMARK_COLOR_GRAY + 30)  # 灰色通道
+
 DILATE_SIZE = 3  # 膨胀
-LOWER_RGB = (160, 160, 160) # RGB通道
-UPPER_RGB = (230, 230, 230) # RGB通道
+LOWER_RGB = (160, 160, 160) # RGB通道, 使用时需修改
+UPPER_RGB = (230, 230, 230) # RGB通道, 使用时需修改
 
 def calculate_watermark_mask(
         img, 

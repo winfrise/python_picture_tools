@@ -3,6 +3,7 @@ import numpy as np
 
 FILL_COLOR = [255, 255, 255]
 FILL_COLOR = [0, 255, 0]
+FILL_COLOR = [212, 235, 219]
 
 def fill_watermark_white(img, final_mask):
     """

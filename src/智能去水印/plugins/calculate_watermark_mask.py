@@ -6,11 +6,14 @@ import os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from helpers.color_to_gray import color_to_gray
 
-WATERMARK_COLOR = "#d3d2d7" # 水印颜色, 使用时需修改
+WATERMARK_COLOR = "#72736d" # 水印颜色, 使用时需修改
 WATERMARK_COLOR_GRAY = color_to_gray(WATERMARK_COLOR)
-GRAY_RANGE = (WATERMARK_COLOR_GRAY - 30, WATERMARK_COLOR_GRAY + 30)  # 灰色通道
+GRAY_RANGE = (WATERMARK_COLOR_GRAY - 50, WATERMARK_COLOR_GRAY + 50)  # 灰色通道
 
+USE_DILATE = False # 是否开启膨胀
 DILATE_SIZE = 3  # 膨胀
+
+USE_RGB_RANGE = False # 是否开启rgb区间
 LOWER_RGB = (160, 160, 160) # RGB通道, 使用时需修改
 UPPER_RGB = (230, 230, 230) # RGB通道, 使用时需修改
 
@@ -54,23 +57,23 @@ def calculate_watermark_mask(
             print(f"水印区域图片错误")
     else:
         print(f"水印区域图片不存在")
+        
     # 转灰度
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-
     # 灰度范围检测， 灰色通道
     gray_range_mask = cv2.inRange(gray, gray_range[0], gray_range[1])
-
     # 灰度检测与区域限制的交集
-    combined = cv2.bitwise_and(gray_range_mask, area_mask)
+    final_mask = cv2.bitwise_and(gray_range_mask, area_mask)
 
     # 膨胀
-    kernel = np.ones((dilate_size, dilate_size), np.uint8)
-    mask = cv2.dilate(combined, kernel, iterations=1)
+    if USE_DILATE:
+        kernel = np.ones((dilate_size, dilate_size), np.uint8)
+        final_mask = cv2.dilate(final_mask, kernel, iterations=1)
 
-    # RGB 范围检测, 彩色通道
-    range_mask = cv2.inRange(img, lower_rgb, upper_rgb)
-
-    # 最终掩码 = 膨胀掩码 & RGB范围
-    final_mask = cv2.bitwise_and(mask, range_mask)
+    if USE_RGB_RANGE:
+        # RGB 范围检测, 彩色通道
+        range_mask = cv2.inRange(img, lower_rgb, upper_rgb)
+        # 最终掩码 = 膨胀掩码 & RGB范围
+        final_mask = cv2.bitwise_and(final_mask, range_mask)
 
     return final_mask

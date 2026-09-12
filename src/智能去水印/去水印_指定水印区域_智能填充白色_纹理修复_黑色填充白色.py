@@ -49,10 +49,10 @@ def remove_gray_watermark(
 
 if __name__ == "__main__":
 
-    INPUT_PATH = "/Users/teacher/Desktop/青岛大学附属医院总务设备采购项目002(二次)-证书-测试/333"
-    # WATERMARK_AREA_IMG = "/Users/teacher/Desktop/20260830/0902钢板去水印/test/mask.png"
-    WATERMARK_AREA_IMG = None
-    IS_SMART_FILL = True  # 是否开启智能填充，使用时需修改
+    INPUT_PATH = "/Users/teacher/Desktop/青岛大学附属医院总务设备采购项目002(二次)-证书-测试/证书/03_output_智能去水印"
+    WATERMARK_AREA_IMG = "/Users/teacher/Desktop/青岛大学附属医院总务设备采购项目002(二次)-证书-测试/证书/03_mask.png"
+    # WATERMARK_AREA_IMG = None
+    IS_SMART_FILL = False  # 是否开启智能填充，使用时需修改
 
     # dark_threshold
     # 20 ~ 40（极暗/纯黑）：只识别接近纯黑的颜色。如果你的背景是深灰、深蓝或深红，它们不会被判定为黑色。

@@ -9,7 +9,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils import batch_process_file_with_callback
 
 from plugins.calculate_watermark_mask import calculate_watermark_mask
-from plugins.fill_watermark_smart_old import fill_watermark_smart
+from plugins.fill_watermark_smart import fill_watermark_smart
 from plugins.fill_watermark_white import fill_watermark_white
 
 def remove_gray_watermark(

@@ -5,7 +5,7 @@ import sys
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
-from helpers.rgb_to_gray import rgb_to_gray
+from helpers.color_to_gray import color_to_gray
 
 def adjust_levels(
         input_path, 

@@ -1,5 +1,6 @@
 import numpy as np
 from collections import Counter
+from helpers.hex_to_rgb import hex_to_rgb
 
 SURROUND_RADIUS = 5                   #向外采样扩展的半径
 WHITE_THRESHOLD = 200                 #填充白色的亮度判定阈值
@@ -7,7 +8,7 @@ WHITE_THRESHOLD = 200                 #填充白色的亮度判定阈值
 DARK_THRESHOLD_MIN = 0 #（深色阈值下限）
 DARK_THRESHOLD_MAX = 150 #（深色阈值上限）
 IS_DARK_SURROUND_FILL_WHITE = True # 是否开启黑色填充白色）
-FILL_COLOR = [212, 235, 219]
+FILL_COLOR = [255, 255, 255]  # 水印填充颜色
 
 def fill_watermark_smart(
         img, 
@@ -70,16 +71,16 @@ def fill_watermark_smart(
             # 周围主要是白色，填充白色
             result[y, x] = FILL_COLOR
         else:
-            # 否则，找周围出现最多的颜色
-            quantized_patch = quantized_img[y_min:y_max, x_min:x_max]
-            valid_quantized = quantized_patch[surround_mask_patch == 0]
+            # # 否则，找周围出现最多的颜色
+            quantized_patch = quantized_img[y_min:y_max, x_min:x_max] # 提取“周围区域的量化图像块”
+            valid_quantized = quantized_patch[surround_mask_patch == 0] # 筛选“有效”的周围像素（排除已填充/无效区域）
             
-            if valid_quantized.size == 0:
+            if valid_quantized.size == 0: #  处理“无有效周围像素”的极端情况
                 result[y, x] = FILL_COLOR
                 continue
                 
             # 将颜色转为元组以便统计
-            colors = [tuple(c) for c in valid_quantized]
+            colors = [tuple(c) for c in valid_quantized] # 统计周围“最常见的颜色”
             most_common_color = Counter(colors).most_common(1)[0][0]
             
             # 用原始图像中该颜色组的平均值填充（更平滑）

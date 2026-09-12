@@ -4,10 +4,10 @@ import sys
 import os
 
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
-from helpers.rgb_to_gray import rgb_to_gray
+from helpers.color_to_gray import color_to_gray
 
-WATERMARK_COLOR = "#c0c9c4" # 水印颜色, 使用时需修改
-WATERMARK_COLOR_GRAY = rgb_to_gray(WATERMARK_COLOR)
+WATERMARK_COLOR = "#d3d2d7" # 水印颜色, 使用时需修改
+WATERMARK_COLOR_GRAY = color_to_gray(WATERMARK_COLOR)
 GRAY_RANGE = (WATERMARK_COLOR_GRAY - 30, WATERMARK_COLOR_GRAY + 30)  # 灰色通道
 
 DILATE_SIZE = 3  # 膨胀

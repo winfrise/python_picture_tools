@@ -1,6 +1,6 @@
 import math
 
-def rgb_to_gray(color, round_mode='round'):
+def color_to_gray(color, round_mode='round'):
     """
     将 RGB 或 16进制颜色转换为灰度值
     :param color: 支持 (R,G,B) 元组/列表 或 "#RRGGBB" 字符串

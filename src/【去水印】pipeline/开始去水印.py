@@ -16,10 +16,20 @@ if __name__ == "__main__":
             "fill_color": hex_to_rgb("#d4ebdb")
         },
         {
-            "watermark_target_gray": color_to_gray("#767875"),
-            "watermark_gray_tolerance": 30,
             "watermark_area_img": None,
-            "fill_color": [0, 0, 0]
+            "watermark_target_gray": color_to_gray("#767875"),
+            "watermark_gray_tolerance": 20,
+            "exclude_rgb_list": [
+                {
+                    "color_rgb": hex_to_rgb("#4f9d73"),
+                    "color_threshold": 10
+                },
+                {
+                    "color_rgb": hex_to_rgb("#089141"),
+                    "color_threshold": 30
+                }
+            ],
+            "fill_color": [255, 0, 0]
         },
     ]
 

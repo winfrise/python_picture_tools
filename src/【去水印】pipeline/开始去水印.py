@@ -22,16 +22,10 @@ if __name__ == "__main__":
             "exclude_rgb_list": [
                 {
                     "color_rgb": hex_to_rgb("#4f9d73"),
-                    "h_threshold": 10,
-                    "s_threshold": 70,
-                    "v_threshold": 80
-                },
-                # {
-                #     "color_rgb": hex_to_rgb("#089141"),
-                #     "h_threshold": 30
-                # }
+                    "color_threshold": 50,
+                }
             ],
-            "fill_color": [255, 0, 0]
+            "fill_color": [0, 0, 0]
         },
     ]
 

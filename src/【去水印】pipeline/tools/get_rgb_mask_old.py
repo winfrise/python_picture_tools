@@ -13,7 +13,7 @@ def get_rgb_mask(img, color_rgb_list):
 
     for item in color_rgb_list:
         color_rgb =  item.get('color_rgb')
-        color_threshold = item.get('color_threshold', 10)
+        color_threshold = item.get('color_threshold', 50)
 
         color_bgr = color_rgb[::-1]
 
@@ -32,10 +32,4 @@ def get_rgb_mask(img, color_rgb_list):
         final_exclude_mask = cv2.bitwise_or(final_exclude_mask, single_exclude_mask)
 
 
-
-
-    # 3. 取反得到最终的 Keep Mask
-    # 排除掩膜中白色是要删掉的 -> 取反后白色变成黑色(删掉)，黑色变成白色(保留)
-    keep_mask = cv2.bitwise_not(final_exclude_mask)
-
-    return keep_mask
+    return final_exclude_mask

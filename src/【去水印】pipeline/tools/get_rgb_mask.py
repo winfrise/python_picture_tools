@@ -15,7 +15,6 @@ def get_rgb_mask(img, color_rgb_list):
         color_rgb =  item.get('color_rgb')
         color_threshold = item.get('color_threshold', 10)
 
-        print(color_rgb)
         color_bgr = color_rgb[::-1]
 
         # 2. 【颜色排除】计算图片中每个像素与“目标绿色”的距离

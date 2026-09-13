@@ -9,16 +9,16 @@ if __name__ == "__main__":
     image_path = "/Users/teacher/Desktop/青岛大学附属医院总务设备采购项目002(二次)-证书-测试/证书/test11/青岛大学_页面_009.jpg"
     pipeline_steps = [
         {
-            "watermark_target_gray": color_to_gray("#bcbeb9"),
-            "watermark_gray_tolerance": 30,
             "watermark_area_img": None,
+            "target_gray": color_to_gray("#bcbeb9"),
+            "target_gray_threshold": 30,
             # "fill_color": [255, 255, 255]
             "fill_color": hex_to_rgb("#d4ebdb")
         },
         {
             "watermark_area_img": None,
-            "watermark_target_gray": color_to_gray("#767875"),
-            "watermark_gray_tolerance": 20,
+            "target_gray": color_to_gray("#767875"),
+            "target_gray_threshold": 20,
             "exclude_rgb_list": [
                 {
                     "color_rgb": hex_to_rgb("#4f9d73"),

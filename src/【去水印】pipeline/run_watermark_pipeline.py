@@ -20,21 +20,20 @@ def run_watermark_pipeline(image_path, steps, output_path = None):
     current_image = cv2.imread(image_path)
 
     for step in steps:
-        watermark_target_gray = step.get("watermark_target_gray")
-        watermark_gray_tolerance = step.get("watermark_gray_tolerance")
         watermark_area_img = step.get("watermark_area_img")
+        target_gray = step.get("target_gray")
+        target_gray_threshold = step.get("target_gray_threshold")
         exclude_rgb_list = step.get("exclude_rgb_list")
-        exclude_rgb_threshold = step.get("exclude_rgb_threshold")
         fill_color = step.get("fill_color")
         
 
         mask = calc_watermark_mask(
             img = current_image, 
+            watermark_area_img=watermark_area_img,
             gray_range= [
-                watermark_target_gray - watermark_gray_tolerance, 
-                watermark_target_gray + watermark_gray_tolerance
-            ],
-            watermark_area_img=watermark_area_img
+                target_gray - target_gray_threshold, 
+                target_gray + target_gray_threshold
+            ]
         )
 
         # 排除指定颜色的rgb蒙版

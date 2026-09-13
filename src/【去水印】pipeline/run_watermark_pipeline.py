@@ -42,7 +42,13 @@ def run_watermark_pipeline(image_path, steps, output_path = None):
                 img = current_image, 
                 color_rgb_list=exclude_rgb_list
             )
-            mask = cv2.bitwise_and(mask, mask_exclude)
+            # 1. 先对排除蒙版取反 (黑色变白，白色变黑)
+            # 此时，你想排除的区域变成了 0 (黑)，其他区域是 255 (白)
+            mask_exclude_inv = cv2.bitwise_not(mask_exclude)
+
+            # 2. 再与原蒙版进行“与”运算
+            # 原蒙版中，对应排除区域的部分会被强制变为 0
+            mask = cv2.bitwise_and(mask, mask_exclude_inv)
 
         current_image = fill_watermark_with_color(current_image, mask, fill_color)
         

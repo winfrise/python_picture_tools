@@ -17,17 +17,19 @@ if __name__ == "__main__":
         },
         {
             "watermark_area_img": None,
-            "target_gray": color_to_gray("#767875"),
+            "target_gray": color_to_gray("#757774"),
             "target_gray_threshold": 20,
             "exclude_rgb_list": [
                 {
                     "color_rgb": hex_to_rgb("#4f9d73"),
-                    "color_threshold": 10
+                    "h_threshold": 10,
+                    "s_threshold": 70,
+                    "v_threshold": 80
                 },
-                {
-                    "color_rgb": hex_to_rgb("#089141"),
-                    "color_threshold": 30
-                }
+                # {
+                #     "color_rgb": hex_to_rgb("#089141"),
+                #     "h_threshold": 30
+                # }
             ],
             "fill_color": [255, 0, 0]
         },

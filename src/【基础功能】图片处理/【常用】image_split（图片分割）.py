@@ -1,4 +1,6 @@
 import os
+import sys
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import math
 from PIL import Image
 from utils import batch_process_file_with_callback
@@ -85,10 +87,10 @@ def batch_split_image(input_dir):
 # ================= 使用示例 =================
 if __name__ == "__main__":
 
-    IMAGE_PATH = "/Volumes/西数4T外置/拼多多图片/图文速改（通用详情页）/北极狼详情页.png" # 替换成你的图片路径
-    DIRECTION = "horizontal" #  ("vertical" 垂直分割, "horizontal" 水平分割)
+    IMAGE_PATH = "/Users/teacher/Desktop/裁剪分页_改内容/未命名文件夹" # 替换成你的图片路径
+    DIRECTION = "vertical" #  ("vertical" 垂直分割, "horizontal" 水平分割)
     MODE = "count" # 分割模式 ("count" 按数量, "size" 按宽度/高度像素值)
-    VALUE = 12 # 具体数值 (如果是count模式就是切几块，如果是size模式就是每块的像素宽/高)
+    VALUE = 4 # 具体数值 (如果是count模式就是切几块，如果是size模式就是每块的像素宽/高)
 
 
     if os.path.isfile(IMAGE_PATH):

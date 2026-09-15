@@ -1,6 +1,7 @@
 from PIL import Image
 from typing import List, Callable, Union
-import os
+import sys, os
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import re
 from utils import batch_process_file_with_callback
 
@@ -72,27 +73,27 @@ if __name__ == "__main__":
         # 匹配模式：'page' 后面紧跟的连续数字
         match = re.search(r'page(\d+)', filename)
         # 默认返回空列表（如果没找到数字）
-        overlay_list = []
+        overlay_list = ["/Users/teacher/Desktop/青岛投标去水印/证书-测试/证书/mask_3.png"]
         
-        if match:
-            page_num = int(match.group(1))  # 提取到的数字，例如 15
+        # if match:
+        #     page_num = int(match.group(1))  # 提取到的数字，例如 15
 
-            print(f"识别到文件名: {filename}, 提取数字: {page_num}")
-            if 7 <= page_num <= 41:
-                # 3. 判断奇偶并返回对应的图片路径
-                if page_num % 2 != 0:
-                    # 奇数返回图片1
-                    overlay_list = ["/Users/teacher/Desktop/20260830/改公司名称100元/overlay_1.png"] 
-                else:
-                    # 偶数返回图片2
-                    overlay_list = ["/Users/teacher/Desktop/20260830/改公司名称100元/overlay_2.png"]
-        else:
-            print(f"警告: 文件名 '{filename}' 中未找到 'page' 及数字")
+        #     print(f"识别到文件名: {filename}, 提取数字: {page_num}")
+        #     if 7 <= page_num <= 41:
+        #         # 3. 判断奇偶并返回对应的图片路径
+        #         if page_num % 2 != 0:
+        #             # 奇数返回图片1
+        #             overlay_list = ["/Users/teacher/Desktop/20260830/改公司名称100元/overlay_1.png"] 
+        #         else:
+        #             # 偶数返回图片2
+        #             overlay_list = ["/Users/teacher/Desktop/20260830/改公司名称100元/overlay_2.png"]
+        # else:
+        #     print(f"警告: 文件名 '{filename}' 中未找到 'page' 及数字")
             
         return overlay_list
 
 
-    image_path = "/Users/teacher/Desktop/20260830/改公司名称100元/修改过的图片"
+    image_path = "/Users/teacher/Desktop/青岛投标去水印/证书-测试/证书/03_output_02"
     if os.path.isfile(image_path):
         bg_image_path = image_path
         base_name, ext = os.path.splitext(bg_image_path)

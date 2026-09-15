@@ -7,7 +7,6 @@ import os
 from tools.calc_watermark_mask import calc_watermark_mask
 from tools.fill_watermark_with_color import fill_watermark_with_color
 from tools.get_rgb_mask import get_rgb_mask
-from tools.get_rgb_mask_old import get_rgb_mask
 
 
 def run_watermark_pipeline(image_path, steps, output_path = None):

@@ -7,28 +7,28 @@ from utils import batch_process_file_with_callback
 
 # ================= 3. 测试运行 =================
 if __name__ == "__main__":
-    image_path = "/Users/teacher/Desktop/青岛投标去水印/证书-测试/证书/02"
+    image_path = "/Users/teacher/Desktop/青岛投标去水印/证书-测试/证书/03"
     pipeline_steps = [
         {
             "watermark_area_img": None,
             # "watermark_area_img": "/Users/teacher/Desktop/青岛投标去水印/证书-测试/证书/02_mask.png",
-            "target_gray": color_to_gray("#d2d4d3"),
+            "target_gray": color_to_gray("#bebfb9"),
             "target_gray_threshold": 30,
             # "fill_color": [255, 255, 255]
-            "fill_color": hex_to_rgb("#daecf8")
+            "fill_color": hex_to_rgb("#deeee1")
         },
-        {
-            "watermark_area_img": None,
-            "target_gray": color_to_gray("#827473"),
-            "target_gray_threshold": 20,
-            "exclude_rgb_list": [
-                {
-                    "color_rgb": hex_to_rgb("#000000"),
-                    "color_threshold": 50,
-                }
-            ],
-            "fill_color": [0, 0, 0]
-        },
+        # {
+        #     "watermark_area_img": None,
+        #     "target_gray": color_to_gray("#827473"),
+        #     "target_gray_threshold": 20,
+        #     "exclude_rgb_list": [
+        #         {
+        #             "color_rgb": hex_to_rgb("#000000"),
+        #             "color_threshold": 50,
+        #         }
+        #     ],
+        #     "fill_color": [0, 0, 0]
+        # },
     ]
 
 

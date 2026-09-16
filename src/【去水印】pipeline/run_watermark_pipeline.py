@@ -7,6 +7,7 @@ import os
 from tools.calc_watermark_mask import calc_watermark_mask
 from tools.fill_watermark_with_color import fill_watermark_with_color
 from tools.get_rgb_mask import get_rgb_mask
+from tools.detect_shape_mask import detect_shape_mask
 
 
 def run_watermark_pipeline(image_path, steps, output_path = None):
@@ -25,6 +26,7 @@ def run_watermark_pipeline(image_path, steps, output_path = None):
         target_gray_threshold = step.get("target_gray_threshold")
         exclude_rgb_list = step.get("exclude_rgb_list")
         fill_color = step.get("fill_color")
+        detect_shape_img = step.get("detect_shape_img")
         
 
         mask = calc_watermark_mask(
@@ -35,6 +37,14 @@ def run_watermark_pipeline(image_path, steps, output_path = None):
                 target_gray + target_gray_threshold
             ]
         )
+
+        if detect_shape_img:
+            detect_mask = detect_shape_mask(
+                img=current_image,
+                detect_shape_img = detect_shape_img,
+            )
+            mask = cv2.bitwise_and(mask, detect_mask)
+
 
         # 排除指定颜色的rgb蒙版
         if exclude_rgb_list:

@@ -7,13 +7,14 @@ from utils import batch_process_file_with_callback
 
 # ================= 3. 测试运行 =================
 if __name__ == "__main__":
-    image_path = "/Users/teacher/Desktop/青岛投标去水印/证书-测试/证书/03_output_01"
+    image_path = "/Users/teacher/Desktop/青岛投标去水印/证书-测试/证书/shape_test"
     pipeline_steps = [
         {
-            "watermark_area_img": "/Users/teacher/Desktop/青岛投标去水印/证书-测试/证书/03_mask_2.png",
+            "watermark_area_img": None,
             # "watermark_area_img": "/Users/teacher/Desktop/青岛投标去水印/证书-测试/证书/02_mask.png",
-            "target_gray": color_to_gray("#7d7c78"),
-            "target_gray_threshold": 30,
+            "target_gray": color_to_gray("#d9e9de"),
+            "target_gray_threshold": 1,
+            # "detect_shape_img": "/Users/teacher/Desktop/青岛投标去水印/证书-测试/证书/shape.png",
             # "fill_color": [255, 255, 255]
             "fill_color": hex_to_rgb("#000000")
         },

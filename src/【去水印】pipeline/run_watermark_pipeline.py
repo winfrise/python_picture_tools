@@ -26,6 +26,7 @@ def run_watermark_pipeline(image_path, steps, output_path = None):
         target_gray_threshold = step.get("target_gray_threshold")
         exclude_rgb_list = step.get("exclude_rgb_list")
         include_rgb_list = step.get("include_rgb_list")
+        expand_px = step.get("expand_px", 0)
         fill_color = step.get("fill_color")
         detect_shape_img = step.get("detect_shape_img")
 
@@ -73,6 +74,17 @@ def run_watermark_pipeline(image_path, steps, output_path = None):
             # 2. 再与原蒙版进行“与”运算
             # 原蒙版中，对应排除区域的部分会被强制变为 0
             mask = cv2.bitwise_and(mask, mask_exclude_inv)
+
+
+        if expand_px > 0:
+            # 1. 自动计算卷积核大小（例如：扩展1px -> 3x3，扩展2px -> 5x5）
+            kernel_size = expand_px * 2 + 1 
+            
+            # 2. 生成对应大小的矩阵核
+            kernel = np.ones((kernel_size, kernel_size), np.uint8)
+            
+            # 3. 对现有的 mask 进行膨胀（扩展）
+            mask = cv2.dilate(mask, kernel, iterations=1)
 
         current_image = fill_watermark_with_color(current_image, mask, fill_color)
         

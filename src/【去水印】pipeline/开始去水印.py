@@ -7,16 +7,22 @@ from utils import batch_process_file_with_callback
 
 # ================= 3. 测试运行 =================
 if __name__ == "__main__":
-    image_path = "/Users/teacher/Desktop/青岛投标去水印/证书-测试/证书/shape_test"
+    image_path = "/Users/teacher/Desktop/111/旭能岩棉板-Reach报告__提取的图片_output_01印"
     pipeline_steps = [
         {
             "watermark_area_img": None,
-            # "watermark_area_img": "/Users/teacher/Desktop/青岛投标去水印/证书-测试/证书/02_mask.png",
-            "target_gray": color_to_gray("#d9e9de"),
-            "target_gray_threshold": 1,
+            "watermark_area_img": "/Users/teacher/Desktop/111/mask2.png",
+            # "target_gray": color_to_gray("#ff4545"),
+            # "target_gray_threshold": 30,
+            # "include_rgb_list": [
+            #     {
+            #         "color_rgb": hex_to_rgb("#ff5151"),
+            #         "color_threshold": 10,
+            #     }
+            # ],
             # "detect_shape_img": "/Users/teacher/Desktop/青岛投标去水印/证书-测试/证书/shape.png",
             # "fill_color": [255, 255, 255]
-            "fill_color": hex_to_rgb("#000000")
+            "fill_color": hex_to_rgb("#ffffff")
         },
         # {
         #     "watermark_area_img": None,

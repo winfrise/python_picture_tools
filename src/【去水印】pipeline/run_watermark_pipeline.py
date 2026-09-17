@@ -25,18 +25,24 @@ def run_watermark_pipeline(image_path, steps, output_path = None):
         target_gray = step.get("target_gray")
         target_gray_threshold = step.get("target_gray_threshold")
         exclude_rgb_list = step.get("exclude_rgb_list")
+        include_rgb_list = step.get("include_rgb_list")
         fill_color = step.get("fill_color")
         detect_shape_img = step.get("detect_shape_img")
-        
 
-        mask = calc_watermark_mask(
-            img = current_image, 
-            watermark_area_img=watermark_area_img,
-            gray_range= [
-                target_gray - target_gray_threshold, 
-                target_gray + target_gray_threshold
-            ]
-        )
+        # 初始化 area_mask（默认整图都算水印区域）
+        h, w = current_image.shape[:2]
+        mask = np.ones((h, w), dtype=np.uint8) * 255
+
+        if target_gray:
+            gray_mask = calc_watermark_mask(
+                img = current_image, 
+                watermark_area_img=watermark_area_img,
+                gray_range= [
+                    target_gray - target_gray_threshold, 
+                    target_gray + target_gray_threshold
+                ]
+            )
+            mask = cv2.bitwise_and(mask, gray_mask)
 
         if detect_shape_img:
             detect_mask = detect_shape_mask(
@@ -45,6 +51,14 @@ def run_watermark_pipeline(image_path, steps, output_path = None):
             )
             mask = cv2.bitwise_and(mask, detect_mask)
 
+        if include_rgb_list:
+            mask_include = get_rgb_mask(
+                img = current_image, 
+                color_rgb_list=include_rgb_list
+            )
+
+            mask = cv2.bitwise_and(mask, mask_include)
+            cv2.imwrite("111.png", mask)
 
         # 排除指定颜色的rgb蒙版
         if exclude_rgb_list:

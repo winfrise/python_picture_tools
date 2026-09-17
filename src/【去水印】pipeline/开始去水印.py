@@ -25,18 +25,18 @@ if __name__ == "__main__":
             # "fill_color": [255, 255, 255]
             "fill_color": hex_to_rgb("#ffffff")
         },
-        # {
-        #     "watermark_area_img": None,
-        #     "target_gray": color_to_gray("#827473"),
-        #     "target_gray_threshold": 20,
-        #     "exclude_rgb_list": [
-        #         {
-        #             "color_rgb": hex_to_rgb("#000000"),
-        #             "color_threshold": 50,
-        #         }
-        #     ],
-        #     "fill_color": [0, 0, 0]
-        # },
+        {
+            "watermark_area_img": None,
+            "target_gray": color_to_gray("#ff7d7d"),
+            "target_gray_threshold": 30,
+            # "exclude_rgb_list": [
+            #     {
+            #         "color_rgb": hex_to_rgb("#000000"),
+            #         "color_threshold": 50,
+            #     }
+            # ],
+            "fill_color": [0, 0, 0]
+        },
     ]
 
 

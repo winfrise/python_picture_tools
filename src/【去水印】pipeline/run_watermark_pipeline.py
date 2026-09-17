@@ -83,7 +83,6 @@ def run_watermark_pipeline(image_path, steps, output_path = None):
             )
 
             mask = cv2.bitwise_or(mask, mask_include)
-            cv2.imwrite("111.png", mask_include)
 
         # 排除指定颜色的rgb蒙版
         if exclude_rgb_list:

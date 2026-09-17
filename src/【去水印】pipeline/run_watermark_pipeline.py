@@ -4,10 +4,11 @@ import time
 import cv2
 import os
 
-from tools.calc_watermark_mask import calc_watermark_mask
 from tools.fill_watermark_with_color import fill_watermark_with_color
 from tools.get_rgb_mask import get_rgb_mask
 from tools.detect_shape_mask import detect_shape_mask
+from tools.get_watermark_img_mask import get_watermark_img_mask
+from tools.get_gray_mask import get_gray_mask
 
 
 def run_watermark_pipeline(image_path, steps, output_path = None):
@@ -34,10 +35,20 @@ def run_watermark_pipeline(image_path, steps, output_path = None):
         h, w = current_image.shape[:2]
         mask = np.ones((h, w), dtype=np.uint8) * 255
 
-        if target_gray:
-            gray_mask = calc_watermark_mask(
+        # 获取水印大致区域
+        if watermark_area_img:
+            watermark_img_mask = get_watermark_img_mask(
                 img = current_image, 
-                watermark_area_img=watermark_area_img,
+                mask = mask, 
+                watermark_area_img = watermark_area_img
+            )
+            mask = cv2.bitwise_and(mask, watermark_img_mask)
+
+        # 处理灰度区域范围
+        if target_gray:
+            gray_mask = get_gray_mask(
+                img = current_image, 
+                mask = mask,
                 gray_range= [
                     target_gray - target_gray_threshold, 
                     target_gray + target_gray_threshold
@@ -45,26 +56,44 @@ def run_watermark_pipeline(image_path, steps, output_path = None):
             )
             mask = cv2.bitwise_and(mask, gray_mask)
 
+        # 形状检测
         if detect_shape_img:
+            if not watermark_area_img:
+                print('【错误】使用detect_shape_img功能时,请确定设置了[water_area_img]')
+                return
+            
             detect_mask = detect_shape_mask(
                 img=current_image,
+                mask = watermark_img_mask,
                 detect_shape_img = detect_shape_img,
             )
+
             mask = cv2.bitwise_and(mask, detect_mask)
 
+        # 包含的rgb颜色
         if include_rgb_list:
+            if not watermark_area_img:
+                print('【错误】使用include_rgb_list功能时,请确定设置了[water_area_img]')
+                return
+        
             mask_include = get_rgb_mask(
                 img = current_image, 
+                mask = watermark_img_mask,
                 color_rgb_list=include_rgb_list
             )
 
-            mask = cv2.bitwise_and(mask, mask_include)
-            cv2.imwrite("111.png", mask)
+            mask = cv2.bitwise_or(mask, mask_include)
+            cv2.imwrite("111.png", mask_include)
 
         # 排除指定颜色的rgb蒙版
         if exclude_rgb_list:
+            if not watermark_area_img:
+                print('【错误】使用exclude_rgb_list功能时,请确定设置了[water_area_img]')
+                return
+
             mask_exclude = get_rgb_mask(
                 img = current_image, 
+                mask = watermark_img_mask,
                 color_rgb_list=exclude_rgb_list
             )
             # 1. 先对排除蒙版取反 (黑色变白，白色变黑)

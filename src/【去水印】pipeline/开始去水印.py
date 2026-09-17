@@ -7,7 +7,7 @@ from utils import batch_process_file_with_callback
 
 # ================= 3. 测试运行 =================
 if __name__ == "__main__":
-    image_path = "/Users/teacher/Desktop/111/02"
+    image_path = "/Users/teacher/Desktop/111/page1_img1.png"
     pipeline_steps = [
         {
             "watermark_area_img": None,
@@ -16,11 +16,11 @@ if __name__ == "__main__":
             "target_gray_threshold": 30,
             # "include_rgb_list": [
             #     {
-            #         "color_rgb": hex_to_rgb("#ff5151"),
+            #         "color_rgb": hex_to_rgb("#ba0000"),
             #         "color_threshold": 10,
             #     }
             # ],
-            "expand_px": 1,
+            "expand_px": 0, # 蒙版膨胀
             # "detect_shape_img": "/Users/teacher/Desktop/青岛投标去水印/证书-测试/证书/shape.png",
             # "fill_color": [255, 255, 255]
             "fill_color": hex_to_rgb("#ffffff")

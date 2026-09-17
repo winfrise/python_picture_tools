@@ -1,15 +1,25 @@
 import cv2
 import numpy as np
 
-def get_rgb_mask(img, color_rgb_list):
+def get_rgb_mask(
+        img, 
+        mask,
+        color_rgb_list,
+    ):
+
+    img_h, img_w = img.shape[:2]
+    if mask is None:
+        mask = np.ones((img_h, img_w), dtype=np.uint8) * 255
+
+    masked_img = cv2.bitwise_and(img, img, mask=mask)
 
     # 1. 预处理图片：转为 float32 防止计算溢出，只需做一次
-    img_float = img.astype(np.float32)
-    h, w = img.shape[:2]
+    img_float = masked_img.astype(np.float32)
+
     
     # 初始化一个全黑的掩膜（作为合并的基础）
     # 逻辑：我们需要找出所有“符合排除条件”的像素，最后取反即可
-    final_exclude_mask = np.zeros((h, w), dtype=np.uint8)
+    final_exclude_mask = np.zeros((img_h, img_w), dtype=np.uint8)
 
     for item in color_rgb_list:
         color_rgb =  item.get('color_rgb')
@@ -30,6 +40,5 @@ def get_rgb_mask(img, color_rgb_list):
         
         # D. 合并掩膜 (使用按位或运算：只要满足任意一种颜色，就标记为白色)
         final_exclude_mask = cv2.bitwise_or(final_exclude_mask, single_exclude_mask)
-
-
+        
     return final_exclude_mask

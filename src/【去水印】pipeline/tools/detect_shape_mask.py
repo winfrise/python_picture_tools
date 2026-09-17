@@ -8,6 +8,7 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 def detect_shape_mask(
         img,
+        mask,
         detect_shape_img,
         threshold=0.8,
         scale_range=None,

@@ -45,9 +45,9 @@ def ps_levels_watermark_removal(input_path, output_path = None, input_black=0, i
 # --- 使用示例 ---
 if __name__ == "__main__":
     # 你可以传入一个图片的路径，也可以传入一个文件夹的路径
-    input_path = "/Users/teacher/Desktop/未命名文件夹/9月写作预测-故事写作_图片" 
+    input_path = "/Users/teacher/Downloads/百度网盘Download/ps" 
     input_black = 0
-    input_white = color_to_gray("#e0e0e0") - 2
+    input_white = color_to_gray("#f7f7f7")
 
     if os.path.isfile(input_path):
         ps_levels_watermark_removal(

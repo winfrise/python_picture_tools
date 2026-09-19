@@ -7,13 +7,13 @@ from utils import batch_process_file_with_callback
 
 # ================= 3. 测试运行 =================
 if __name__ == "__main__":
-    image_path = "/Users/teacher/Desktop/111/page1_img1.png"
+    image_path = "/Users/teacher/Downloads/百度网盘Download/未命名文件夹/七上 地理+生物）知识点早背晚默__提取的图片"
     pipeline_steps = [
         {
             "watermark_area_img": None,
-            "watermark_area_img": "/Users/teacher/Desktop/111/mask2.png",
-            "target_gray": color_to_gray("#ff4545"),
-            "target_gray_threshold": 30,
+            "watermark_area_img": "/Users/teacher/Downloads/百度网盘Download/未命名文件夹/mask.png",
+            "target_gray": color_to_gray("#79ddd1"),
+            "target_gray_threshold": 40,
             # "include_rgb_list": [
             #     {
             #         "color_rgb": hex_to_rgb("#ba0000"),
@@ -25,18 +25,34 @@ if __name__ == "__main__":
             # "fill_color": [255, 255, 255]
             "fill_color": hex_to_rgb("#ffffff")
         },
-        {
-            "watermark_area_img": None,
-            "target_gray": color_to_gray("#ff7d7d"),
-            "target_gray_threshold": 30,
-            # "exclude_rgb_list": [
-            #     {
-            #         "color_rgb": hex_to_rgb("#000000"),
-            #         "color_threshold": 50,
-            #     }
-            # ],
-            "fill_color": [0, 0, 0]
-        },
+        # {
+        #     "watermark_area_img": None,
+        #     "watermark_area_img": "/Users/teacher/Downloads/百度网盘Download/未命名文件夹/mask.png",
+        #     "target_gray": color_to_gray("#2dafc7"),
+        #     "target_gray_threshold": 40,
+        #     # "exclude_rgb_list": [
+        #     #     {
+        #     #         "color_rgb": hex_to_rgb("#000000"),
+        #     #         "color_threshold": 50,
+        #     #     }
+        #     # ],
+        #     "expand_px": 0, # 蒙版膨胀
+        #     "fill_color": [255, 255, 255]
+        # },
+        # {
+        #     "watermark_area_img": None,
+        #     "watermark_area_img": "/Users/teacher/Downloads/百度网盘Download/未命名文件夹/mask.png",
+        #     "target_gray": color_to_gray("#8a061d"),
+        #     "target_gray_threshold": 40,
+        #     # "exclude_rgb_list": [
+        #     #     {
+        #     #         "color_rgb": hex_to_rgb("#000000"),
+        #     #         "color_threshold": 50,
+        #     #     }
+        #     # ],
+        #     "expand_px": 0, # 蒙版膨胀
+        #     "fill_color": [255, 255, 255]
+        # },
     ]
 
 

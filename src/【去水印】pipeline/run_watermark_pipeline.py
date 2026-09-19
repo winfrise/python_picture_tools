@@ -43,7 +43,7 @@ def run_watermark_pipeline(image_path, steps, output_path = None):
                 watermark_area_img = watermark_area_img
             )
             mask = cv2.bitwise_and(mask, watermark_img_mask)
-
+        cv2.imwrite('111.png', mask)
         # 处理灰度区域范围
         if target_gray:
             gray_mask = get_gray_mask(
@@ -55,7 +55,7 @@ def run_watermark_pipeline(image_path, steps, output_path = None):
                 ]
             )
             mask = cv2.bitwise_and(mask, gray_mask)
-
+        cv2.imwrite('1112.png', mask)
         # 形状检测
         if detect_shape_img:
             if not watermark_area_img:

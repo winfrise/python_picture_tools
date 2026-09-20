@@ -7,12 +7,12 @@ from utils import batch_process_file_with_callback
 
 # ================= 3. 测试运行 =================
 if __name__ == "__main__":
-    image_path = "/Users/teacher/Downloads/百度网盘Download/未命名文件夹/七上 地理+生物）知识点早背晚默__提取的图片"
+    image_path = "/Users/teacher/Desktop/未命名文件夹/page1_img1.jpx"
     pipeline_steps = [
         {
             "watermark_area_img": None,
-            "watermark_area_img": "/Users/teacher/Downloads/百度网盘Download/未命名文件夹/mask.png",
-            "target_gray": color_to_gray("#79ddd1"),
+            # "watermark_area_img": "/Users/teacher/Downloads/百度网盘Download/未命名文件夹/mask.png",
+            "target_gray": color_to_gray("#b9bfbe"),
             "target_gray_threshold": 40,
             # "include_rgb_list": [
             #     {

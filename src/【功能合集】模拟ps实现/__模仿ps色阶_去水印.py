@@ -2,6 +2,7 @@ import os
 import numpy as np
 from PIL import Image
 import sys
+import gc
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from utils import batch_process_file_with_callback
@@ -41,13 +42,19 @@ def ps_levels_watermark_removal(input_path, output_path = None, input_black=0, i
         print(f"[成功] 已保存至: {output_path}")
     except Exception as e:
         print(f"[错误] 处理 {input_path} 时发生异常: {e}")
+    finally:
+        # ✅【关键】每张处理结束强制释放内存！多张图片时最重要！
+        if img is not None:
+            img.close()
+        del img, img_array, result_array, result_img
+        gc.collect()
 
 # --- 使用示例 ---
 if __name__ == "__main__":
     # 你可以传入一个图片的路径，也可以传入一个文件夹的路径
-    input_path = "/Users/teacher/Desktop/未命名文件夹/page1_img1.jpx" 
+    input_path = "/Users/teacher/Downloads/百度网盘Download/去水印/001/历史章节练" 
     input_black = 0
-    input_white = color_to_gray("#c8cbca")
+    input_white = color_to_gray("#dcdcdc") + 2
 
     if os.path.isfile(input_path):
         ps_levels_watermark_removal(

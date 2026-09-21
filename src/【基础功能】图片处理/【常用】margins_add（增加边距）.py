@@ -66,8 +66,7 @@ def batch_add_margins(input_dir, output_dir, margin_params, fill_color=(255, 255
 # --- 测试调用示例 ---
 if __name__ == "__main__":
 
-    input_path="/Users/teacher/Downloads/百度网盘Download/新建文件夹 (2)"
-    output_path="/Users/teacher/Downloads/百度网盘Download/新建文件夹 (2)-2"
+    input_path="/Users/teacher/Downloads/百度网盘Download/入户照片"
     color = (255, 255, 0)
     params = {
         "top": 0,
@@ -77,6 +76,8 @@ if __name__ == "__main__":
     }
 
     if os.path.isfile(input_path):
+        base_name, ext = os.path.splitext(input_path)
+        output_path = f"{base_name}_output_增加边距{ext}"
         # 单张图片处理
         add_margins(
             input_path=input_path,
@@ -85,6 +86,7 @@ if __name__ == "__main__":
             fill_color=color
         )
     else:
+        output_path = f"{input_path}_output_增加边距"
         # 批量处理
         batch_add_margins(
             input_dir=input_path,

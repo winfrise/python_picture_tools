@@ -72,25 +72,26 @@ def batch_crop_by_margins(input_dir, output_dir, margin_params):
 
 # --- 测试调用示例 ---
 if __name__ == "__main__":
-    input_path="/Users/teacher/Downloads/百度网盘Download/新建文件夹 (2)-3"
-    output_path="/Users/teacher/Downloads/百度网盘Download/新建文件夹 (2)-4"
+    input_path="/Users/teacher/Downloads/百度网盘Download/入户照片"
+
 
     params = {
         "top": 0,      # 从顶部裁剪掉 50px
-        "bottom": 290,   # 从底部裁剪掉 50px
+        "bottom": 100,   # 从底部裁剪掉 50px
         "left": 0,    # 从左侧裁剪掉 100px
         "right": 0    # 从右侧裁剪掉 100px
     }
 
     if os.path.isfile(input_path):
-        # 1. 单个裁剪
+        base_name, ext = os.path.splitext(input_path)
+        output_path = f"{base_name}_output_增加边距{ext}"
         crop_by_margins(
             input_path = input_path,
             margin_params=params,
             output_path = output_path
         )
     else:
-        # 2. 批量裁剪
+        output_path = f"{input_path}_output_裁剪"
         batch_crop_by_margins(
             input_dir=input_path,
             output_dir=output_path,

@@ -107,7 +107,7 @@ def batch_add_texts_to_image(input_dir, output_dir, texts_config):
 # ================= 测试调用示例 ================= 
 if __name__ == "__main__":
     # 调用函数 (请替换为真实的图片路径)
-    input_path = "/Users/teacher/Desktop/未命名文件夹 3/思凡尼2026图册_图片"
+    input_path = "/Users/teacher/Downloads/百度网盘Download/制度改公司名称/汗克尔标准化制度牌2024__提取的图片"
 
 
     texts_config = [

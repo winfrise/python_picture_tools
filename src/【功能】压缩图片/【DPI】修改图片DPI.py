@@ -30,11 +30,11 @@ def change_image_dpi(input_path, output_path, dpi=300):
 
 # --- 使用示例 ---
 if __name__ == "__main__":
-    input_path = "/Users/teacher/Desktop/百度网盘下载/未命名文件夹/方兴未“艾”——千年艾草活化开发与利用的领航者__合成的图片_DPI_300"
+    input_path = "/Users/teacher/Desktop/百度网盘下载/未命名文件夹 2/0925绿顶青山计划书__合成的图片_DPI_300"
     dpi = 72
     if os.path.isfile(input_path):
         base_name, ext = os.path.splitext(input_path)
-        output_path = f"{input_path}_output_转DPI{ext}"
+        output_path = f"{input_path}_output_转DPI{dpi}{ext}"
         change_image_dpi(
             input_path = input_path, 
             output_path = output_path, 
@@ -43,7 +43,7 @@ if __name__ == "__main__":
     elif os.path.isdir(input_path):
         # 批量处理
         input_dir = input_path
-        output_dir = f"{input_dir}_output_转DPI"
+        output_dir = f"{input_dir}_output_转DPI{dpi}"
         
         def callback_func(input_file, output_file):
             change_image_dpi(

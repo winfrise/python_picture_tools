@@ -93,8 +93,8 @@ def process_single_file(input_file, output_file, quality=85, max_size=None, dpi=
 
 if __name__ == "__main__":
 
-    input_path = "/Users/teacher/Desktop/111xxx/1.jpeg"   # 可以是文件路径或文件夹路径
-    output_path = "/Users/teacher/Desktop/1112" # 对应的输出文件或文件夹路径
+    input_path = "/Users/teacher/Desktop/百度网盘下载/未命名文件夹/方兴未“艾”——千年艾草活化开发与利用的领航者__合成的图片_DPI_300_output_转DPI/1240"   # 可以是文件路径或文件夹路径
+    output_path = "/Users/teacher/Desktop/百度网盘下载/未命名文件夹/方兴未“艾”——千年艾草活化开发与利用的领航者__合成的图片_DPI_300_output_转DPI/1240_yasuo" # 对应的输出文件或文件夹路径
     quality = 30
     max_size = (700, 1754)
     dpi = 72

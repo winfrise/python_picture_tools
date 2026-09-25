@@ -1,11 +1,12 @@
-import os
+import os, sys
 from PIL import Image
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils import batch_process_file_with_callback
 
-INPUT_PATH = "/Users/teacher/Downloads/百度网盘Download/新建文件夹 (2)-4/未命名文件夹 2"
-OUTPUT_PATH = "/Users/teacher/Downloads/百度网盘Download/新建文件夹 (2)-4/未命名文件夹2222"
-WIDTH = 2400 # 数值(px) / auto
-HEIGHT = 1800 # 数值(px) / auto
+INPUT_PATH = "/Users/teacher/Desktop/百度网盘下载/未命名文件夹/方兴未“艾”——千年艾草活化开发与利用的领航者__合成的图片_DPI_300_output_转DPI/01_width_1000"
+OUTPUT_PATH = "/Users/teacher/Desktop/百度网盘下载/未命名文件夹/方兴未“艾”——千年艾草活化开发与利用的领航者__合成的图片_DPI_300_output_转DPI/01_width_850"
+WIDTH = 850 # 数值(px) / auto
+HEIGHT = "auto" # 数值(px) / auto
 MODE = "crop" # crop / fill
 
 def resize_image(input_file, output_file, width, height, mode = "fill"):

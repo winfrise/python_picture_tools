@@ -1,5 +1,6 @@
-import os
+import os, sys
 from PIL import Image
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils import batch_process_file_with_callback
 
 def convert_image(input_file, output_file = None, target_format = 'jpeg', quality = 90):
@@ -44,9 +45,9 @@ def convert_image(input_file, output_file = None, target_format = 'jpeg', qualit
     
 if __name__ == "__main__":
     # 设置你的输入和输出文件夹路径
-    INPUT_PATH = "/Users/teacher/Downloads/百度网盘下载/施工图片/施工图片修改"       # 原图所在的文件夹
-    OUTPUT_PATH = "/Users/teacher/Downloads/百度网盘下载/施工图片/施工图片修改111" # 转换后保存的文件夹
-    TARGET_FORMAT = 'jpeg'
+    INPUT_PATH = "/Users/teacher/Desktop/百度网盘下载/未命名文件夹/方兴未“艾”——千年艾草活化开发与利用的领航者__合成的图片_DPI_300_output_转DPI/1240"       # 原图所在的文件夹
+    OUTPUT_PATH = "/Users/teacher/Desktop/百度网盘下载/未命名文件夹/方兴未“艾”——千年艾草活化开发与利用的领航者__合成的图片_DPI_300_output_转DPI/1240_png" # 转换后保存的文件夹
+    TARGET_FORMAT = 'png'
     QUALITY = 100
     
     if os.path.isfile(INPUT_PATH):

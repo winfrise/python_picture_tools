@@ -62,7 +62,7 @@ def overlay_images(
 # 调用主函数
 if __name__ == "__main__":
     # 模拟一个获取图片列表的函数
-    def my_custom_get_images(bg_path: str) -> List[str]:
+    def custom_get_overlay_images(bg_path: str) -> List[str]:
         """
         根据背景图文件名中 'page' 后的数字判断奇偶，返回不同的图片列表
         """
@@ -73,34 +73,39 @@ if __name__ == "__main__":
         # 匹配模式：'page' 后面紧跟的连续数字
         match = re.search(r'page(\d+)', filename)
         # 默认返回空列表（如果没找到数字）
-        overlay_list = ["/Users/teacher/Desktop/青岛投标去水印/证书-测试/证书/mask_3.png"]
+        overlay_list = []
         
-        # if match:
-        #     page_num = int(match.group(1))  # 提取到的数字，例如 15
+        if match:
+            page_num = int(match.group(1))  # 提取到的数字，例如 15
+            print(f"识别到文件名: {filename}, 提取数字: {page_num}")
+        else:
+            print(f"警告: 文件名 '{filename}' 中未找到 'page' 及数字")
 
-        #     print(f"识别到文件名: {filename}, 提取数字: {page_num}")
-        #     if 7 <= page_num <= 41:
-        #         # 3. 判断奇偶并返回对应的图片路径
-        #         if page_num % 2 != 0:
-        #             # 奇数返回图片1
-        #             overlay_list = ["/Users/teacher/Desktop/20260830/改公司名称100元/overlay_1.png"] 
-        #         else:
-        #             # 偶数返回图片2
-        #             overlay_list = ["/Users/teacher/Desktop/20260830/改公司名称100元/overlay_2.png"]
-        # else:
-        #     print(f"警告: 文件名 '{filename}' 中未找到 'page' 及数字")
-            
+        if 7 <= page_num <= 41:
+            # 3. 判断奇偶并返回对应的图片路径
+            if page_num % 2 != 0:
+                # 奇数返回图片1
+                overlay_list = ["/Users/teacher/Desktop/20260830/改公司名称100元/overlay_1.png"] 
+            else:
+                # 偶数返回图片2
+                overlay_list = ["/Users/teacher/Desktop/20260830/改公司名称100元/overlay_2.png"]
+
         return overlay_list
 
+    def get_overlay_list_func(image_path):
+        overlay_img = "/Users/teacher/Desktop/百度网盘下载/未命名文件夹/mask.png"
+        return [overlay_img]
 
-    image_path = "/Users/teacher/Desktop/青岛投标去水印/证书-测试/证书/03_output_02"
+    image_path = "/Users/teacher/Desktop/百度网盘下载/未命名文件夹/2色阶去中间水印"
+    get_overlay_list = get_overlay_list_func
+
     if os.path.isfile(image_path):
         bg_image_path = image_path
         base_name, ext = os.path.splitext(bg_image_path)
         save_path = f"{base_name}_output_图片覆盖{ext}"
         overlay_images(
             bg_image_path=bg_image_path,
-            get_overlay_list_func=my_custom_get_images,
+            get_overlay_list_func=get_overlay_list,
             save_path=save_path,
             position=(0, 0),       # 从坐标 (50, 50) 开始覆盖
             resize_to_bg=False       # 保持覆盖图原始大小
@@ -109,7 +114,7 @@ if __name__ == "__main__":
         def callback_func(input_file, output_file):
             overlay_images(
                 bg_image_path=input_file,
-                get_overlay_list_func=my_custom_get_images,
+                get_overlay_list_func=get_overlay_list,
                 save_path=output_file,
                 position=(0, 0),       # 从坐标 (50, 50) 开始覆盖
                 resize_to_bg=False       # 保持覆盖图原始大小

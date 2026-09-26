@@ -6,12 +6,16 @@ from utils import batch_process_file_with_callback
 
 def resize_image(input_file, output_file, target_size):
 
-    target_attr = target_size[0]
-    target_val = target_size[1]
-
     # 1. 打开图片
     img = Image.open(input_file)
     orig_width, orig_height = img.size
+
+    # 获取目标宽/高
+    if callable(target_size):
+        target_size = target_size(orig_width, orig_height)
+
+    target_attr = target_size[0]
+    target_val = target_size[1]
 
     if target_attr.lower() == 'width':
         new_width = int(target_val)
@@ -34,10 +38,18 @@ def resize_image(input_file, output_file, target_size):
 
 if __name__ == "__main__":
 
+    def target_size_func (img_width, img_height):
+        is_horizontal = img_width > img_height
+        is_vertical = img_width < img_height
+        if is_horizontal:
+            return ['width', 100]
+        return ['height', 100]
+
     INPUT_PATH = "/Users/teacher/Desktop/百度网盘下载/0925去水印/1转图片"
 
      # TARGET_SIZE = ['width', 200]
     TARGET_SIZE = ['height', 300]
+    # TARGET_SIZE = target_size_func
 
     target_attr = TARGET_SIZE[0]
     target_val = TARGET_SIZE[1]

@@ -4,117 +4,62 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils import batch_process_file_with_callback
 
 
-def resize_image(input_file, output_file, width, height, mode = "fill"):
+def resize_image(input_file, output_file, target_size):
+
+    target_attr = target_size[0]
+    target_val = target_size[1]
+
     # 1. 打开图片
     img = Image.open(input_file)
     orig_width, orig_height = img.size
 
-    # 2. 处理宽高参数（将 'auto' 或字符串数字转换为整数）
-    is_width_auto = str(width).lower() == 'auto'
-    is_height_auto = str(height).lower() == 'auto'
-
-
-    # --- 情况 A：包含 auto，保持原图比例缩放 ---
-    if is_width_auto or is_height_auto:
-        if is_width_auto and is_height_auto:
-            new_width, new_height = orig_width, orig_height
-        elif is_width_auto:
-            new_height = int(height)
-            ratio = new_height / orig_height
-            new_width = round(orig_width * ratio)
-        else:  # height is auto
-            new_width = int(width)
-            ratio = new_width / orig_width
-            new_height = round(orig_height * ratio)
-
-        # Auto 模式下直接调整大小
-        img = img.resize((new_width, new_height), Image.LANCZOS)
-
-    # --- 情况 B：宽高都有具体数值 ---
+    if target_attr.lower() == 'width':
+        new_width = int(target_val)
+        new_height = round(orig_height / orig_width * new_width)
+    elif target_attr.lower() == 'height':
+        new_height = int(target_val)
+        new_width = round(orig_width / orig_height * new_height)
     else:
-        target_w = int(width)
-        target_h = int(height)
+        print(f'参数无法识别: {target_attr}')
 
-        if mode == 'stretch':
-            # 强制拉伸
-            img = img.resize((target_w, target_h), Image.LANCZOS)
-
-        elif mode == 'fill':
-            # 留白填充 (Letterbox)
-            # 计算缩放比例，取较小值以保证图片能完全放入
-            ratio = min(target_w / orig_width, target_h / orig_height)
-            new_w = round(orig_width * ratio)
-            new_h = round(orig_height * ratio)
-
-            # 先缩放
-            img_resized = img.resize((new_w, new_h), Image.LANCZOS)
-
-            # 创建白色背景画布
-            img = Image.new('RGB', (target_w, target_h), (255, 255, 255))
-            # 居中粘贴
-            paste_x = (target_w - new_w) // 2
-            paste_y = (target_h - new_h) // 2
-            img.paste(img_resized, (paste_x, paste_y))
-
-        else:
-            # 居中裁剪 (Center Crop) - 默认模式
-            # 计算缩放比例，取较大值以保证填满画布
-            ratio = max(target_w / orig_width, target_h / orig_height)
-            new_w = round(orig_width * ratio)
-            new_h = round(orig_height * ratio)
-
-            # 先放大/缩小到刚好覆盖目标尺寸
-            img_resized = img.resize((new_w, new_h), Image.LANCZOS)
-
-            # 计算裁剪区域
-            left = (new_w - target_w) // 2
-            top = (new_h - target_h) // 2
-            right = left + target_w
-            bottom = top + target_h
-
-            # 裁剪
-            img = img_resized.crop((left, top, right, bottom))
-
+    # 改变图片大小
+    new_img = img.resize((new_width, new_height), Image.LANCZOS)
 
     # 4. 确保输出目录存在并保存图片
-    os.makedirs(os.path.dirname(output_file) or '.', exist_ok=True)
-    if output_file.lower().endswith(('.jpg', '.jpeg')) and img.mode in ('RGBA', 'P'):
-        img = img.convert('RGB')
+    output_dir = os.path.dirname(output_file)
+    os.makedirs(output_dir, exist_ok=True)
 
-    img.save(output_file)
+    new_img.save(output_file)
     print(f"处理完成！已保存至: {output_file}")
 
 if __name__ == "__main__":
 
     INPUT_PATH = "/Users/teacher/Desktop/百度网盘下载/0925去水印/1转图片"
 
-    WIDTH = 20 # 数值(px) / auto
-    HEIGHT = "auto" # 数值(px) / auto
-    MODE = "crop" # crop / fill
-    
+     # TARGET_SIZE = ['width', 200]
+    TARGET_SIZE = ['height', 300]
+
+    target_attr = TARGET_SIZE[0]
+    target_val = TARGET_SIZE[1]
     if os.path.isfile(INPUT_PATH):
         input_file = INPUT_PATH
 
         base_name, ext = os.path.splitext(input_file)
-        output_file = f"{base_name}_output_{WIDTH}x{HEIGHT}{ext}"
+        output_file = f"{base_name}_output_{target_attr}{target_val}{ext}"
         resize_image(
             input_file=INPUT_PATH,
             output_file = output_file,
-            width = WIDTH,
-            height = HEIGHT,
-            mode = MODE,
+            target_size = TARGET_SIZE,
         )
     elif os.path.isdir(INPUT_PATH):
         def callback_func(input_file, output_file):
             resize_image(
                 input_file=input_file,
                 output_file= output_file,
-                width = WIDTH,
-                height = HEIGHT,
-                mode = MODE
+                target_size = TARGET_SIZE,
             )
         input_dir = INPUT_PATH
-        output_dir = f"{input_dir}_output_{WIDTH}x{HEIGHT}"
+        output_dir = f"{input_dir}_output_{target_attr}{target_val}"
         batch_process_file_with_callback(
             input_dir=INPUT_PATH,
             output_dir=output_dir,

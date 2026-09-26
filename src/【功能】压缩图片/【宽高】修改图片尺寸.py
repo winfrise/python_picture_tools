@@ -3,13 +3,7 @@ from PIL import Image
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils import batch_process_file_with_callback
 
-INPUT_PATH = "/Users/teacher/Desktop/百度网盘下载/未命名文件夹 2/0925绿顶青山计划书__合成的图片_DPI_300_output_转DPI"
 
-WIDTH = 400 # 数值(px) / auto
-HEIGHT = "auto" # 数值(px) / auto
-MODE = "crop" # crop / fill
-
-OUTPUT_PATH = f"{INPUT_PATH}_output_{WIDTH}x{HEIGHT}"
 def resize_image(input_file, output_file, width, height, mode = "fill"):
     # 1. 打开图片
     img = Image.open(input_file)
@@ -91,11 +85,21 @@ def resize_image(input_file, output_file, width, height, mode = "fill"):
     print(f"处理完成！已保存至: {output_file}")
 
 if __name__ == "__main__":
+
+    INPUT_PATH = "/Users/teacher/Desktop/百度网盘下载/0925去水印/1转图片"
+
+    WIDTH = 20 # 数值(px) / auto
+    HEIGHT = "auto" # 数值(px) / auto
+    MODE = "crop" # crop / fill
     
     if os.path.isfile(INPUT_PATH):
+        input_file = INPUT_PATH
+
+        base_name, ext = os.path.splitext(input_file)
+        output_file = f"{base_name}_output_{WIDTH}x{HEIGHT}{ext}"
         resize_image(
             input_file=INPUT_PATH,
-            output_file = OUTPUT_PATH,
+            output_file = output_file,
             width = WIDTH,
             height = HEIGHT,
             mode = MODE,
@@ -109,8 +113,12 @@ if __name__ == "__main__":
                 height = HEIGHT,
                 mode = MODE
             )
+        input_dir = INPUT_PATH
+        output_dir = f"{input_dir}_output_{WIDTH}x{HEIGHT}"
         batch_process_file_with_callback(
             input_dir=INPUT_PATH,
-            output_dir=OUTPUT_PATH,
+            output_dir=output_dir,
             callback_func=callback_func,
         )
+    else: 
+         print(f"地址无效: {INPUT_PATH}")

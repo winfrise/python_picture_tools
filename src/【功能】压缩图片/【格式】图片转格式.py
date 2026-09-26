@@ -75,3 +75,5 @@ if __name__ == "__main__":
             callback_func=callback_func,
             quality = QUALITY
         )
+    else:
+        print(f"地址无效: {INPUT_PATH}")

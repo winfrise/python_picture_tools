@@ -7,7 +7,7 @@ from utils import batch_process_file_with_callback
 
 # ================= 3. 测试运行 =================
 if __name__ == "__main__":
-    image_path = "/Users/teacher/Desktop/未命名文件夹/page1_img1.jpx"
+    image_path = "/Users/teacher/Desktop/百度网盘下载/2026年初职会计基础1-8讲（学员版）132__提取的图片"
     pipeline_steps = [
         {
             "watermark_area_img": None,

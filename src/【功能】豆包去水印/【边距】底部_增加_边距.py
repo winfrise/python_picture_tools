@@ -34,7 +34,7 @@ def add_bottom_margins(input_path, output_path, fill_color=(255, 255, 255)):
 # --- 测试调用示例 ---
 if __name__ == "__main__":
 
-    input_path="/Users/teacher/Desktop/百度网盘下载/1790493861826.jpeg"
+    input_path="/Users/teacher/Desktop/未命名文件夹/图片.png"
     fill_color = (255, 255, 0)
 
     if os.path.isfile(input_path):

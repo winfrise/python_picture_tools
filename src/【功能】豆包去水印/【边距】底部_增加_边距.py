@@ -18,6 +18,10 @@ def add_bottom_margins(input_path, output_path, fill_color=(255, 255, 255)):
         new_img = Image.new(original_img.mode, (new_width, new_height), fill_color)
         new_img.paste(original_img, (0, 0)) # (0, 0) 是位置
 
+        # 处理透明通道
+        if new_img.mode in ("RGBA", "P"):
+            new_img = new_img.convert("RGB")
+
         # 保存
         new_img.save(output_path)
         print(f"✅ 成功处理: {os.path.basename(input_path)}")
@@ -30,7 +34,7 @@ def add_bottom_margins(input_path, output_path, fill_color=(255, 255, 255)):
 # --- 测试调用示例 ---
 if __name__ == "__main__":
 
-    input_path="/Users/teacher/Desktop/未命名文件夹/01.png"
+    input_path="/Users/teacher/Desktop/百度网盘下载/1790493861826.jpeg"
     fill_color = (255, 255, 0)
 
     if os.path.isfile(input_path):

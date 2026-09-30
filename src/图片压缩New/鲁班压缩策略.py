@@ -5,7 +5,7 @@ def luban_compress(input_path, output_path, target_size_kb=50):
 
     if output_path is None:
         base_name, ext = os.path.splitext(input_path)
-        output_path = f"{base_name}_output_鲁班压缩11{ext}"
+        output_path = f"{base_name}_output_鲁班压缩{ext}"
 
 
     """

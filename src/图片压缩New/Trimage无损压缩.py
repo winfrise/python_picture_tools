@@ -1,5 +1,10 @@
 import subprocess
-import os
+import os, sys
+import math
+import shutil
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from utils import batch_process_file_with_callback
+
 
 def trimage_compress(input_path, output_path=None):
     """
@@ -11,27 +16,35 @@ def trimage_compress(input_path, output_path=None):
         base_name, ext = os.path.splitext(input_path)
         output_path = f"{base_name}_output_无损压缩{ext}"
 
+    # 关键修复1：确保输出目录存在，否则复制/写出会失败
+    out_dir = os.path.dirname(os.path.abspath(output_path))
+    os.makedirs(out_dir, exist_ok=True)
+
     ext = os.path.splitext(input_path)[-1].lower()
-    
+
     try:
         if ext in ['.jpg', '.jpeg']:
-            # 严格无损模式：优化Huffman表、渐进式扫描、剥离所有元数据
+            # 关键修复2：jpegoptim 没有"输出到指定文件"的参数！
+            # 它只能"原地覆盖"作为位置参数传给它的那个【已存在】的文件。
+            # 旧代码把【还不存在】的 output_path 直接传给它，会被当成"待优化的输入文件"
+            # 去打开 -> cannot open input file -> CalledProcessError 被吞掉 -> 什么都没生成。
+            # 正确做法：先把原图复制到 output_path，再原地无损优化这个副本。
+            shutil.copyfile(input_path, output_path)
             cmd = [
-                'jpegoptim', 
-                '--strip-all', 
-                '--all-progressive', 
-                '-o',  # 无损优化
-                output_path
+                'jpegoptim',
+                '--strip-all',          # 剥离所有元数据(EXIF/GPS等)
+                '--all-progressive',    # 转为渐进式扫描，体积更小
+                output_path,            # 原地优化这个已存在的副本
             ]
         elif ext == '.png':
-            # 多轮试探性无损压缩，不改变像素值和调色板
+            # optipng 支持 -out 指定输出文件，这个分支原本就是对的，保持不变
             cmd = [
-                'optipng', 
-                '-o7',  # 最高优化级别
-                '-strip', 'all', 
-                '-clobber', 
-                '-out', output_path, 
-                input_path
+                'optipng',
+                '-o7',
+                '-strip', 'all',
+                '-clobber',
+                '-out', output_path,
+                input_path,
             ]
         else:
             print(f"[Trimage] 警告：不支持的格式 {ext}，已跳过。")
@@ -39,20 +52,39 @@ def trimage_compress(input_path, output_path=None):
 
         subprocess.run(cmd, check=True, capture_output=True)
         print(f"[Trimage] 无损优化完成: {output_path}")
-        
+
     except FileNotFoundError:
         print("[Trimage] 错误：未找到 jpegoptim 或 optipng，请先在系统中安装。")
     except subprocess.CalledProcessError as e:
-        print(f"[Trimage] 压缩失败: {e.stderr.decode()}")
-
+        # 关键修复3：打印真实错误，不要再"静默失败"
+        print(f"[Trimage] 压缩失败: {e.stderr.decode(errors='ignore')}")
 
 
 if __name__ == "__main__":
-    input_path = "/Users/teacher/Desktop/未命名文件夹 2/page1_img1.jpeg"
-    output_path = None
-    
-    # Trimage 无损压缩：原地覆盖优化
-    trimage_compress(
-        input_path=input_path,
-        output_path=output_path,
-    )
+    input_path = "/Users/teacher/Desktop/未命名文件夹 2/001/义乌市北遴电子商务商行欧盟授权代表续费（产品组）协议2026.10.20-2027.10.19__提取的图片"
+
+    if os.path.isfile(input_path):
+        output_path = None
+        trimage_compress(
+            input_path=input_path,
+            output_path=output_path,
+        )
+    elif os.path.isdir(input_path):
+        counter = [0]
+        def callback_func(input_file, output_file):
+            counter[0] += 1
+            print(f"正在压缩第{counter[0]}张图片")
+            trimage_compress(
+                input_path=input_file,
+                output_path=output_file,
+            )
+
+        input_dir = input_path
+        output_dir = f"{input_dir}_无损压缩"
+        batch_process_file_with_callback(
+            input_dir=input_dir,
+            output_dir=output_dir,
+            callback_func=callback_func,
+        )
+    else:
+        print(f"地址无效: {input_path}")

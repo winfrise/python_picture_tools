@@ -52,9 +52,9 @@ def ps_levels_watermark_removal(input_path, output_path = None, input_black=0, i
 # --- 使用示例 ---
 if __name__ == "__main__":
     # 你可以传入一个图片的路径，也可以传入一个文件夹的路径
-    input_path = "/Users/teacher/Desktop/百度网盘下载/未命名文件夹/1转图片" 
+    input_path = "/Users/teacher/Desktop/未命名文件夹/图片" 
     input_black = 0
-    input_white = color_to_gray("#dfdfdf") + 2
+    input_white = color_to_gray("#c0c0c0") + 2
 
     if os.path.isfile(input_path):
         ps_levels_watermark_removal(
@@ -71,7 +71,7 @@ if __name__ == "__main__":
                 input_white=input_white, 
             )
 
-        output_dir = f'{input_path}_output_去水印'
+        output_dir = f'{input_path}_output_设置白场'
         batch_process_file_with_callback(
             input_dir=input_path,
             output_dir=output_dir,

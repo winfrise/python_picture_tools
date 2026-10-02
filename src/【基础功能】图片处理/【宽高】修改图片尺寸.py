@@ -86,11 +86,11 @@ def resize_image(input_file, output_file, width, height, mode = "fill"):
 
 if __name__ == "__main__":
 
-    INPUT_PATH = "/Users/teacher/Desktop/百度网盘下载/0925去水印/1转图片"
+    INPUT_PATH = "/Users/teacher/Desktop/百度网盘下载/未命名文件夹/001"
 
-    WIDTH = 20 # 数值(px) / auto
-    HEIGHT = "auto" # 数值(px) / auto
-    MODE = "crop" # crop / fill
+    WIDTH = 1521 # 数值(px) / auto
+    HEIGHT = 1076 # 数值(px) / auto
+    MODE = "stretch" # stretch / crop / fill
     
     if os.path.isfile(INPUT_PATH):
         input_file = INPUT_PATH

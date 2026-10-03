@@ -32,8 +32,8 @@ def ps_levels_white_point(input_path, output_path, white_point=114):
 
 if __name__ == "__main__":
     # 你可以传入一个图片的路径，也可以传入一个文件夹的路径
-    input_path = "/Users/teacher/Desktop/百度网盘下载/未命名文件夹/贵州宝利服饰有限公司__提取的图片_灰度"
-    white_point = 167
+    input_path = "/Users/teacher/Desktop/百度网盘下载/未命名文件夹 3/中华本草-苗药卷__提取的图片_鲁班压缩"
+    white_point = 169
 
     if os.path.isfile(input_path):
         base_name, ext = os.path.split

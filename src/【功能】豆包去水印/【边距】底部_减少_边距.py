@@ -45,7 +45,7 @@ def crop_by_margins(input_path, output_path = None):
 
 # --- 测试调用示例 ---
 if __name__ == "__main__":
-    input_path="/Users/teacher/Desktop/百度网盘下载/去除图片网格水印.png"
+    input_path="/Users/teacher/Downloads/图片去水印.jpeg"
 
     if os.path.isfile(input_path):
         base_name, ext = os.path.splitext(input_path)

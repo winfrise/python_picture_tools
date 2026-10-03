@@ -86,12 +86,12 @@ def find_best_quality(img, output_path, target_size_kb):
     return best_q
 
 if __name__ == "__main__":
-    input_path = "/Users/teacher/Desktop/未命名文件夹 2/001/义乌市北遴电子商务商行欧盟授权代表续费（产品组）协议2026.10.20-2027.10.19__提取的图片"
+    input_path = "/Users/teacher/Desktop/百度网盘下载/未命名文件夹 3/中华本草-苗药卷__提取的图片_鲁班压缩_output_滑块去水印"
     
     # target_size_kb = 50
 
-    total_size_kb = 5 * 1024
-    total_page = 16
+    total_size_kb = 80 * 1024
+    total_page = 664
     target_size_kb = math.floor(total_size_kb / total_page)
     print(f"target_size_kb: {target_size_kb}")
 

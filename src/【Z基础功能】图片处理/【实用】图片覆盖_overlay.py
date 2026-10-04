@@ -7,7 +7,7 @@ from utils import batch_process_file_with_callback
 
 def overlay_images(
     bg_image_path: str, 
-    get_overlay_list_func: Callable[[str], List[str]], 
+    overlay_image_func: Callable[[str], List[str]], 
     save_path: str = None,
     position: tuple = (0, 0),
     resize_to_bg: bool = False
@@ -16,7 +16,7 @@ def overlay_images(
     将一组图片覆盖到背景图上
     
     :param bg_image_path: 背景图片的本地路径
-    :param get_overlay_list_func: 获取覆盖图片列表的函数，入参为图片地址，返回图片路径列表
+    :param overlay_image_func: 获取覆盖图片列表的函数，入参为图片地址，返回图片路径列表
     :param save_path: 可选，合并后图片的保存路径
     :param position: 覆盖图片在背景图上的起始坐标 (x, y)，默认为左上角 (0, 0)
     :param resize_to_bg: 是否将覆盖图片缩放至与背景图相同大小，默认为 False
@@ -29,7 +29,7 @@ def overlay_images(
     background = Image.open(bg_image_path).convert("RGBA")
     
     # 2. 调用传入的函数，获取需要覆盖的图片列表
-    overlay_list = get_overlay_list_func(bg_image_path)
+    overlay_list = overlay_image_func(bg_image_path)
     
     if not isinstance(overlay_list, list):
         raise TypeError("get_overlay_list_func 必须返回一个包含图片路径的列表")
@@ -92,12 +92,12 @@ if __name__ == "__main__":
 
         return overlay_list
 
-    def get_overlay_list_func(image_path):
-        overlay_img = "/Users/teacher/Desktop/百度网盘下载/未命名文件夹/mask.png"
+    def get_overlay_image_func(image_path):
+        overlay_img = "/Users/teacher/Desktop/百度网盘下载/少北拳批处理/mask.png"
         return [overlay_img]
 
-    image_path = "/Users/teacher/Desktop/百度网盘下载/未命名文件夹/2色阶去中间水印"
-    get_overlay_list = get_overlay_list_func
+    image_path = "/Users/teacher/Desktop/百度网盘下载/少北拳批处理/少北拳"
+    overlay_image_func = get_overlay_image_func
 
     if os.path.isfile(image_path):
         bg_image_path = image_path
@@ -105,7 +105,7 @@ if __name__ == "__main__":
         save_path = f"{base_name}_output_图片覆盖{ext}"
         overlay_images(
             bg_image_path=bg_image_path,
-            get_overlay_list_func=get_overlay_list,
+            overlay_image_func=overlay_image_func,
             save_path=save_path,
             position=(0, 0),       # 从坐标 (50, 50) 开始覆盖
             resize_to_bg=False       # 保持覆盖图原始大小
@@ -114,7 +114,7 @@ if __name__ == "__main__":
         def callback_func(input_file, output_file):
             overlay_images(
                 bg_image_path=input_file,
-                get_overlay_list_func=get_overlay_list,
+                overlay_image_func=overlay_image_func,
                 save_path=output_file,
                 position=(0, 0),       # 从坐标 (50, 50) 开始覆盖
                 resize_to_bg=False       # 保持覆盖图原始大小

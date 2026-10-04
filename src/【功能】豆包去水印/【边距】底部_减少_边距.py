@@ -12,6 +12,8 @@ def crop_by_margins(input_path, output_path = None):
         original_img = Image.open(input_path)
         original_width, original_height = original_img.size
 
+        output_path_max = None
+        output_path_min = None
         if not output_path:
             base_name, ext = os.path.splitext(input_path)
 
@@ -45,7 +47,7 @@ def crop_by_margins(input_path, output_path = None):
 
 # --- 测试调用示例 ---
 if __name__ == "__main__":
-    input_path="/Users/teacher/Downloads/图片去水印.jpeg"
+    input_path="/Users/teacher/Downloads/111"
 
     if os.path.isfile(input_path):
         base_name, ext = os.path.splitext(input_path)

@@ -34,7 +34,7 @@ def add_bottom_margins(input_path, output_path, fill_color=(255, 255, 255)):
 # --- 测试调用示例 ---
 if __name__ == "__main__":
     # 帮我去水印，图片尺寸不变，底部黄色不变
-    input_path="/Users/teacher/Desktop/未命名文件夹/图片.png"
+    input_path="/Users/teacher/Desktop/未命名文件夹/001"
     fill_color = (255, 255, 0)
 
     if os.path.isfile(input_path):

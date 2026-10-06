@@ -55,18 +55,18 @@ def overlay_images(
 # 调用主函数
 if __name__ == "__main__":
     # 模拟一个获取图片列表的函数
-    def custom_overlay_image_func(image_path):
-        # 1. 从完整路径中提取纯文件名，例如 'page15_img1.jpeg'
-        filename = os.path.basename(image_path)
-        page_num = int(m.group(1)) if (m := re.search(r'page(\d+)', filename)) else None
+    # def custom_overlay_image_func(image_path):
+    #     # 1. 从完整路径中提取纯文件名，例如 'page15_img1.jpeg'
+    #     filename = os.path.basename(image_path)
+    #     page_num = int(m.group(1)) if (m := re.search(r'page(\d+)', filename)) else None
 
-        return  "/Users/teacher/Desktop/企业画册/mask_right.png"
+    #     return  "/Users/teacher/Desktop/企业画册/mask_right.png"
 
 
     image_path = "/Users/teacher/Desktop/企业画册/04右"
-    custom_overlay_image = "/Users/teacher/Desktop/企业画册/mask.png"
+    custom_overlay_image = "/Users/teacher/Desktop/企业画册/mask_right.png"
 
-    overlay_image_path = custom_overlay_image_func
+    overlay_image_path = custom_overlay_image
 
     if os.path.isfile(image_path):
         bg_image_path = image_path

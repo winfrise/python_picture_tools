@@ -35,7 +35,7 @@ def add_bottom_margins(input_path, output_path, fill_color=(255, 255, 255)):
 if __name__ == "__main__":
     # 帮我去水印，图片尺寸不变，底部黄色不变
     # 清理画面中的水印 / 平台标识，保持原图构图、比例和底部黄色区域不变
-    input_path="/Users/teacher/Desktop/未命名文件夹/图片.png"
+    input_path="/Users/teacher/Desktop/图片.png"
     fill_color = (255, 255, 0)
 
     if os.path.isfile(input_path):

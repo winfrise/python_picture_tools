@@ -52,7 +52,7 @@ def ps_levels_watermark_removal(input_path, output_path = None, input_black=0, i
 # --- 使用示例 ---
 if __name__ == "__main__":
     # 你可以传入一个图片的路径，也可以传入一个文件夹的路径
-    input_path = "/Users/teacher/Desktop/未命名文件夹/图片" 
+    input_path = "/Users/teacher/Desktop/百度网盘下载/公式大全/公式大全__合成的图片_DPI_300" 
     input_black = 0
     input_white = color_to_gray("#c0c0c0") + 2
 

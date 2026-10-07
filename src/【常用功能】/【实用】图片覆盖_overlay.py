@@ -28,7 +28,7 @@ def overlay_images(
     
 
     if callable(overlay_image_path):
-        overlay_image_path = overlay_image_path(image_path)
+        overlay_image_path = overlay_image_path(image_path, image)
     
     if not overlay_image_path:
         raise TypeError("overlay_image_path 不能为空")
@@ -55,18 +55,23 @@ def overlay_images(
 # 调用主函数
 if __name__ == "__main__":
     # 模拟一个获取图片列表的函数
-    # def custom_overlay_image_func(image_path):
-    #     # 1. 从完整路径中提取纯文件名，例如 'page15_img1.jpeg'
-    #     filename = os.path.basename(image_path)
-    #     page_num = int(m.group(1)) if (m := re.search(r'page(\d+)', filename)) else None
+    def custom_overlay_image_func(image_path, image):
+        # 1. 从完整路径中提取纯文件名，例如 'page15_img1.jpeg'
+        # filename = os.path.basename(image_path)
+        # page_num = int(m.group(1)) if (m := re.search(r'page(\d+)', filename)) else None
 
-    #     return  "/Users/teacher/Desktop/企业画册/mask_right.png"
+        width, height = image.size
+        if (width > height):
+            return  "/Users/teacher/Desktop/百度网盘下载/50+10元/mask_h.png"
+
+        return "/Users/teacher/Desktop/百度网盘下载/50+10元/mask_v.png"
 
 
-    image_path = "/Users/teacher/Desktop/企业画册/04右"
+
+    image_path = "/Users/teacher/Desktop/百度网盘下载/50+10元/尺木酒店设计方案(1)__提取的图片/001"
     custom_overlay_image = "/Users/teacher/Desktop/企业画册/mask_right.png"
 
-    overlay_image_path = custom_overlay_image
+    overlay_image_path = custom_overlay_image_func
 
     if os.path.isfile(image_path):
         bg_image_path = image_path

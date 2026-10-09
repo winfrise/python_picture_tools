@@ -49,7 +49,7 @@ def remove_gray_watermark(
 
 if __name__ == "__main__":
 
-    INPUT_PATH = "/Users/teacher/Desktop/百度网盘下载/2026年初职会计基础1-8讲（学员版）132__提取的图片"
+    INPUT_PATH = "/Users/teacher/Desktop/百度网盘下载/劳动合同书(8)__提取的图片"
     WATERMARK_AREA_IMG = "/Users/teacher/Desktop/百度网盘下载/001/mask.png"
     # WATERMARK_AREA_IMG = None
     IS_SMART_FILL = False  # 是否开启智能填充，使用时需修改

@@ -1,6 +1,7 @@
 import numpy as np
+import sys, os
 from collections import Counter
-from helpers.hex_to_rgb import hex_to_rgb
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 SURROUND_RADIUS = 5                   #向外采样扩展的半径
 WHITE_THRESHOLD = 200                 #填充白色的亮度判定阈值

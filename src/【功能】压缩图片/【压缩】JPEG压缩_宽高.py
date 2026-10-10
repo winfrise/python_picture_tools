@@ -28,9 +28,6 @@ def compress_jpeg(input_path, output_path, quality=75, max_width=1920):
         new_size = os.path.getsize(output_path) / 1024
         print(f"✅ {os.path.basename(input_path)}: {original_size:.1f}KB → {new_size:.1f}KB (质量={quality})")
 
-
-
-
 if __name__ == "__main__":
     input_path = "/Users/teacher/Desktop/百度网盘下载/2M/扫描_压缩/教学工作1_扫描版__提取的图片"
     quality=30

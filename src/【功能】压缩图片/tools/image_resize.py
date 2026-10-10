@@ -4,9 +4,9 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils import batch_process_file_with_callback
 
 
-def resize_image(input_file, output_file, target_size):
+def resize_image(input_path, output_path, target_size):
     # 1. 打开图片
-    img = Image.open(input_file)
+    img = Image.open(input_path)
     orig_width, orig_height = img.size
 
     # 获取目标宽/高
@@ -29,11 +29,11 @@ def resize_image(input_file, output_file, target_size):
     new_img = img.resize((new_width, new_height), Image.LANCZOS)
 
     # 4. 确保输出目录存在并保存图片
-    output_dir = os.path.dirname(output_file)
+    output_dir = os.path.dirname(output_path)
     os.makedirs(output_dir, exist_ok=True)
 
-    new_img.save(output_file, exif=b"")
-    print(f"处理完成！已保存至: {output_file}")
+    new_img.save(output_path, exif=b"")
+    print(f"处理完成！已保存至: {output_path}")
 
 
 
@@ -52,20 +52,20 @@ if __name__ == "__main__":
 
 
     if os.path.isfile(INPUT_PATH):
-        input_file = INPUT_PATH
+        input_path = INPUT_PATH
 
-        base_name, ext = os.path.splitext(input_file)
-        output_file = f"{base_name}_output_{TARGET_SIZE[0]}{TARGET_SIZE[1]}{ext}"
+        base_name, ext = os.path.splitext(input_path)
+        output_path = f"{base_name}_output_{TARGET_SIZE[0]}{TARGET_SIZE[1]}{ext}"
         resize_image(
-            input_file=INPUT_PATH,
-            output_file = output_file,
+            input_path=INPUT_PATH,
+            output_path = output_path,
             target_size = TARGET_SIZE,
         )
     elif os.path.isdir(INPUT_PATH):
-        def callback_func(input_file, output_file):
+        def callback_func(input_path, output_path):
             resize_image(
-                input_file=input_file,
-                output_file= output_file,
+                input_path=input_path,
+                output_path= output_path,
                 target_size = TARGET_SIZE,
             )
         input_dir = INPUT_PATH

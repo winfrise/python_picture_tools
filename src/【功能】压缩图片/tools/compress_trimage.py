@@ -1,8 +1,7 @@
 import subprocess
 import os, sys
-import math
 import shutil
-sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+sys.path.append(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))))
 from utils import batch_process_file_with_callback
 
 
@@ -24,12 +23,10 @@ def trimage_compress(input_path, output_path=None):
 
     try:
         if ext in ['.jpg', '.jpeg']:
-            # 关键修复2：jpegoptim 没有"输出到指定文件"的参数！
-            # 它只能"原地覆盖"作为位置参数传给它的那个【已存在】的文件。
-            # 旧代码把【还不存在】的 output_path 直接传给它，会被当成"待优化的输入文件"
-            # 去打开 -> cannot open input file -> CalledProcessError 被吞掉 -> 什么都没生成。
-            # 正确做法：先把原图复制到 output_path，再原地无损优化这个副本。
-            shutil.copyfile(input_path, output_path)
+
+            if not os.path.exists(output_path):
+                shutil.copyfile(input_path, output_path)
+
             cmd = [
                 'jpegoptim',
                 '--strip-all',          # 剥离所有元数据(EXIF/GPS等)
@@ -46,9 +43,11 @@ def trimage_compress(input_path, output_path=None):
                 '-out', output_path,
                 input_path,
             ]
+        elif ext == '.jpx':
+            
+            raise ValueError(f"格式{ext}功能待完善")
         else:
-            print(f"[Trimage] 警告：不支持的格式 {ext}，已跳过。")
-            return
+            raise ValueError(f"[Trimage] 警告：不支持的格式 {ext}，已跳过。")
 
         subprocess.run(cmd, check=True, capture_output=True)
         print(f"[Trimage] 无损优化完成: {output_path}")

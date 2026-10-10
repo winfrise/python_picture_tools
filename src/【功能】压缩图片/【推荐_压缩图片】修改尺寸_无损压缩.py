@@ -14,8 +14,8 @@ from tools.image_resize import resize_image
 if __name__ == "__main__":
 
 
-    INPUT_PATH = "/Users/teacher/Desktop/压缩2/test/page6_img1_KSPX6.jpeg"
-    TARGET_SIZE = ['width', 700]                  # 例：['height', 300] / ['width', 200] / TARGET_SIZE: Function
+    INPUT_PATH = "/Users/teacher/Desktop/压缩2/test/图片"
+    TARGET_SIZE = ['width', 800]                  # 例：['height', 300] / ['width', 200] / TARGET_SIZE: Function
 
     if os.path.isfile(INPUT_PATH):
         base_name, ext = os.path.splitext(INPUT_PATH)

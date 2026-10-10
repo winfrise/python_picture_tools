@@ -90,10 +90,10 @@ def compress_pipeline(input_path, output_path, target_size_kb=50):
             break
 
         # 阶段 B: 如果依然超标，强制缩小尺寸 (每次缩小 20%)
-        print(f"[Pipeline-鲁班] 警告: 质量降至最低仍为 {actual_size_kb:.1f}KB，正在缩小尺寸...")
-        scale_factor = 0.8
-        new_size = (int(current_width * scale_factor), int(current_height * scale_factor))
-        img = img.resize(new_size, Image.LANCZOS)
+        # print(f"[Pipeline-鲁班] 警告: 质量降至最低仍为 {actual_size_kb:.1f}KB，正在缩小尺寸...")
+        # scale_factor = 0.8
+        # new_size = (int(current_width * scale_factor), int(current_height * scale_factor))
+        # img = img.resize(new_size, Image.LANCZOS)
 
     # 清理临时文件
     if os.path.exists(temp_path): os.remove(temp_path)

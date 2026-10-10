@@ -50,10 +50,10 @@ def luban_compress(input_path, output_path, target_size_kb=50):
             return
 
         # --- 阶段 B: 如果依然超标，强制缩小尺寸 (每次缩小 20%) ---
-        print(f"[鲁班压缩] 警告: 质量降至最低仍为 {actual_size_kb:.1f}KB，正在缩小尺寸...")
-        scale_factor = 0.8
-        new_size = (int(current_width * scale_factor), int(current_height * scale_factor))
-        img = img.resize(new_size, Image.LANCZOS)
+        # print(f"[鲁班压缩] 警告: 质量降至最低仍为 {actual_size_kb:.1f}KB，正在缩小尺寸...")
+        # scale_factor = 0.8
+        # new_size = (int(current_width * scale_factor), int(current_height * scale_factor))
+        # img = img.resize(new_size, Image.LANCZOS)
         
         if os.path.exists(temp_path): os.remove(temp_path)
 

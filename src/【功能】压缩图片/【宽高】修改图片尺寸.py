@@ -45,10 +45,9 @@ if __name__ == "__main__":
             return ['width', 100]
         return ['height', 100]
 
-    INPUT_PATH = "/Users/teacher/Desktop/百度网盘下载/0925去水印/1转图片"
+    INPUT_PATH = "/Users/teacher/Desktop/百度网盘下载/2M/扫描_压缩/教学工作1_扫描版__提取的图片"
 
-     # TARGET_SIZE = ['width', 200]
-    TARGET_SIZE = ['height', 300]
+    TARGET_SIZE = ['width', 700] # ['height', 300]或['width', 200] 
     # TARGET_SIZE = target_size_func
 
     target_attr = TARGET_SIZE[0]

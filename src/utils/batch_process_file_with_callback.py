@@ -8,7 +8,7 @@ def batch_process_file_with_callback(input_dir, output_dir,  callback_func,  **k
         print(f"错误：路径不存在 -> {input_dir}")
         return
     
-    valid_extensions = ('.jpg', '.jpeg', '.png', '.bmp', '.gif', '.tiff')
+    valid_extensions = ('.jpg', '.jpeg', '.jpx', '.png', '.bmp', '.gif', '.tiff')
 
     if not output_dir:
         output_dir = input_dir + "_output"

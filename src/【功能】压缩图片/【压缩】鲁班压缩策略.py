@@ -70,7 +70,7 @@ def find_best_quality(img, output_path, target_size_kb):
     while left <= right:
         mid = (left + right) // 2
         try:
-            img.save(temp_path, quality=mid, optimize=True)
+            img.save(temp_path, quality=mid, optimize=True, exif=b"")
             size = os.path.getsize(temp_path) / 1024
             
             if size <= target_size_kb:

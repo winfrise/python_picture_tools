@@ -5,7 +5,6 @@ from utils import batch_process_file_with_callback
 
 
 def resize_image(input_file, output_file, target_size):
-
     # 1. 打开图片
     img = Image.open(input_file)
     orig_width, orig_height = img.size
@@ -33,30 +32,30 @@ def resize_image(input_file, output_file, target_size):
     output_dir = os.path.dirname(output_file)
     os.makedirs(output_dir, exist_ok=True)
 
-    new_img.save(output_file)
+    new_img.save(output_file, exif=b"")
     print(f"处理完成！已保存至: {output_file}")
+
+
 
 if __name__ == "__main__":
 
     def target_size_func (img_width, img_height):
-        is_horizontal = img_width > img_height
-        is_vertical = img_width < img_height
+        is_horizontal = img_width > img_height # 横向图片
+        is_vertical = img_width < img_height  # 纵向图片
         if is_horizontal:
             return ['width', 100]
         return ['height', 100]
 
     INPUT_PATH = "/Users/teacher/Desktop/百度网盘下载/2M/扫描_压缩/教学工作1_扫描版__提取的图片"
-
     TARGET_SIZE = ['width', 700] # ['height', 300]或['width', 200] 
     # TARGET_SIZE = target_size_func
 
-    target_attr = TARGET_SIZE[0]
-    target_val = TARGET_SIZE[1]
+
     if os.path.isfile(INPUT_PATH):
         input_file = INPUT_PATH
 
         base_name, ext = os.path.splitext(input_file)
-        output_file = f"{base_name}_output_{target_attr}{target_val}{ext}"
+        output_file = f"{base_name}_output_{TARGET_SIZE[0]}{TARGET_SIZE[1]}{ext}"
         resize_image(
             input_file=INPUT_PATH,
             output_file = output_file,
@@ -70,7 +69,7 @@ if __name__ == "__main__":
                 target_size = TARGET_SIZE,
             )
         input_dir = INPUT_PATH
-        output_dir = f"{input_dir}_output_{target_attr}{target_val}"
+        output_dir = f"{input_dir}_output_{TARGET_SIZE[0]}{TARGET_SIZE[1]}"
         batch_process_file_with_callback(
             input_dir=INPUT_PATH,
             output_dir=output_dir,

@@ -16,40 +16,48 @@ def convert_image(input_file, output_file = None, target_format = 'jpeg', qualit
 
     if not output_file:
         base_name, ext = os.path.splitext(input_file)
-        new_ext = f".{target_format}"
+        new_ext = f".{target_format.lower()}"
         output_file = f"{base_name}_output{new_ext}"
     
     output_dir = os.path.dirname(output_file)
     os.makedirs(output_dir, exist_ok=True)
 
     # 判断格式是否支持
-    supported_formats = {'jpeg', 'jpg', 'png', 'webp', 'bmp', 'gif'}
+    supported_formats = {'jpeg', 'jpg', 'jpx', 'png', 'webp', 'bmp', 'gif'}
+    no_alpha_formats = ['jpeg', 'jpg', 'bmp'] 
+
     if target_format.lower() not in supported_formats:
         print(f"不支持的格式：{target_format}，仅支持 {supported_formats}")
         return False
 
-    print(f"正在打开文件: {input_file} -> {output_file}")
+    print(f"正在打开文件: {input_file}  -> {output_file}")
 
     # 开始格式转换
     try:
         # 打开图片并转换
         with Image.open(input_file) as img:
             # 如果是转换为 JPEG，且原图带有透明通道 (RGBA)，需要先转为 RGB
-            no_alpha_formats = ['jpeg', 'jpg', 'bmp'] 
             if target_format.lower() in no_alpha_formats and img.mode in ('RGBA', 'P', 'LA'):
-                # 注意：直接 convert('RGB') 会让透明变黑。
-                # 如果希望透明变白，建议用之前的“粘贴到白底”逻辑，或者简单处理：
                 if img.mode == 'RGBA':
                     background = Image.new('RGB', img.size, (255, 255, 255))
                     background.paste(img, mask=img.split()[3]) 
                     img = background
                 else:
                     img = img.convert('RGB')
-            
+
+            # 1. 统一格式名称
+            fmt = target_format.lower()
+            if fmt in ['jpg', 'jpeg']:
+                save_format = 'JPEG'       # jpg/jpeg 必须转为 JPEG
+            elif fmt == 'jpx':
+                save_format = 'JPEG2000'   # jpx 必须转为 JPEG2000
+            else:
+                save_format = fmt.upper()  # png/webp 等直接大写即可
             img.save(
                 output_file, 
-                format=target_format, 
+                format=save_format, 
                 quality=quality, 
+                optimize=True,
                 exif=b'', # 清除元数据
             )
             print(f"🎉 🎉 🎉 🎉 处理完成！🎉 🎉 🎉 ")
@@ -60,9 +68,9 @@ def convert_image(input_file, output_file = None, target_format = 'jpeg', qualit
     
 if __name__ == "__main__":
     # 设置你的输入和输出文件夹路径
-    INPUT_PATH = "/Users/teacher/Desktop/百度网盘下载/未命名文件夹 2/000"       # 原图所在的文件夹
-    TARGET_FORMAT = 'png'
-    QUALITY = 100
+    INPUT_PATH = "/Users/teacher/Desktop/百度网盘下载/压缩测试/（已压缩）郑州市课题_扫描版__提取的图片"       # 原图所在的文件夹
+    TARGET_FORMAT = 'webp'
+    QUALITY = 85
     
     if os.path.isfile(INPUT_PATH):
         convert_image(

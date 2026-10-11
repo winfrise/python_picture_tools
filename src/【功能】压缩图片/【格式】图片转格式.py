@@ -68,8 +68,8 @@ def convert_image(input_file, output_file = None, target_format = 'jpeg', qualit
     
 if __name__ == "__main__":
     # 设置你的输入和输出文件夹路径
-    INPUT_PATH = "/Users/teacher/Desktop/百度网盘下载/压缩测试/（已压缩）郑州市课题_扫描版__提取的图片"       # 原图所在的文件夹
-    TARGET_FORMAT = 'webp'
+    INPUT_PATH = "/Users/teacher/Downloads/001"       # 原图所在的文件夹
+    TARGET_FORMAT = 'jpg'
     QUALITY = 85
     
     if os.path.isfile(INPUT_PATH):

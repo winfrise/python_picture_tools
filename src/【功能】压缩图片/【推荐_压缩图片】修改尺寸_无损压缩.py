@@ -2,20 +2,17 @@
 
 import os
 import sys
-import subprocess
-import shutil
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils import batch_process_file_with_callback
 
-from PIL import Image
 from tools.compress_trimage import trimage_compress
 from tools.image_resize import resize_image
 
 if __name__ == "__main__":
 
 
-    INPUT_PATH = "/Users/teacher/Desktop/pdf_command/pdf解密/input/001"
-    TARGET_SIZE = ['width', 2600]                  # 例：['height', 300] / ['width', 200] / TARGET_SIZE: Function
+    INPUT_PATH = "/Users/teacher/Downloads/001_output_jpg_output_width1200"
+    TARGET_SIZE = ['width', 800]                  # 例：['height', 300] / ['width', 200] / TARGET_SIZE: Function
 
     if os.path.isfile(INPUT_PATH):
         base_name, ext = os.path.splitext(INPUT_PATH)

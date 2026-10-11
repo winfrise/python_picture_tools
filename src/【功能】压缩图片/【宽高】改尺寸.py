@@ -15,8 +15,8 @@ if __name__ == "__main__":
             return ['width', 100]
         return ['height', 100]
 
-    INPUT_PATH = "/Users/teacher/Downloads/001_output_jpg"
-    TARGET_SIZE = ['width', 1200] # ['height', 300]或['width', 200] 
+    INPUT_PATH = "/Users/teacher/Desktop/001/AI"
+    TARGET_SIZE = ['width', 3000] # ['height', 300]或['width', 200] 
     # TARGET_SIZE = target_size_func
 
 

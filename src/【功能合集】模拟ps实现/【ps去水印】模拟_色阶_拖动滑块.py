@@ -26,8 +26,8 @@ def ps_levels_white_point(input_path, output_path, white_point=114):
 
 if __name__ == "__main__":
     # 你可以传入一个图片的路径，也可以传入一个文件夹的路径
-    input_path = "/Users/teacher/Desktop/百度网盘下载/【理论精讲】刑诉法讲义（向高甲）/图片"
-    white_point = 226
+    input_path = "/Users/teacher/Desktop/百度网盘下载/9-12月雅思口语题库完整版/图片"
+    white_point = 200
 
     if os.path.isfile(input_path):
         base_name, ext = os.path.split

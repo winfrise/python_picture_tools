@@ -4,36 +4,30 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils import batch_process_file_with_callback
 
 def ps_levels_white_point(input_path, output_path, white_point=114):
-    """
-    模拟 PS 色阶：调整白场（右侧滑块）
-    :param white_point: 对应 PS 中输入色阶的右侧数值 (0-255)
-    """
-    img = Image.open(input_path).convert("L") # 转为灰度图处理
-    
-    # 构建查找表 (LUT)
-    # 逻辑：如果像素值 >= white_point，直接变 255 (纯白)
-    # 否则：将其拉伸。例如 white_point=114，则 114->255, 57->127...
+    # 保留彩色：转成 RGB（而不是灰度 L）
+    img = Image.open(input_path).convert("RGB")
+
     lut = []
     for i in range(256):
         if i >= white_point:
             lut.append(255)
         else:
-            # 线性拉伸公式：(当前值 / 白场值) * 255
             val = int((i / float(white_point)) * 255)
             lut.append(min(val, 255))
-            
-    # 应用变换
-    new_img = img.point(lut)
+
+    # RGB 有 3 个通道，需要把同一张 256 长的表复制成 768 长
+    # 若想对不同通道用不同阈值，可分别构造 R/G/B 三段表拼接
+    lut_rgb = lut * 3
+    new_img = img.point(lut_rgb)
     new_img.save(output_path)
     print(f"处理完成！白场阈值设为: {white_point}")
 
 
 
-
 if __name__ == "__main__":
     # 你可以传入一个图片的路径，也可以传入一个文件夹的路径
-    input_path = "/Users/teacher/Desktop/百度网盘下载/2M/（已压缩）郑州市课题_扫描版__提取的图片"
-    white_point = 220
+    input_path = "/Users/teacher/Desktop/百度网盘下载/【理论精讲】刑诉法讲义（向高甲）/图片"
+    white_point = 226
 
     if os.path.isfile(input_path):
         base_name, ext = os.path.split

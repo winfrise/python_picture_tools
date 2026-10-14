@@ -30,7 +30,7 @@ def convert_to_grayscale(input_path, output_path):
 
 
 if __name__ == "__main__":
-    input_path = "/Users/teacher/Desktop/百度网盘下载/未命名文件夹/贵州宝利服饰有限公司__提取的图片"
+    input_path = "/Volumes/西数4T外置/百度网盘默认下载/2M/001_output_jpg_鲁班压缩"
     
     if os.path.isfile(input_path):
         output_path = None

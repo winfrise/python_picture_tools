@@ -1,10 +1,16 @@
+import os, sys
+import math
+sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+from utils import batch_process_file_with_callback
+from tools.compress_luban import luban_compress
+
 if __name__ == "__main__":
-    input_path = "/Users/teacher/Desktop/百度网盘下载/未命名文件夹 3/中华本草-苗药卷__提取的图片_鲁班压缩_output_滑块去水印"
+    input_path = "/Volumes/西数4T外置/百度网盘默认下载/2M/001_output_jpg"
     
     # target_size_kb = 50
 
-    total_size_kb = 80 * 1024
-    total_page = 664
+    total_size_kb = 2 * 1024
+    total_page = 16
     target_size_kb = math.floor(total_size_kb / total_page)
     print(f"target_size_kb: {target_size_kb}")
 

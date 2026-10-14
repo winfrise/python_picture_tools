@@ -11,7 +11,7 @@ from tools.image_resize import resize_image
 if __name__ == "__main__":
 
 
-    INPUT_PATH = "/Users/teacher/Downloads/03/报告书__提取的图片"
+    INPUT_PATH = "/Volumes/西数4T外置/百度网盘默认下载/2M/001_output_jpg_鲁班压缩_灰度"
     TARGET_SIZE = ['width', 1200]                  # 例：['height', 300] / ['width', 200] / TARGET_SIZE: Function
 
     if os.path.isfile(INPUT_PATH):

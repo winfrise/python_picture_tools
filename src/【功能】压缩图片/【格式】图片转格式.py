@@ -68,7 +68,7 @@ def convert_image(input_file, output_file = None, target_format = 'jpeg', qualit
     
 if __name__ == "__main__":
     # 设置你的输入和输出文件夹路径
-    INPUT_PATH = "/Users/teacher/Downloads/001"       # 原图所在的文件夹
+    INPUT_PATH = "/Volumes/西数4T外置/百度网盘默认下载/2M/001"       # 原图所在的文件夹
     TARGET_FORMAT = 'jpg'
     QUALITY = 85
     

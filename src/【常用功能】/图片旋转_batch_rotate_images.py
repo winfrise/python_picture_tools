@@ -46,8 +46,8 @@ def batch_rotate_images(input_dir, output_dir, angle):
 
 # ================= 使用示例 =================
 if __name__ == "__main__":
-    input_folder = 'xxx'   # 替换为你的输入文件夹路径
-    output_folder = 'xxx' # 替换为你的输出文件夹路径
-    rotation_angle = -90              # 设置旋转角度，例如 -90 表示逆时针旋转90度<websource>source_group_web_3</websource>
+    input_folder = '/Volumes/西数4T外置/百度网盘默认下载/试卷/001/政治'   # 替换为你的输入文件夹路径
+    output_folder = f"{input_folder}_旋转" # 替换为你的输出文件夹路径
+    rotation_angle = -180              # 设置旋转角度，例如 -90 表示逆时针旋转90度<websource>source_group_web_3</websource>
 
     batch_rotate_images(input_folder, output_folder, rotation_angle)

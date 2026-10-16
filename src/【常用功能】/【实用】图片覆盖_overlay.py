@@ -56,20 +56,23 @@ def overlay_images(
 if __name__ == "__main__":
     # 模拟一个获取图片列表的函数
     def custom_overlay_image_func(image_path, image):
-        # 1. 从完整路径中提取纯文件名，例如 'page15_img1.jpeg'
-        # filename = os.path.basename(image_path)
-        # page_num = int(m.group(1)) if (m := re.search(r'page(\d+)', filename)) else None
-
         width, height = image.size
-        if (width > height):
-            return  "/Users/teacher/Desktop/百度网盘下载/50+10元/mask_h.png"
+        # 1. 从完整路径中提取纯文件名，例如 'page15_img1.jpeg'
+        filename = os.path.basename(image_path)
+        page_num = int(m.group(1)) if (m := re.search(r'page(\d+)', filename)) else None
 
-        return "/Users/teacher/Desktop/百度网盘下载/50+10元/mask_v.png"
+        if page_num % 2 == 0: # 偶数页
+            return "/Volumes/西数4T外置/百度网盘默认下载/试卷/001/mask2.png"
+        else: # 奇数页
+            return "/Volumes/西数4T外置/百度网盘默认下载/试卷/001/mask1.png"
+        # if (width > height):
+        #     return  "/Users/teacher/Desktop/百度网盘下载/50+10元/mask_h.png"
 
 
 
-    image_path = "/Users/teacher/Desktop/百度网盘下载/50+10元/尺木酒店设计方案(1)__提取的图片/001"
-    custom_overlay_image = "/Users/teacher/Desktop/企业画册/mask_right.png"
+
+    image_path = "/Volumes/西数4T外置/百度网盘默认下载/试卷/001/政治_旋转"
+    custom_overlay_image = "/Volumes/西数4T外置/百度网盘默认下载/试卷/001/mask.png"
 
     overlay_image_path = custom_overlay_image_func
 

@@ -71,10 +71,10 @@ if __name__ == "__main__":
 
 
 
-    image_path = "/Volumes/西数4T外置/百度网盘默认下载/试卷/001/政治_旋转"
-    custom_overlay_image = "/Volumes/西数4T外置/百度网盘默认下载/试卷/001/mask.png"
+    image_path = "/Volumes/西数4T外置/百度网盘默认下载/去水印/001_output_删除图片_Object/用所选项目新建的文件夹/2026年江西三支一扶考前讲练考密训（9天9晚）行测2天讲义-判断推理-学生版-261012-60p__合成的图片_DPI_300_调色阶"
+    custom_overlay_image = "/Volumes/西数4T外置/百度网盘默认下载/去水印/001_output_删除图片_Object/用所选项目新建的文件夹/mask.png"
 
-    overlay_image_path = custom_overlay_image_func
+    overlay_image_path = custom_overlay_image
 
     if os.path.isfile(image_path):
         bg_image_path = image_path

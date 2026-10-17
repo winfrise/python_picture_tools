@@ -63,9 +63,9 @@ def adjust_levels(
 
 if __name__ == "__main__":
     # 你可以传入一个图片的路径，也可以传入一个文件夹的路径
-    input_path = "/Users/teacher/Desktop/百度网盘下载/9-12月雅思口语题库完整版/图片_output_滑块去水印"
-    white_point = 255 # 默认值:  255
-    black_point = 0 # 默认值: 0
+    input_path = "/Volumes/西数4T外置/百度网盘默认下载/去水印/001_output_删除图片_Object/用所选项目新建的文件夹/长沙判断讲义__合成的图片_DPI_300"
+    white_point = 230 # 默认值:  255
+    black_point = 45 # 默认值: 0
     gamma = 1.0 # 默认值: 1.0
 
     if os.path.isfile(input_path):

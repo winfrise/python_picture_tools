@@ -19,6 +19,9 @@ def batch_rotate_images(input_dir, output_dir, angle):
 
     # 遍历输入文件夹中的所有文件
     for filename in os.listdir(input_dir):
+        if filename.startswith('.'):
+            continue  # 如果是，跳过本次循环，处理下一个文件
+
         if filename.lower().endswith(supported_formats):
             input_path = os.path.join(input_dir, filename)
             output_path = os.path.join(output_dir, filename)
@@ -46,7 +49,7 @@ def batch_rotate_images(input_dir, output_dir, angle):
 
 # ================= 使用示例 =================
 if __name__ == "__main__":
-    input_folder = '/Volumes/西数4T外置/百度网盘默认下载/试卷/001/政治'   # 替换为你的输入文件夹路径
+    input_folder = '/Volumes/西数4T外置/百度网盘默认下载/2026-河南10套综合卷-40/图片_旋转_调色阶/用所选项目新建的文件夹'   # 替换为你的输入文件夹路径
     output_folder = f"{input_folder}_旋转" # 替换为你的输出文件夹路径
     rotation_angle = -180              # 设置旋转角度，例如 -90 表示逆时针旋转90度<websource>source_group_web_3</websource>
 

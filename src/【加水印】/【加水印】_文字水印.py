@@ -16,8 +16,8 @@ def add_texts_to_image(input_path, output_path, texts_list, config=None):
     font_size = config.get("font_size", 100)
     color = config.get("color", "red")
     font_path = config.get("font_path", None)
-    margin_x = config.get("margin_x", 20)      # 距离左边距
-    margin_y = config.get("margin_y", 20)      # 距离底部/行间距
+    margin_left = config.get("margin_left", 20)      # 距离左边距
+    margin_bottom = config.get("margin_bottom", 20)      # 距离底部/行间距
     line_spacing = config.get("line_spacing", 10)  # 行间距额外像素
 
     image = Image.open(input_path).convert("RGB")
@@ -53,8 +53,8 @@ def add_texts_to_image(input_path, output_path, texts_list, config=None):
 
         # 计算该行文字应该在哪：越靠后的项（索引越大）越靠下
         # 最后一项 i = total_lines-1 画在最下面
-        # 第 i 项距离底部的偏移 = (total_lines - 1 - i) * row_height + margin_y
-        offset_from_bottom = (total_lines - 1 - i) * row_height + margin_y
+        # 第 i 项距离底部的偏移 = (total_lines - 1 - i) * row_height + margin_bottom
+        offset_from_bottom = (total_lines - 1 - i) * row_height + margin_bottom
 
         # 计算 y 坐标（左上角为原点，需要减去文字本身高度来对齐底部）
         bbox = draw.textbbox((0, 0), text, font=font)
@@ -62,7 +62,7 @@ def add_texts_to_image(input_path, output_path, texts_list, config=None):
         # 使用 bbox[1] 作为偏移，让文字基线正确对齐
         y = img_height - offset_from_bottom - text_h - bbox[1]
 
-        x = margin_x
+        x = margin_left
 
         # 边界检查
         if y < -text_h or y > img_height:
@@ -120,8 +120,8 @@ if __name__ == "__main__":
         # "font_path": "/Users/teacher/Library/Fonts/SourceHanSerifSC-Bold.otf",
         "font_path": "/Users/teacher/Library/Fonts/微软雅黑.ttf", # 微软雅黑
         "color": "#ffffff",
-        "margin_x": 23,       # 距离左边距
-        "margin_y": 37,       # 距离底部边距
+        "margin_left": 23,       # 距离左边距
+        "margin_bottom": 37,       # 距离底部边距
         "line_spacing": 6,   # 行间距
     }
 

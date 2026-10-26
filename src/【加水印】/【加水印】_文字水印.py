@@ -1,13 +1,11 @@
-from PIL import Image, ImageDraw, ImageFont, ImageColor
+from PIL import Image, ImageDraw, ImageFont, ImageColor, ImageFilter
 import os
+import random
+from datetime import datetime, timedelta
 
 
 def _parse_color(color, opacity):
-    """
-    颜色 + 透明度 -> (R, G, B, A)
-    color: 支持 "red" / "#ffffff" / (255,0,0) / (255,0,0,128)
-    opacity: 0~255 整数 或 0.0~1.0 浮点；None 表示使用颜色自带 alpha
-    """
+    """颜色 + 透明度 -> (R, G, B, A)"""
     if isinstance(color, str):
         rgba = ImageColor.getrgb(color)
     elif isinstance(color, (tuple, list)):
@@ -29,32 +27,46 @@ def _parse_color(color, opacity):
     return (r, g, b, a)
 
 
+def _resolve_text(item):
+    """
+    将 texts_list 中的一项解析为字符串：
+    - 字符串：直接返回
+    - 函数：调用并返回结果
+    - 字典：取 "func"（优先）或 "text"
+    """
+    if callable(item):
+        return str(item())
+    if isinstance(item, dict):
+        if "func" in item and callable(item["func"]):
+            return str(item["func"]())
+        return str(item.get("text", ""))
+    if item is None:
+        return ""
+    return str(item)
+
+
 def add_texts_to_image(input_path, output_path, texts_list, config=None):
     """
-    在图片上添加多行文字，从下往上排列，支持半透明
-    texts_list: 文字列表，最后一项在左下角最下面，依次向上排列
-    config: 可选配置字典，包含 font_size, font_path, color, opacity, margin 等
+    在图片上添加多行文字，从下往上排列，支持半透明、动态文字、高斯模糊
     """
     if not os.path.exists(input_path):
         raise FileNotFoundError(f"找不到输入图片: {input_path}")
 
-    # 默认配置
     if config is None:
         config = {}
     font_size = config.get("font_size", 100)
     color = config.get("color", "red")
-    opacity = config.get("opacity", 128)          # 【新增】默认半透明
+    opacity = config.get("opacity", 128)
     font_path = config.get("font_path", None)
     margin_left = config.get("margin_left", 20)
     margin_bottom = config.get("margin_bottom", 20)
     line_spacing = config.get("line_spacing", 10)
+    blur_radius = config.get("blur_radius", 0)      # 【新增】高斯模糊半径，0 表示不模糊
 
-    # 【改动1】原图转 RGBA，才能做透明合成
     base = Image.open(input_path).convert("RGBA")
     img_width, img_height = base.size
     print(f"图片尺寸: {img_width} x {img_height}")
 
-    # 【改动2】新建一张全透明图层，文字画在它上面
     text_layer = Image.new("RGBA", base.size, (0, 0, 0, 0))
     draw = ImageDraw.Draw(text_layer)
 
@@ -69,18 +81,18 @@ def add_texts_to_image(input_path, output_path, texts_list, config=None):
         print(f"字体加载失败: {e}，使用默认字体。")
         font = ImageFont.load_default()
 
-    # 【改动3】解析带 alpha 的填充色
     fill_color = _parse_color(color, opacity)
     print(f"文字颜色(含透明度): {fill_color}")
 
-    # 计算每行文字的高度
+    resolved_texts = [_resolve_text(item) for item in texts_list]
+
     sample_bbox = draw.textbbox((0, 0), "测试Ag", font=font)
     line_height = sample_bbox[3] - sample_bbox[1]
     row_height = line_height + line_spacing
 
-    total_lines = len(texts_list)
+    total_lines = len(resolved_texts)
     for i in range(total_lines - 1, -1, -1):
-        text = texts_list[i]
+        text = resolved_texts[i]
         if text is None or text == "":
             continue
 
@@ -97,13 +109,15 @@ def add_texts_to_image(input_path, output_path, texts_list, config=None):
         draw.text((x, y), text, font=font, fill=fill_color)
         print(f"已绘制: '{text}' at ({x}, {y})")
 
-    # 【改动4】透明图层与底图 alpha 合成，透明度精确生效
+    # 【新增】对文字图层做高斯模糊（只模糊文字，背景不受影响）
+    if blur_radius and blur_radius > 0:
+        text_layer = text_layer.filter(ImageFilter.GaussianBlur(radius=blur_radius))
+        print(f"已对文字图层应用高斯模糊: radius={blur_radius}")
+
     result = Image.alpha_composite(base, text_layer)
 
-    # 【改动5】保存时处理不支持透明的格式
     ext = os.path.splitext(output_path)[1].lower()
     if ext in (".jpg", ".jpeg", ".bmp"):
-        # 这些格式不支持透明，合成到白底
         background = Image.new("RGB", result.size, (255, 255, 255))
         background.paste(result, mask=result.split()[3])
         background.save(output_path)
@@ -141,6 +155,21 @@ def batch_add_texts_to_image(input_dir, output_dir, texts_list, config=None):
     print(f"\n🎉 批量任务完成！")
 
 
+# ================= 动态文字函数 =================
+def random_time_near(base_time_str, hours_range=2, fmt="%Y-%m-%d %H:%M:%S"):
+    base = datetime.strptime(base_time_str, fmt)
+    delta_seconds = int(timedelta(hours=hours_range).total_seconds())
+    rand_seconds = random.randint(-delta_seconds, delta_seconds)
+    return (base + timedelta(seconds=rand_seconds)).strftime(fmt)
+
+
+BASE_TIME = "2026-09-28 10:50:46"
+
+
+def gen_time_text():
+    return f"时间：{random_time_near(BASE_TIME, hours_range=2)}"
+
+
 # ================= 测试调用示例 =================
 if __name__ == "__main__":
     input_path = "/Users/teacher/Downloads/去水印_待加水印"
@@ -148,7 +177,7 @@ if __name__ == "__main__":
     texts_list = [
         "经度：112.510967",
         "纬度：22.399309",
-        "时间：2026-09-28 10:50:46",
+        gen_time_text,
         "备注：茂名化州平定木浪村北",
     ]
 
@@ -156,10 +185,11 @@ if __name__ == "__main__":
         "font_size": 25,
         "font_path": "/Users/teacher/Library/Fonts/微软雅黑.ttf",
         "color": "#ffffff",
-        "opacity": 255,        # 【新增】半透明：128 ≈ 50%，可调 0~255 或 0.0~1.0
+        "opacity": 255,
         "margin_left": 23,
         "margin_bottom": 37,
         "line_spacing": 6,
+        "blur_radius": 0.1,      # 【新增】高斯模糊半径：0=不模糊，1~3=轻微柔化，5+=明显雾化
     }
 
     if os.path.isfile(input_path):

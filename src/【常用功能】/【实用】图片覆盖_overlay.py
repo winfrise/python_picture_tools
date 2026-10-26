@@ -71,8 +71,8 @@ if __name__ == "__main__":
 
 
 
-    image_path = "/Volumes/西数4T外置/百度网盘默认下载/必修1讲义/必修1讲义__提取的图片_调色阶"
-    custom_overlay_image = "/Volumes/西数4T外置/百度网盘默认下载/必修1讲义/mask.png"
+    image_path = "/Volumes/西数4T外置/百度网盘默认下载/老60元/2027年浙江省考笔试-进阶训练（16天16晚）行测实战刷题-言语理解和判断推理-学生版-260529-141p__合成的图片_DPI_300"
+    custom_overlay_image = "/Volumes/西数4T外置/百度网盘默认下载/老60元/mask.png"
 
     overlay_image_path = custom_overlay_image
 

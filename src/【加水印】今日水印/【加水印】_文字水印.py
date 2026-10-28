@@ -181,7 +181,7 @@ if __name__ == "__main__":
     ]
 
     config = {
-        "font_size": 42,
+        "font_size": 42+1, # 会比ps字体小1-2个像素
         "font_path": "/Users/teacher/Library/Fonts/微软雅黑.ttf",
         "color": "#ffffff",
         "opacity": 255,

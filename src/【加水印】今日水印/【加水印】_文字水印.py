@@ -163,22 +163,24 @@ def random_time_near(base_time_str, hours_range=2, fmt="%Y-%m-%d %H:%M:%S"):
     return (base + timedelta(seconds=rand_seconds)).strftime(fmt)
 
 
-BASE_TIME = "2026-09-28 10:50:46"
+
 
 
 def gen_time_text():
-    return f"时间：{random_time_near(BASE_TIME, hours_range=2)}"
+    BASE_TIME = "2026.09.23 13:06"
+    time_str = random_time_near(BASE_TIME, hours_range=2, fmt="%Y.%m.%d %H:%M")
+    return f"时间：{time_str}"
 
 
 # ================= 测试调用示例 =================
 if __name__ == "__main__":
-    input_path = "/Users/teacher/Downloads/去水印_待加水印"
+    input_path = "/Users/teacher/Downloads/Canvas_20261028_14时30分54秒/001"
 
     texts_list = [
-        "经度：112.510967",
-        "纬度：22.399309",
         gen_time_text,
-        "备注：茂名化州平定木浪村北",
+        "地点： 化州市 · 947乡道",
+        "经纬度： 21.883004°N,110.391798°E",
+        "备. 注： 化州中垌镇那梨鸡肾岭",
     ]
 
     config = {

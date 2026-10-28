@@ -169,29 +169,26 @@ def random_time_near(base_time_str, hours_range=2, fmt="%Y-%m-%d %H:%M:%S"):
 def gen_time_text():
     BASE_TIME = "2026.09.23 13:06"
     time_str = random_time_near(BASE_TIME, hours_range=2, fmt="%Y.%m.%d %H:%M")
-    return f"时间：{time_str}"
+    return f"{time_str}"
 
 
 # ================= 测试调用示例 =================
 if __name__ == "__main__":
-    input_path = "/Users/teacher/Downloads/Canvas_20261028_14时30分54秒/001"
+    input_path = "/Users/teacher/Downloads/Canvas_20261028_14时30分54秒/001_output_图片覆盖"
 
     texts_list = [
-        gen_time_text,
-        "地点： 化州市 · 947乡道",
-        "经纬度： 21.883004°N,110.391798°E",
-        "备. 注： 化州中垌镇那梨鸡肾岭",
+        gen_time_text
     ]
 
     config = {
-        "font_size": 25,
+        "font_size": 42,
         "font_path": "/Users/teacher/Library/Fonts/微软雅黑.ttf",
         "color": "#ffffff",
         "opacity": 255,
-        "margin_left": 23,
-        "margin_bottom": 37,
+        "margin_left": 290,
+        "margin_bottom": 300,
         "line_spacing": 6,
-        "blur_radius": 0.1,      # 【新增】高斯模糊半径：0=不模糊，1~3=轻微柔化，5+=明显雾化
+        "blur_radius": 0,      # 【新增】高斯模糊半径：0=不模糊，1~3=轻微柔化，5+=明显雾化
     }
 
     if os.path.isfile(input_path):

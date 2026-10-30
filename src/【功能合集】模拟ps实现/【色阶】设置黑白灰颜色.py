@@ -15,6 +15,8 @@ def adjust_levels(
     """
     调整图像的色阶（黑场、白场、灰场）
     """
+
+    print(f"正在处理完件{input_path}")
     # 1. 打开并转为 RGB 模式以保留色彩
     img = Image.open(input_path).convert("RGB")
 
@@ -63,9 +65,9 @@ def adjust_levels(
 
 if __name__ == "__main__":
     # 你可以传入一个图片的路径，也可以传入一个文件夹的路径
-    input_path = "/Volumes/西数4T外置/百度网盘默认下载/政治必修一二合订本/图片"
-    white_point = 218 # 默认值:  255
-    black_point = 60 # 默认值: 0
+    input_path = "/Volumes/西数4T外置/百度网盘默认下载/001/图片"
+    white_point = 170 # 默认值:  255
+    black_point = 30 # 默认值: 0
     gamma = 1.0 # 默认值: 1.0
 
     if os.path.isfile(input_path):

@@ -3,6 +3,37 @@ import re
 import uuid
 from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
+from tools.generate_random_time_str import generate_random_time_str
+
+def get_font_path(font_name="苹方黑体-中粗-简.ttf"):
+    """
+    获取项目 assets/fonts 目录下字体的绝对路径。
+    
+    Args:
+        font_name (str): 字体文件名，默认为 "苹方黑体-中粗-简.ttf"
+        
+    Returns:
+        str: 字体的绝对路径字符串。如果文件不存在，返回 None 并打印警告。
+    """
+    # 1. 获取当前脚本所在的绝对目录
+    # __file__ 指向当前代码所在的 .py 文件
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    
+    # 2. 向上回退一级到 src 目录，再进入 assets/fonts
+    # 假设当前文件在 src/某文件夹/ 下，所以需要 ".."
+    font_dir = os.path.join(current_dir, "..", "assets", "fonts")
+    
+    # 3. 规范化路径（消除 .. 符号）并拼接文件名
+    full_path = os.path.normpath(os.path.join(font_dir, font_name))
+    
+    # 4. 检查文件是否存在
+    if os.path.exists(full_path):
+        return full_path
+    else:
+        print(f"⚠️ 警告：未找到字体文件 -> {full_path}")
+        return None
+
+
 
 def generate_text_image(text, output_dir="./output", config=None):
     """
@@ -31,10 +62,15 @@ def generate_text_image(text, output_dir="./output", config=None):
     if not isinstance(text, str):
         text = str(text)
 
-    # 1. 载入字体
+    # 加载字体
     try:
-        font = ImageFont.truetype(font_path, font_size)
-    except IOError:
+        if font_path and os.path.exists(font_path):
+            font = ImageFont.truetype(font_path, font_size)
+        else:
+            font = ImageFont.load_default()
+            print("警告: 未找到指定字体文件，正在使用默认字体。")
+    except Exception as e:
+        print(f"字体加载失败: {e}，使用默认字体。")
         font = ImageFont.load_default()
 
     # 2. 测量原始文字尺寸（用 textbbox 得到真实像素边界）
@@ -77,14 +113,36 @@ def generate_text_image(text, output_dir="./output", config=None):
 
 
 if __name__ == "__main__":
-    test_config = {
-        "font_path": "/Users/teacher/Library/Fonts/微软雅黑.ttf",
-        "font_size": 40,
+    def gen_time_text():
+        random_time = generate_random_time_str(
+            start_date_str="2026-08-12",
+            end_date_str="2026-08-25",
+            start_hour=9,
+            end_hour=17
+        )
+        return random_time
+
+    text = gen_time_text
+    output_dir = "/Volumes/西数4T外置/百度网盘默认下载/37张图片/8月10日——8月25日_完成/01"
+
+    config = {
+        "font_path": get_font_path("苹方黑体-中黑-简.ttf"),
+        "font_size": 35,
         "padding": 30,
-        "text_color": "#333333",
+        "text_color": "#000000",
         "bg_color": (255, 255, 255, 0),
         "width_ratio": 1.0,
-        "height_ratio": 1.2,
+        "height_ratio": 1.1,
         "blur_radius": 0.8,        # 新增：模糊半径，0 表示不模糊
     }
-    generate_text_image("测试文字缩放", output_dir="./output", config=test_config)
+
+    count = 10
+
+    for i in range(count):
+        print(f"\n--- 正在执行第 {i+1}/{count} 次 ---")
+        generate_text_image(
+            text=text, 
+            output_dir=output_dir, 
+            config=config
+        )
+    print("\n✅ 所有任务执行完成！")

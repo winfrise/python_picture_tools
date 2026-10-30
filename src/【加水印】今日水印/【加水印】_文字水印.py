@@ -2,9 +2,10 @@ from PIL import Image, ImageDraw, ImageFont, ImageColor, ImageFilter
 import os, sys
 import random
 from datetime import datetime, timedelta
-from tools.generate_random_time_str import generate_random_time_str
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 from utils import batch_process_file_with_callback
+
+from tools.generate_random_time_str import generate_random_time_str
 
 def get_font_path(font_name="苹方黑体-中粗-简.ttf"):
     """
@@ -198,7 +199,6 @@ if __name__ == "__main__":
         "opacity": 255,
         "margin_left": 260,
         "margin_bottom": 658,
-        "line_spacing": 6,
         "blur_radius": 0.8,
         "width_ratio": 1.0,    # 【新增】1.0=原宽，1.2=拉宽20%，0.8=压缩到80%
         "height_ratio": 1.1,   # 【新增】1.0=原高，1.2=拉高20%，0.8=压缩到80%

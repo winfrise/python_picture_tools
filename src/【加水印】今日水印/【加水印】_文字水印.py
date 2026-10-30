@@ -36,7 +36,9 @@ def _resolve_text(item):
     - 字典：取 "func"（优先）或 "text"
     """
     if callable(item):
-        return str(item())
+        result = str(item())
+        print(result)
+        return result
     if isinstance(item, dict):
         if "func" in item and callable(item["func"]):
             return str(item["func"]())
@@ -66,7 +68,7 @@ def add_texts_to_image(input_path, output_path, texts_list, config=None):
 
     base = Image.open(input_path).convert("RGBA")
     img_width, img_height = base.size
-    print(f"图片尺寸: {img_width} x {img_height}")
+    # print(f"图片尺寸: {img_width} x {img_height}")
 
     text_layer = Image.new("RGBA", base.size, (0, 0, 0, 0))
     draw = ImageDraw.Draw(text_layer)
@@ -83,7 +85,7 @@ def add_texts_to_image(input_path, output_path, texts_list, config=None):
         font = ImageFont.load_default()
 
     fill_color = _parse_color(color, opacity)
-    print(f"文字颜色(含透明度): {fill_color}")
+    # print(f"文字颜色(含透明度): {fill_color}")
 
     resolved_texts = [_resolve_text(item) for item in texts_list]
 
@@ -108,12 +110,12 @@ def add_texts_to_image(input_path, output_path, texts_list, config=None):
             print(f"警告: 文本 '{text}' 的坐标 y={y} 可能在画布外！")
 
         draw.text((x, y), text, font=font, fill=fill_color)
-        print(f"已绘制: '{text}' at ({x}, {y})")
+        # print(f"已绘制: '{text}' at ({x}, {y})")
 
     # 【新增】对文字图层做高斯模糊（只模糊文字，背景不受影响）
     if blur_radius and blur_radius > 0:
         text_layer = text_layer.filter(ImageFilter.GaussianBlur(radius=blur_radius))
-        print(f"已对文字图层应用高斯模糊: radius={blur_radius}")
+        # print(f"已对文字图层应用高斯模糊: radius={blur_radius}")
 
     result = Image.alpha_composite(base, text_layer)
 
@@ -122,11 +124,11 @@ def add_texts_to_image(input_path, output_path, texts_list, config=None):
         background = Image.new("RGB", result.size, (255, 255, 255))
         background.paste(result, mask=result.split()[3])
         background.save(output_path)
-        print(f"注意: {ext} 不支持透明，已合成到白色背景保存。")
+        # print(f"注意: {ext} 不支持透明，已合成到白色背景保存。")
     else:
         result.save(output_path)
 
-    print(f"处理完成，已保存至: {output_path}")
+    # print(f"处理完成，已保存至: {output_path}")
 
 
 def batch_add_texts_to_image(input_dir, output_dir, texts_list, config=None):
@@ -175,7 +177,7 @@ def random_time_near(base_time_str, hours_range=2, fmt="%Y-%m-%d %H:%M:%S"):
 def gen_time_text():
     random_time = generate_random_time_str(
         start_date_str="2026-08-12",
-        end_date_str="2026-08-31",
+        end_date_str="2026-08-25",
         start_hour=9,
         end_hour=17
     )
@@ -185,7 +187,7 @@ def gen_time_text():
 
 # ================= 测试调用示例 =================
 if __name__ == "__main__":
-    input_path = "/Volumes/西数4T外置/百度网盘默认下载/37张图片/8月"
+    input_path = "/Volumes/西数4T外置/百度网盘默认下载/37张图片/8月10日——8月25日"
 
     texts_list = [
         gen_time_text

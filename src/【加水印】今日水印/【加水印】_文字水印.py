@@ -2,6 +2,7 @@ from PIL import Image, ImageDraw, ImageFont, ImageColor, ImageFilter
 import os
 import random
 from datetime import datetime, timedelta
+from tools.generate_random_time_str import generate_random_time_str
 
 
 def _parse_color(color, opacity):
@@ -166,27 +167,37 @@ def random_time_near(base_time_str, hours_range=2, fmt="%Y-%m-%d %H:%M:%S"):
 
 
 
+# def gen_time_text():
+#     BASE_TIME = "2026.09.23 13:06"
+#     time_str = random_time_near(BASE_TIME, hours_range=2, fmt="%Y.%m.%d %H:%M")
+#     return f"{time_str}"
+
 def gen_time_text():
-    BASE_TIME = "2026.09.23 13:06"
-    time_str = random_time_near(BASE_TIME, hours_range=2, fmt="%Y.%m.%d %H:%M")
-    return f"{time_str}"
+    random_time = generate_random_time_str(
+        start_date_str="2026-08-12",
+        end_date_str="2026-08-31",
+        start_hour=9,
+        end_hour=17
+    )
+    return random_time
+
 
 
 # ================= 测试调用示例 =================
 if __name__ == "__main__":
-    input_path = "/Users/teacher/Downloads/Canvas_20261028_14时30分54秒/001_output_图片覆盖"
+    input_path = "/Volumes/西数4T外置/百度网盘默认下载/37张图片/8月"
 
     texts_list = [
         gen_time_text
     ]
 
     config = {
-        "font_size": 42+1, # 会比ps字体小1-2个像素
+        "font_size": 37+1, # 会比ps字体小1-2个像素
         "font_path": "/Users/teacher/Library/Fonts/微软雅黑.ttf",
-        "color": "#ffffff",
+        "color": "#000000",
         "opacity": 255,
-        "margin_left": 290,
-        "margin_bottom": 300,
+        "margin_left": 260,
+        "margin_bottom": 658,
         "line_spacing": 6,
         "blur_radius": 0,      # 【新增】高斯模糊半径：0=不模糊，1~3=轻微柔化，5+=明显雾化
     }

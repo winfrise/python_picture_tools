@@ -65,9 +65,9 @@ def adjust_levels(
 
 if __name__ == "__main__":
     # 你可以传入一个图片的路径，也可以传入一个文件夹的路径
-    input_path = "/Volumes/西数4T外置/百度网盘默认下载/001/图片"
-    white_point = 170 # 默认值:  255
-    black_point = 30 # 默认值: 0
+    input_path = "/Users/teacher/Downloads/未命名文件夹/图片"
+    white_point = 220 # 默认值:  255
+    black_point = 35 # 默认值: 0
     gamma = 1.0 # 默认值: 1.0
 
     if os.path.isfile(input_path):

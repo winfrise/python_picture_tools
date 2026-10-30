@@ -71,8 +71,8 @@ if __name__ == "__main__":
 
 
 
-    image_path = "/Volumes/西数4T外置/百度网盘默认下载/001/图片_调色阶"
-    custom_overlay_image = "/Volumes/西数4T外置/百度网盘默认下载/001/mask.png"
+    image_path = "/Users/teacher/Downloads/未命名文件夹/图片_调色阶"
+    custom_overlay_image = "/Users/teacher/Downloads/未命名文件夹/mask.png"
 
     overlay_image_path = custom_overlay_image
 

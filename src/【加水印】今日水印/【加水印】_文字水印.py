@@ -199,7 +199,7 @@ if __name__ == "__main__":
         "margin_left": 260,
         "margin_bottom": 658,
         "line_spacing": 6,
-        "blur_radius": 0,      # 【新增】高斯模糊半径：0=不模糊，1~3=轻微柔化，5+=明显雾化
+        "blur_radius": 0.8,      # 【新增】高斯模糊半径：0=不模糊，1~3=轻微柔化，5+=明显雾化
     }
 
     if os.path.isfile(input_path):

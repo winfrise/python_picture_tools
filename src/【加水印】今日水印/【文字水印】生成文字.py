@@ -1,7 +1,7 @@
 import os
 import re
 import uuid
-from PIL import Image, ImageDraw, ImageFont
+from PIL import Image, ImageDraw, ImageFont, ImageFilter
 
 
 def generate_text_image(text, output_dir="./output", config=None):
@@ -10,6 +10,7 @@ def generate_text_image(text, output_dir="./output", config=None):
     - width_ratio:  文字最终宽度 = 原始文字宽度 × width_ratio
     - height_ratio: 文字最终高度 = 原始文字高度 × height_ratio
     两者独立，通过对文字位图做非等比拉伸实现（可实现"只变高不变宽"）。
+    - blur_radius:  文字模糊半径（高斯模糊），0 表示不模糊
     """
     if config is None:
         config = {}
@@ -21,11 +22,11 @@ def generate_text_image(text, output_dir="./output", config=None):
     bg_color     = config.get("bg_color", "white")
     width_ratio  = config.get("width_ratio", 1.0)
     height_ratio = config.get("height_ratio", 1.0)
-
+    blur_radius  = config.get("blur_radius", 0)      # 新增：模糊半径
 
     if callable(text):
         text = text()
-    
+
     # 确保最终拿到的是字符串
     if not isinstance(text, str):
         text = str(text)
@@ -55,6 +56,10 @@ def generate_text_image(text, output_dir="./output", config=None):
     target_h = max(1, int(round(bh * height_ratio)))
     text_img = text_img.resize((target_w, target_h), Image.LANCZOS)
 
+    # 4.1 对文字做模糊处理（在拉伸之后做，模糊效果才会跟随缩放一致）
+    if blur_radius and blur_radius > 0:
+        text_img = text_img.filter(ImageFilter.GaussianBlur(radius=blur_radius))
+
     # 5. 画布 = 拉伸后的文字尺寸 + padding，并把文字居中贴上
     final_w = target_w + padding * 2
     final_h = target_h + padding * 2
@@ -66,7 +71,8 @@ def generate_text_image(text, output_dir="./output", config=None):
     os.makedirs(output_dir, exist_ok=True)
     save_path = os.path.join(output_dir, f"{safe_text}.png")
     canvas.save(save_path)
-    print(f"图片已生成: {save_path}  (文字 {bw}x{bh} -> {target_w}x{target_h})")
+    print(f"图片已生成: {save_path}  "
+          f"(文字 {bw}x{bh} -> {target_w}x{target_h}, blur={blur_radius})")
     return save_path
 
 
@@ -78,7 +84,7 @@ if __name__ == "__main__":
         "text_color": "#333333",
         "bg_color": (255, 255, 255, 0),
         "width_ratio": 1.0,
-        "height_ratio": 1.5,
-        "fit_mode": "none",   # 关键：文字保持原大小，画布高 = 文字高 × 150%
+        "height_ratio": 1.2,
+        "blur_radius": 0.8,        # 新增：模糊半径，0 表示不模糊
     }
     generate_text_image("测试文字缩放", output_dir="./output", config=test_config)

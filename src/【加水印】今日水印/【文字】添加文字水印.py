@@ -176,8 +176,8 @@ def random_time_near(base_time_str, hours_range=2, fmt="%Y-%m-%d %H:%M:%S"):
 
 def gen_time_text():
     random_time = generate_random_time_str(
-        start_date_str="2026-08-05",
-        end_date_str="2026-08-30",
+        start_date_str="2026-05-05",
+        end_date_str="2026-06-30",
         start_hour=9,
         end_hour=17
     )

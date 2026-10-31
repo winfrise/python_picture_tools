@@ -7,13 +7,11 @@ from plugins.get_font_path import get_font_path
 from tools.generate_random_time_str import generate_random_time_str
 
 
-
-# ============ 新增：文本分段 + 高度归一化 ============
+# ============ 文本分段 + 高度归一化 ============
 def split_text_by_script(text):
     """
     把文本切分成连续片段，每段标记类型：'digit' 或 'other'。
-    例如 "8月12日 09:30" -> [('8','digit'), ('月','other'), ('12','digit'), ('日 09','other'), ...]
-    更准确地说，按"字符是否为 ASCII 数字"聚合连续同类字符。
+    按"字符是否为 ASCII 数字"聚合连续同类字符。
     """
     if not text:
         return []
@@ -42,88 +40,96 @@ def measure_pixel_height(text, font):
 
 def build_segment_fonts(text, font_path, base_size):
     """
-    为每段文字返回 (segment_text, type, font) 列表。
-    - 'other' 段用 base_size。
-    - 'digit' 段用 base_size 渲染后，若其像素高度低于同字号下中文的像素高度，
-      则按比例放大字号，使像素高度相等。
+    以「数字在 base_size 下的像素高度」为基准，
+    中文按比例缩放字号，使像素高度与数字一致。
+    返回 (segments, base_font, target_h)
     """
-    # 先测一次同字号下"中文/other"字符的像素高度作为基准
-    try:
-        base_font = ImageFont.truetype(font_path, base_size) if font_path and os.path.exists(font_path) \
-            else ImageFont.load_default()
-    except Exception:
-        base_font = ImageFont.load_default()
+    def load_font(size):
+        try:
+            if font_path and os.path.exists(font_path):
+                return ImageFont.truetype(font_path, size)
+        except Exception:
+            pass
+        return ImageFont.load_default()
 
-    # 用一个非数字、非空白的字符来估计"中文高度"；若文本里没有，就用全角字符
-    sample_chars = [c for c in text if not c.isdigit() and not c.isspace()]
-    sample_other = sample_chars[0] if sample_chars else "国"
-    target_h = measure_pixel_height(sample_other, base_font)
+    base_font = load_font(base_size)
 
-    # 测一个数字字符在 base_size 下的高度
-    sample_digit = next((c for c in text if c.isdigit()), "0")
-    digit_h_base = measure_pixel_height(sample_digit, base_font)
+    # 找数字基准
+    sample_digit = next((c for c in text if c.isdigit()), None)
+    if sample_digit is None:
+        return [(text, 'other', base_font)], base_font, 0
 
-    if digit_h_base <= 0 or target_h <= 0:
-        return [(t, typ, base_font) for t, typ in split_text_by_script(text)]
+    target_h = measure_pixel_height(sample_digit, base_font)
 
-    # 数字字号：按高度比例放大
-    if digit_h_base < target_h:
-        digit_size = max(1, int(round(base_size * target_h / digit_h_base)))
-    else:
-        digit_size = base_size  # 数字本来就更高就不缩小（避免视觉变细），按需求也可改成等比缩小
+    # 找中文样本
+    sample_chars = [c for c in text if not c.isascii() and not c.isspace()]
+    if not sample_chars:
+        return [(t, typ, base_font) for t, typ in split_text_by_script(text)], base_font, target_h
 
-    try:
-        digit_font = ImageFont.truetype(font_path, digit_size) if font_path and os.path.exists(font_path) \
-            else ImageFont.load_default()
-    except Exception:
-        digit_font = base_font
+    sample_cn = sample_chars[0]
+    cn_h_base = measure_pixel_height(sample_cn, base_font)
 
-    # 二次校正（字体量化字号后高度可能不精确，微调 1~2 号）
+    if target_h <= 0 or cn_h_base <= 0:
+        return [(t, typ, base_font) for t, typ in split_text_by_script(text)], base_font, target_h
+
+    # 按高度比例缩放中文字号
+    cn_size = max(1, int(round(base_size * target_h / cn_h_base)))
+    cn_font = load_font(cn_size)
+
+    # 二次微调
     for _ in range(4):
-        h = measure_pixel_height(sample_digit, digit_font)
+        h = measure_pixel_height(sample_cn, cn_font)
         if h == target_h:
             break
-        if h < target_h:
-            digit_size += 1
-        else:
-            digit_size -= 1
-        digit_size = max(1, digit_size)
-        try:
-            digit_font = ImageFont.truetype(font_path, digit_size) if font_path and os.path.exists(font_path) \
-                else ImageFont.load_default()
-        except Exception:
-            break
+        cn_size += 1 if h < target_h else -1
+        cn_size = max(1, cn_size)
+        cn_font = load_font(cn_size)
 
+    # 组装 segments
     result = []
-    for seg_text, typ in split_text_by_script(text):
-        result.append((seg_text, typ, digit_font if typ == 'digit' else base_font))
-    return result, base_font
+    for seg_text, _ in split_text_by_script(text):
+        typ = 'digit' if seg_text and seg_text[0].isdigit() else 'other'
+        result.append((seg_text, typ, base_font if typ == 'digit' else cn_font))
+    
+    return result, base_font, target_h
 
 
-def render_text_on_canvas(canvas, draw, origin_x, origin_y, segments, fill):
+def render_text_on_canvas(canvas, draw, origin_x, origin_y, segments, fill, target_h):
     """
-    逐段绘制，返回整体 bbox（相对于 canvas 坐标），便于后续裁剪/对齐。
-    基线对齐：每段都用 anchor='ls'（左基线），保证数字与中文底部对齐。
+    逐段绘制。
+    origin_y 为整体文本的“顶部对齐线”。
+    数字正常绘制，中文根据实际高度计算垂直偏移 dy，使其与数字在垂直方向完全居中对齐。
     """
     x = origin_x
-    y_baseline = origin_y
     for seg_text, typ, font in segments:
-        draw.text((x, y_baseline), seg_text, font=font, fill=fill, anchor="ls")
-        # 用该段字体测量前进宽度
-        seg_bbox = font.getbbox(seg_text, anchor="ls")
-        x += seg_bbox[2] - seg_bbox[0]
+        if not seg_text:
+            continue
+        
+        # 获取当前段在当前字体下的 bbox
+        bbox = font.getbbox(seg_text, anchor="ls")
+        
+        # 如果设定了目标高度(即数字的高度)，计算当前段的垂直偏移
+        dy = 0
+        if target_h > 0:
+            seg_h = bbox[3] - bbox[1]
+            # 核心逻辑：中文向下偏一点，让它与数字的中心线对齐
+            dy = (target_h - seg_h) / 2.0
+            
+            # 对于数字本身，不用偏移；仅对缩放后的中文/其他字符应用偏移
+            if typ == 'digit':
+                dy = 0
+                
+        # 绘制：origin_y 是顶部起点，我们需要把 anchor 换回默认(左上角)，配合 dy 控制高度
+        # 把 anchor="ls" 变成左上角定位，方便控制顶部对齐
+        draw.text((x, origin_y + dy - bbox[1]), seg_text, font=font, fill=fill, anchor="ls")
+        
+        x += bbox[2] - bbox[0]
+        
     return x
 
 
-# ============ 原有函数改造 ============
+# ============ 主函数 ============
 def generate_text_image(text, output_dir="./output", config=None):
-    """
-    生成文字透明 PNG，效果与「直接绘制到图片」完全一致：
-    - 数字与中文视觉高度对齐
-    - 光栅化参数与 add_texts_to_image 相同
-    - 模糊在带 padding 的画布上做（边界不被截断）
-    - 拉伸在模糊之前/之后均可，但必须保持笔画粗细语义一致
-    """
     if config is None:
         config = {}
 
@@ -135,7 +141,6 @@ def generate_text_image(text, output_dir="./output", config=None):
     width_ratio  = config.get("width_ratio", 1.0)
     height_ratio = config.get("height_ratio", 1.0)
     blur_radius  = config.get("blur_radius", 0)
-    # 新增可选：是否强制数字与中文等高（默认 True）
     match_digit_height = config.get("match_digit_height", True)
 
     if callable(text):
@@ -143,34 +148,30 @@ def generate_text_image(text, output_dir="./output", config=None):
     if not isinstance(text, str):
         text = str(text)
 
-    # ---------- 1. 加载字体 & 构建分段 ----------
+    # 1. 构建字体
     resolved_font_path = font_path if (font_path and os.path.exists(font_path)) else None
     if resolved_font_path is None:
         print("警告: 未找到指定字体文件，正在使用默认字体。")
 
     if match_digit_height:
-        segments, base_font = build_segment_fonts(text, resolved_font_path, font_size)
+        segments, base_font, target_h = build_segment_fonts(text, resolved_font_path, font_size)
     else:
         try:
             base_font = ImageFont.truetype(resolved_font_path, font_size) if resolved_font_path \
                 else ImageFont.load_default()
-        except Exception as e:
-            print(f"字体加载失败: {e}，使用默认字体。")
+        except Exception:
             base_font = ImageFont.load_default()
         segments = [(text, 'other', base_font)]
+        target_h = 0
 
-    # ---------- 2. 测量整体 bbox（用统一基线 anchor='ls' 测量） ----------
-    temp_img = Image.new("RGBA", (1, 1))
-    temp_draw = ImageDraw.Draw(temp_img)
-
-    # 计算整体宽度和最高/最低（各段字体不同，高度需分别看）
+    # 2. 测量整体 bbox
     total_w = 0
     top_min = 0
     bottom_max = 0
     for seg_text, typ, font in segments:
         if not seg_text:
             continue
-        b = font.getbbox(seg_text, anchor="ls")  # 左基线
+        b = font.getbbox(seg_text, anchor="ls")
         total_w += (b[2] - b[0])
         top_min = min(top_min, b[1])
         bottom_max = max(bottom_max, b[3])
@@ -180,44 +181,43 @@ def generate_text_image(text, output_dir="./output", config=None):
     if bw <= 0 or bh <= 0:
         raise ValueError("文字尺寸为 0，请检查文本内容")
 
-    # ---------- 3. 为 blur 预留足够 padding ----------
+    # 3. 画布尺寸
     blur_pad = int(max(0, blur_radius) * 6) + 2
     pad_total = padding + blur_pad
-
     canvas_w = bw + 2 * pad_total
     canvas_h = bh + 2 * pad_total
 
-    # ---------- 4. 在足够大的画布上渲染文字 ----------
+    # 4. 渲染
     canvas = Image.new("RGBA", (canvas_w, canvas_h), (0, 0, 0, 0))
     draw = ImageDraw.Draw(canvas)
 
-    # 基线 y：让整体字形落在画布竖直居中的区域
-    # 画布内容区从 pad_total 开始，内容高度 bh；top 对应 top_min
-    baseline_y = pad_total - top_min
-    # 水平起点：内容区左边界 - 第一段的左边界偏移（anchor='ls' 时 bbox[0] 通常为 0 或负）
+    # 整体文本的顶部 Y 坐标
+    top_y = pad_total - top_min
     first_b = segments[0][2].getbbox(segments[0][0], anchor="ls") if segments[0][0] else (0, 0, 0, 0)
     start_x = pad_total - first_b[0]
 
-    render_text_on_canvas(canvas, draw, start_x, baseline_y, segments, text_color)
+    # 注意这里传入 top_y (作为起点) 和 target_h 用于对齐计算
+    render_text_on_canvas(canvas, draw, start_x, top_y, segments, text_color, target_h)
 
-    # ---------- 5. blur ----------
+    # 5. 模糊
     if blur_radius and blur_radius > 0:
         canvas = canvas.filter(ImageFilter.GaussianBlur(radius=blur_radius))
 
-    # ---------- 6. 非等比拉伸 ----------
+    # 6. 拉伸
     if abs(width_ratio - 1.0) > 1e-6 or abs(height_ratio - 1.0) > 1e-6:
         new_w = max(1, int(round(canvas_w * width_ratio)))
         new_h = max(1, int(round(canvas_h * height_ratio)))
         canvas = canvas.resize((new_w, new_h), Image.LANCZOS)
 
-    # ---------- 7. 保存 ----------
+    # 7. 保存
     safe_text = re.sub(r'[\\/*?:"<>|]', "", text).strip() or uuid.uuid4().hex[:8]
     os.makedirs(output_dir, exist_ok=True)
     save_path = os.path.join(output_dir, f"{safe_text}.png")
     canvas.save(save_path)
-    print(f"图片已生成: {save_path}  "
-          f"(字形 {bw}x{bh}, 画布 {canvas.size[0]}x{canvas.size[1]}, blur={blur_radius})")
+    
+    print(f"图片已生成: {save_path}")
     return save_path
+
 
 if __name__ == "__main__":
     def gen_time_text():
@@ -240,7 +240,8 @@ if __name__ == "__main__":
         "bg_color": (255, 255, 255, 0),
         "width_ratio": 1.0,
         "height_ratio": 1.1,
-        "blur_radius": 0.7,        # 新增：模糊半径，0 表示不模糊
+        "blur_radius": 0.7,
+        "match_digit_height": True,
     }
 
     count = 10
@@ -248,8 +249,8 @@ if __name__ == "__main__":
     for i in range(count):
         print(f"\n--- 正在执行第 {i+1}/{count} 次 ---")
         generate_text_image(
-            text=text, 
-            output_dir=output_dir, 
+            text=text,
+            output_dir=output_dir,
             config=config
         )
     print("\n✅ 所有任务执行完成！")

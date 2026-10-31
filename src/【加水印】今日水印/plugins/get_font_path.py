@@ -1,3 +1,5 @@
+import os
+
 def get_font_path(font_name="苹方黑体-中粗-简.ttf"):
     """
     获取项目 assets/fonts 目录下字体的绝对路径。
@@ -14,11 +16,12 @@ def get_font_path(font_name="苹方黑体-中粗-简.ttf"):
     
     # 2. 向上回退一级到 src 目录，再进入 assets/fonts
     # 假设当前文件在 src/某文件夹/ 下，所以需要 ".."
-    font_dir = os.path.join(current_dir, "..", "assets", "fonts")
+    font_dir = os.path.join(current_dir, "../../", "assets", "fonts")
     
     # 3. 规范化路径（消除 .. 符号）并拼接文件名
     full_path = os.path.normpath(os.path.join(font_dir, font_name))
-    
+
+    print(full_path)
     # 4. 检查文件是否存在
     if os.path.exists(full_path):
         return full_path

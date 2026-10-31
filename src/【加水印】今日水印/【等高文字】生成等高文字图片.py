@@ -112,7 +112,7 @@ if __name__ == "__main__":
         "width_ratio": 1.0,
         "height_ratio": 1.1,
         "blur_radius": 0.7,
-        "match_digit_height": True,
+        "match_digit_height": True, # 是否等高
     }
 
     count = 10

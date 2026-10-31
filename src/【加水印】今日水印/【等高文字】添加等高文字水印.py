@@ -94,10 +94,9 @@ def draw_text_on_image(
     #    可视顶部 block_y 对应 bbox 顶边，而 top_min 是 bbox 相对基线的上伸量（通常 <= 0）
     first_seg_text = segments[0][0] if segments else ""
     first_b = segments[0][2].getbbox(first_seg_text, anchor="ls") if first_seg_text else (0, 0, 0, 0)
-    left_min = first_b[0]
 
-    start_x = block_x - left_min
-    top_y = block_y - top_min
+    start_x = block_x - first_b[0]
+    top_y = block_y - first_b[3]
 
     # 6. 文字层单独渲染（便于单独模糊，不糊底图）
     if blur_radius and blur_radius > 0:

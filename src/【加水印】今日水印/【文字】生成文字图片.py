@@ -1,85 +1,67 @@
 import os
 import re
 import uuid
-from PIL import Image, ImageDraw, ImageFont, ImageFilter
+from PIL import Image, ImageDraw
 
 from plugins.get_font_path import get_font_path
 from tools.generate_random_time_str import generate_random_time_str
+from scope_utils.text_render_utils import (
+    _resolve_text, _load_font, _parse_color, _measure_text,
+    _stretch_image, _blur_image,
+)
+
 
 def generate_text_image(text, output_dir="./output", config=None):
     """
-    生成文字透明 PNG，效果与「直接绘制到图片」完全一致：
-    - 光栅化参数与 add_texts_to_image 相同
-    - 模糊在带 padding 的画布上做（边界不被截断）
-    - 拉伸在模糊之前/之后均可，但必须保持笔画粗细语义一致
+    生成文字透明 PNG，效果与「直接绘制到图片」完全一致。
     """
     if config is None:
         config = {}
 
     font_path    = config.get("font_path", "arial.ttf")
     font_size    = config.get("font_size", 40)
-    padding      = config.get("padding", 20)          # 最终画布四周留白（透明）
+    padding      = config.get("padding", 20)
     text_color   = config.get("text_color", "black")
-    bg_color     = config.get("bg_color", (255, 255, 255, 0))
+    opacity      = config.get("opacity", None)   # 新增：统一由 _parse_color 处理
     width_ratio  = config.get("width_ratio", 1.0)
     height_ratio = config.get("height_ratio", 1.0)
     blur_radius  = config.get("blur_radius", 0)
 
-    if callable(text):
-        text = text()
-    if not isinstance(text, str):
-        text = str(text)
+    text = _resolve_text(text)
 
-    # ---------- 1. 加载字体（与脚本1 完全一致） ----------
-    try:
-        if font_path and os.path.exists(font_path):
-            font = ImageFont.truetype(font_path, font_size)
-        else:
-            font = ImageFont.load_default()
-            print("警告: 未找到指定字体文件，正在使用默认字体。")
-    except Exception as e:
-        print(f"字体加载失败: {e}，使用默认字体。")
-        font = ImageFont.load_default()
+    # ---------- 1. 加载字体 ----------
+    font = _load_font(font_path, font_size)
 
-    # ---------- 2. 测量 bbox ----------
-    temp_img = Image.new("RGBA", (1, 1))
-    temp_draw = ImageDraw.Draw(temp_img)
-    bbox = temp_draw.textbbox((0, 0), text, font=font)
-    bw = bbox[2] - bbox[0]
-    bh = bbox[3] - bbox[1]
-    if bw <= 0 or bh <= 0:
+    # ---------- 2. 颜色解析（统一走 _parse_color） ----------
+    fill_color = _parse_color(text_color, opacity)
+
+    # ---------- 3. 测量 bbox ----------
+    bbox, bw, bh = _measure_text(text, font)
+    if bbox is None:
         raise ValueError("文字尺寸为 0,请检查文本内容")
 
-    # ---------- 3. 关键：为 blur 预留足够 padding ----------
+    # ---------- 4. 为 blur 预留 padding ----------
     # 高斯模糊半径 r 需要 ≥ 4r 的透明余量，否则边界 alpha 会被截断削细
-    # 再叠加用户 padding，保证"直接绘制"时大画布四周的透明余量
-    blur_pad = int(max(0, blur_radius) * 6) + 2      # 模糊保护圈
-    pad_total = padding + blur_pad                   # 最终画布的外边距
+    blur_pad = int(max(0, blur_radius) * 6) + 2
+    pad_total = padding + blur_pad
 
     canvas_w = bw + 2 * pad_total
     canvas_h = bh + 2 * pad_total
 
-    # ---------- 4. 在足够大的画布上渲染文字（只光栅化一次） ----------
+    # ---------- 5. 在足够大的画布上渲染文字 ----------
     canvas = Image.new("RGBA", (canvas_w, canvas_h), (0, 0, 0, 0))
-    draw = ImageDraw.Draw(canvas)
-    draw.text(
+    ImageDraw.Draw(canvas).text(
         (pad_total - bbox[0], pad_total - bbox[1]),
-        text, font=font, fill=text_color
+        text, font=font, fill=fill_color
     )
 
-    # ---------- 5. 在带 padding 的大画布上 blur（边界不截断） ----------
-    if blur_radius and blur_radius > 0:
-        canvas = canvas.filter(ImageFilter.GaussianBlur(radius=blur_radius))
+    # ---------- 6. 大画布 blur（边界不截断） ----------
+    canvas = _blur_image(canvas, blur_radius)
 
-    # ---------- 6. 非等比拉伸（此时整张画布一起拉伸，与脚本1 行为一致） ----------
-    # 脚本1 是先 resize 文字小图再 paste；这里整张画布 resize 等价于
-    # "文字 + 其周围透明余量一起等比/非等比缩放"，字形像素映射与脚本1 相同
-    if abs(width_ratio - 1.0) > 1e-6 or abs(height_ratio - 1.0) > 1e-6:
-        new_w = max(1, int(round(canvas_w * width_ratio)))
-        new_h = max(1, int(round(canvas_h * height_ratio)))
-        canvas = canvas.resize((new_w, new_h), Image.LANCZOS)
+    # ---------- 7. 整张画布拉伸（与旧版行为一致） ----------
+    canvas = _stretch_image(canvas, width_ratio, height_ratio)
 
-    # ---------- 7. 保存 ----------
+    # ---------- 8. 保存 ----------
     safe_text = re.sub(r'[\\/*?:"<>|]', "", text).strip() or uuid.uuid4().hex[:8]
     os.makedirs(output_dir, exist_ok=True)
     save_path = os.path.join(output_dir, f"{safe_text}.png")
@@ -88,37 +70,32 @@ def generate_text_image(text, output_dir="./output", config=None):
           f"(字形 {bw}x{bh}, 画布 {canvas.size[0]}x{canvas.size[1]}, blur={blur_radius})")
     return save_path
 
+
 if __name__ == "__main__":
     def gen_time_text():
-        random_time = generate_random_time_str(
+        return generate_random_time_str(
             start_date_str="2026-08-12",
             end_date_str="2026-08-25",
             start_hour=9,
             end_hour=17
         )
-        return random_time
 
     text = gen_time_text
-    output_dir = "/Volumes/西数4T外置/百度网盘默认下载/37张图片/8月10日——8月25日_完成/01"
+    output_dir = "/Volumes/西数4T外置/百度网盘默认下载/test/文字图片"
 
     config = {
         "font_path": get_font_path("苹方黑体-中粗-简.ttf"),
         "font_size": 36,
         "padding": 30,
         "text_color": "#000000",
-        "bg_color": (255, 255, 255, 0),
+        "opacity": None,          # 保持不透明；如需半透明可填 0.8 / 200
         "width_ratio": 1.0,
         "height_ratio": 1.1,
-        "blur_radius": 0.7,        # 新增：模糊半径，0 表示不模糊
+        "blur_radius": 0.7,
     }
 
     count = 10
-
     for i in range(count):
         print(f"\n--- 正在执行第 {i+1}/{count} 次 ---")
-        generate_text_image(
-            text=text, 
-            output_dir=output_dir, 
-            config=config
-        )
+        generate_text_image(text=text, output_dir=output_dir, config=config)
     print("\n✅ 所有任务执行完成！")

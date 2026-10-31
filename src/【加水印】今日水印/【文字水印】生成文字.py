@@ -130,13 +130,13 @@ if __name__ == "__main__":
 
     config = {
         "font_path": get_font_path("苹方黑体-中粗-简.ttf"),
-        "font_size": 37,
+        "font_size": 36,
         "padding": 30,
         "text_color": "#000000",
         "bg_color": (255, 255, 255, 0),
         "width_ratio": 1.0,
         "height_ratio": 1.1,
-        "blur_radius": 0.8,        # 新增：模糊半径，0 表示不模糊
+        "blur_radius": 0.7,        # 新增：模糊半径，0 表示不模糊
     }
 
     count = 10

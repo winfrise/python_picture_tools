@@ -176,8 +176,8 @@ def random_time_near(base_time_str, hours_range=2, fmt="%Y-%m-%d %H:%M:%S"):
 
 def gen_time_text():
     random_time = generate_random_time_str(
-        start_date_str="2026-08-12",
-        end_date_str="2026-08-25",
+        start_date_str="2026-08-05",
+        end_date_str="2026-08-30",
         start_hour=9,
         end_hour=17
     )
@@ -186,7 +186,7 @@ def gen_time_text():
 
 # ================= 测试调用示例 =================
 if __name__ == "__main__":
-    input_path = "/Volumes/西数4T外置/百度网盘默认下载/37张图片/8月10日——8月25日"
+    input_path = "/Volumes/西数4T外置/百度网盘默认下载/37张图片/8月"
 
     text = gen_time_text
 
@@ -194,11 +194,11 @@ if __name__ == "__main__":
     print(font_path)
     config = {
         "font_path": font_path,
-        "font_size": 35,  # 会比ps字体小1-2个像素
+        "font_size": 36,  # 会比ps字体小1-2个像素
         "color": "#000000",
         "opacity": 255,
-        "margin_left": 260,
-        "margin_bottom": 658,
+        "margin_left": 256,
+        "margin_bottom": 656,
         "blur_radius": 0.8,
         "width_ratio": 1.0,    # 【新增】1.0=原宽，1.2=拉宽20%，0.8=压缩到80%
         "height_ratio": 1.1,   # 【新增】1.0=原高，1.2=拉高20%，0.8=压缩到80%

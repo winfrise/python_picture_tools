@@ -74,14 +74,14 @@ def generate_text_image(text, output_dir="./output", config=None):
 if __name__ == "__main__":
     def gen_time_text():
         return generate_random_time_str(
-            start_date_str="2026-08-12",
-            end_date_str="2026-08-25",
+            start_date_str="2026-05-05",
+            end_date_str="2026-06-30",
             start_hour=9,
             end_hour=17
         )
 
     text = gen_time_text
-    output_dir = "/Volumes/西数4T外置/百度网盘默认下载/test/文字图片"
+    output_dir = "/Volumes/西数4T外置/百度网盘默认下载/37张图片/文字图片"
 
     config = {
         "font_path": get_font_path("苹方黑体-中粗-简.ttf"),

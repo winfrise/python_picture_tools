@@ -68,8 +68,8 @@ def convert_image(input_file, output_file = None, target_format = 'jpeg', qualit
     
 if __name__ == "__main__":
     # 设置你的输入和输出文件夹路径
-    INPUT_PATH = "/Users/teacher/Downloads/Canvas_20261028_19时44分56秒/001"       # 原图所在的文件夹
-    TARGET_FORMAT = 'jpg'
+    INPUT_PATH = "/Users/teacher/Downloads/Canvas_20261104_13时01分43秒/001"       # 原图所在的文件夹
+    TARGET_FORMAT = 'png'
     QUALITY = 100
     
     if os.path.isfile(INPUT_PATH):

@@ -49,8 +49,8 @@ def remove_gray_watermark(
 
 if __name__ == "__main__":
 
-    INPUT_PATH = "/Users/teacher/Desktop/百度网盘下载/劳动合同书(8)__提取的图片"
-    WATERMARK_AREA_IMG = "/Users/teacher/Desktop/百度网盘下载/001/mask.png"
+    INPUT_PATH = "/Volumes/西数4T外置/百度网盘默认下载/1.「在这里→」/图片"
+    WATERMARK_AREA_IMG = "/Volumes/西数4T外置/百度网盘默认下载/1.「在这里→」/mask.png"
     # WATERMARK_AREA_IMG = None
     IS_SMART_FILL = False  # 是否开启智能填充，使用时需修改
 

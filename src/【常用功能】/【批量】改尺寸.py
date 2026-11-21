@@ -101,7 +101,7 @@ def resize_image(input_path, output_path, size_func=get_target_size):
     # 4. 保存
     Path(output_path).parent.mkdir(parents=True, exist_ok=True)
 
-    img.save(output_path, quality=95, subsampling=0)
+    img.save(output_path, quality=100, subsampling=0)
     print(f"完成: {output_path} | 原 {orig_w}x{orig_h} "
           f"-> 缩放 {target_w}x{target_h} -> 最终 {img.size[0]}x{img.size[1]}")
     return img.size

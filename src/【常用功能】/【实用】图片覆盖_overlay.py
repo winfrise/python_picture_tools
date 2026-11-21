@@ -55,7 +55,7 @@ def overlay_images(
         # 如果保存为 JPG，需要去掉 Alpha 通道
         if save_path.lower().endswith(('.jpg', '.jpeg')):
             image = image.convert("RGB")
-        image.save(save_path)
+        image.save(save_path, quality=100, subsampling=0)
         print(f"图片合并完成，已保存至: {save_path}")
         
     return image

@@ -1,11 +1,10 @@
 # draw_text_on_image_steps.py
 """
-多文本分步式图片水印（支持文件夹批量处理、保持目录层级、跳过隐藏文件）：
+多文本分步式图片水印（支持文件夹批量处理、保持原图目录层级、自定义临时目录、保留 meta.json）：
 """
 import os
 import json
 import shutil
-import uuid
 import inspect
 from pathlib import Path
 
@@ -24,7 +23,6 @@ from scope_utils.text_equal_height_render_utils import (
 # ============================================================
 # 配置合并
 # ============================================================
-
 _OVERRIDABLE_KEYS = (
     "font_path", "font_size", "text_color", "match_digit_height",
     "blur_radius", "offset_left", "offset_bottom",
@@ -48,7 +46,6 @@ def _merge_config(common_config, item):
 # ============================================================
 # 工具函数：智能解析文本
 # ============================================================
-
 def _resolve_text(text_or_callable, image_path):
     """解析文本内容，支持传入函数并自动判断是否传入 image_path。"""
     if not callable(text_or_callable):
@@ -72,9 +69,8 @@ def _resolve_text(text_or_callable, image_path):
 
 
 # ============================================================
-# 阶段一：text → 文字图片（每个文本一张），存临时文件夹
+# 阶段一：text → 文字图片，存临时文件夹
 # ============================================================
-
 def _render_one_text_image(text, cfg, work_dir, index):
     font_path          = cfg["font_path"]
     font_size          = cfg["font_size"]
@@ -111,6 +107,7 @@ def _render_one_text_image(text, cfg, work_dir, index):
         segments, text_color, target_h,
     )
 
+    # 自动裁掉多余透明边距
     bbox = text_img.getbbox()
     if bbox:
         text_img = text_img.crop(bbox)
@@ -154,6 +151,7 @@ def generate_text_images(image_path, common_config, text_items, work_dir):
     if not metas:
         raise ValueError("没有任何有效文本项可渲染")
 
+    # 【核心】生成并保留 meta.json
     with open(os.path.join(work_dir, "meta.json"), "w", encoding="utf-8") as f:
         json.dump(metas, f, ensure_ascii=False, indent=2)
 
@@ -163,7 +161,6 @@ def generate_text_images(image_path, common_config, text_items, work_dir):
 # ============================================================
 # 阶段二：把每张文字图贴到 image_path 对应位置
 # ============================================================
-
 def _paste_one_text(base, meta):
     text_layer = Image.open(meta["text_image"]).convert("RGBA")
     bw, bh = meta["width"], meta["height"]
@@ -216,43 +213,44 @@ def compose_text_images(image_path, metas, config, output_path):
 # ============================================================
 # 单个文件处理逻辑
 # ============================================================
-
-def _process_single_image(input_path, output_path, common_config, text_items, work_root, keep_work_dir):
-    """处理单张图片的完整流程"""
-    img_name = Path(input_path).stem
-    work_dir = os.path.join(work_root, f"{img_name}_{uuid.uuid4().hex[:6]}")
-
+def _process_single_image(input_path, output_path, common_config, text_items, temp_image_dir, keep_work_dir):
+    """
+    处理单张图片。
+    temp_image_dir: 当前原图对应的专属临时文件夹
+    """
+    os.makedirs(temp_image_dir, exist_ok=True)
+    
     try:
-        metas = generate_text_images(input_path, common_config, text_items, work_dir)
+        # 生成文字图（存入 temp_image_dir，包含 meta.json）
+        metas = generate_text_images(input_path, common_config, text_items, temp_image_dir)
+        # 合成到输出
         compose_text_images(input_path, metas, {}, output_path)
     finally:
         if not keep_work_dir:
+            # 处理完直接删掉当前图片专属的临时文件夹
             try:
-                shutil.rmtree(work_dir)
+                shutil.rmtree(temp_image_dir)
             except Exception:
                 pass
         else:
-            print(f"  └─ [keep] 临时文件夹保留: {work_dir}")
+            print(f"  └─ [keep] 临时文件夹保留: {temp_image_dir}")
 
 
 # ============================================================
 # 主流程（支持单文件 / 文件夹批量）
 # ============================================================
-
 def draw_texts_on_image(
     image_path,
     text_items,
+    work_root,           
     common_config=None,
     output_dir=None,
-    work_root=None,
     keep_work_dir=True,
 ):
     if common_config is None:
         common_config = {}
 
-    if work_root is None:
-        work_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "watermarks")
-    
+    work_root = os.path.abspath(work_root)
     os.makedirs(work_root, exist_ok=True)
     image_path = os.path.abspath(image_path)
     
@@ -271,8 +269,11 @@ def draw_texts_on_image(
         output_name = f"{base_name}_{joined}{ext}" if joined else f"{base_name}_out{ext}"
         output_path = os.path.join(output_dir, output_name)
         
+        # 单文件时，直接在 work_root 下建一个同名文件夹存放临时图片和 json
+        temp_image_dir = os.path.join(work_root, base_name)
+        
         print(f"[单文件] 处理: {image_path}")
-        _process_single_image(image_path, output_path, common_config, text_items, work_root, keep_work_dir)
+        _process_single_image(image_path, output_path, common_config, text_items, temp_image_dir, keep_work_dir)
         print(f"[完成] 保存至: {output_path}\n")
         return output_path
 
@@ -281,7 +282,6 @@ def draw_texts_on_image(
         if output_dir is None:
             raise ValueError("批量处理文件夹时，必须指定 output_dir 参数")
         
-        image_path = os.path.abspath(image_path)
         output_dir = os.path.abspath(output_dir)
         os.makedirs(output_dir, exist_ok=True)
 
@@ -291,12 +291,8 @@ def draw_texts_on_image(
         
         tasks = []
         for p in Path(image_path).rglob("*"):
-            # 【核心修改】跳过隐藏文件及隐藏在文件夹里的文件
-            # 1. 检查当前文件名是否以 '.' 开头
-            # 2. 检查相对路径中的任何一级目录是否以 '.' 开头（防止进入隐藏目录）
             if any(part.startswith(".") for part in p.relative_to(image_path).parts):
                 continue
-            
             if p.is_file() and p.suffix.lower() in exts:
                 tasks.append(p)
                 
@@ -309,12 +305,18 @@ def draw_texts_on_image(
         results = []
         for p in tasks:
             rel_path = p.relative_to(image_path)
+            
+            # 1. 输出目录：保持原有层级
             out_p = Path(output_dir) / rel_path
             os.makedirs(out_p.parent, exist_ok=True)
 
+            # 2. 临时目录：同样保持原目录层级。直接用原图文件名（不带后缀）作为文件夹名，例如：/work_root/2026/08/11/
+            temp_image_dir = Path(work_root) / rel_path.parent / rel_path.stem
+            temp_image_dir = str(temp_image_dir)
+
             print(f"--> 正在处理: {rel_path}")
             try:
-                _process_single_image(str(p), str(out_p), common_config, text_items, work_root, keep_work_dir)
+                _process_single_image(str(p), str(out_p), common_config, text_items, temp_image_dir, keep_work_dir)
                 print(f"  └─ 保存至: {out_p}")
                 results.append(str(out_p))
             except Exception as e:
@@ -334,7 +336,7 @@ def draw_texts_on_image(
 # ============================================================
 # 单文本兼容包装
 # ============================================================
-def draw_text_on_image(image_path, text, output_dir=None, config=None, **kwargs):
+def draw_text_on_image(image_path, text, work_root, output_dir=None, config=None, **kwargs):
     config = config or {}
     common = {k: v for k, v in config.items() if k not in ("offset_left", "offset_bottom", "output_path", "overwrite")}
     item = {
@@ -345,6 +347,7 @@ def draw_text_on_image(image_path, text, output_dir=None, config=None, **kwargs)
     return draw_texts_on_image(
         image_path=image_path,
         text_items=[item],
+        work_root=work_root,
         common_config=common,
         output_dir=output_dir,
         **kwargs,
@@ -368,6 +371,7 @@ if __name__ == "__main__":
 
     input_dir = "/Volumes/西数4T外置/百度网盘默认下载/test"
     output_dir = "/Volumes/西数4T外置/百度网盘默认下载/test_output"
+    custom_work_root = "/Volumes/西数4T外置/百度网盘默认下载/temp_watermarks"
 
     common_config = {
         "font_path": get_font_path("苹方黑体-中粗-简.ttf"),
@@ -382,13 +386,14 @@ if __name__ == "__main__":
             "text": extract_date_from_path,
             "offset_left": 20,
             "offset_bottom": 20,
-        } 
+        }
     ]
 
     draw_texts_on_image(
         image_path=input_dir,
         text_items=text_items,
+        work_root=custom_work_root,
         common_config=common_config,
         output_dir=output_dir,
-        keep_work_dir=False, 
+        keep_work_dir=True, 
     )

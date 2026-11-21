@@ -3,6 +3,7 @@ from typing import List, Callable, Union
 import sys, os
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 import re
+from pathlib import Path
 from utils import batch_process_file_with_callback
 
 def overlay_images(
@@ -44,6 +45,13 @@ def overlay_images(
         
     # 4. 保存或返回结果
     if save_path:
+        # 1. 将路径转为 Path 对象并获取父目录
+        path_obj = Path(save_path)
+        parent_dir = path_obj.parent
+        
+        # 2. 创建目录，exist_ok=True 表示如果目录已存在则不报错
+        parent_dir.mkdir(parents=True, exist_ok=True)
+
         # 如果保存为 JPG，需要去掉 Alpha 通道
         if save_path.lower().endswith(('.jpg', '.jpeg')):
             image = image.convert("RGB")
@@ -59,22 +67,28 @@ if __name__ == "__main__":
         width, height = image.size
         # 1. 从完整路径中提取纯文件名，例如 'page15_img1.jpeg'
         filename = os.path.basename(image_path)
-        page_num = int(m.group(1)) if (m := re.search(r'page(\d+)', filename)) else None
 
-        if page_num % 2 == 0: # 偶数页
-            return "/Volumes/西数4T外置/百度网盘默认下载/试卷/001/mask2.png"
-        else: # 奇数页
-            return "/Volumes/西数4T外置/百度网盘默认下载/试卷/001/mask1.png"
-        # if (width > height):
-        #     return  "/Users/teacher/Desktop/百度网盘下载/50+10元/mask_h.png"
+        # 奇偶页
+        if False:
+            page_num = int(m.group(1)) if (m := re.search(r'page(\d+)', filename)) else None
+            if page_num % 2 == 0: # 偶数页
+                return "/Volumes/西数4T外置/百度网盘默认下载/试卷/001/mask2.png"
+            else: # 奇数页
+                return "/Volumes/西数4T外置/百度网盘默认下载/试卷/001/mask1.png"
+        # 横版/竖版  
+        if True:
+            if (width > height): # 横版
+                return  "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/水印_横版.png"
+            else: # 竖版
+                return  "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/水印_竖版.png"
 
 
 
-
-    image_path = "/Volumes/西数4T外置/百度网盘默认下载/6个文件/第六季：非连续性文本阅读__提取的图片"
+    image_path = "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/001"
     custom_overlay_image = "/Users/teacher/Desktop/mask.png"
 
-    overlay_image_path = custom_overlay_image
+    # overlay_image_path = custom_overlay_image
+    overlay_image_path = custom_overlay_image_func
 
     if os.path.isfile(image_path):
         bg_image_path = image_path

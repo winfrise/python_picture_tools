@@ -71,9 +71,9 @@ def adjust_levels(
 
 if __name__ == "__main__":
     # 你可以传入一个图片的路径，也可以传入一个文件夹的路径
-    input_path = "/Users/teacher/Desktop/未命名文件夹 3/26-17文科历年真题（LD学生版）A3__提取的图片"
-    white_point = 207   # 默认值: 255
-    black_point = 0     # 默认值: 0
+    input_path = "/Volumes/西数4T外置/百度网盘默认下载/第二+三阶段 数学卷/第二+三阶段 数学卷__合成的图片_DPI_300_调色阶"
+    white_point = 255   # 默认值: 255
+    black_point = 165     # 默认值: 0
     gamma = 1.0         # 默认值: 1.0
     to_grayscale = True # 新增：True 先转灰度，False 保留彩色
 

@@ -120,23 +120,26 @@ def gen_time_text():
         end_hour=17
     )
 
+def get_text():
+    return "北京市海淀区颐和园路5号 北京大学"
+
 
 # ================= 测试调用示例 =================
 if __name__ == "__main__":
-    input_path = "/Volumes/西数4T外置/百度网盘默认下载/37张图片/8月"
+    input_path = "/Users/teacher/Desktop/测试/001"
 
-    text = gen_time_text
+    text = get_text
     font_path = get_font_path("苹方黑体-中黑-简.ttf")
-    print(font_path)
+    # font_path = get_font_path("苹方黑体-准-简.ttf")
 
     config = {
         "font_path": font_path,
-        "font_size": 36,
-        "color": "#000000",
+        "font_size": 40,
+        "color": "#ffffff",
         "opacity": 255,
-        "margin_left": 256,
-        "margin_bottom": 656,
-        "blur_radius": 0.8,
+        "margin_left": 106,
+        "margin_bottom": 30,
+        "blur_radius": 0.4,
         "width_ratio": 1.0,
         "height_ratio": 1.1,
     }

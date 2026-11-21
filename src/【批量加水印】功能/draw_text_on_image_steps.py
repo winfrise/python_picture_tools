@@ -1,6 +1,6 @@
 # draw_text_on_image_steps.py
 """
-多文本分步式图片水印（修复文字被裁切的问题）：
+多文本分步式图片水印（支持从图片地址动态获取文本）：
 
   阶段一 generate_text_images()
       对每个文本项渲染成一张透明底文字图 → 存临时文件夹
@@ -8,26 +8,12 @@
 
   阶段二 compose_text_images()
       读取每张文字图，按各自的 offset_left/offset_bottom 贴到 image_path → 保存
-
-配置结构：
-  common_config = {           # 公共配置，所有文本默认继承
-      "font_path": "...",
-      "font_size": 36,
-      "text_color": "#000000",
-      "match_digit_height": True,
-      "blur_radius": 0,
-      ...
-  }
-  text_items = [              # 每个文本可覆盖任意字段
-      {"text": "2026-08-12", "offset_left": 0,   "offset_bottom": 0},
-      {"text": "Hello",      "offset_left": 200, "offset_bottom": 50,
-       "font_size": 48, "text_color": "#FF0000"},
-  ]
 """
 import os
 import json
 import shutil
 import uuid
+import inspect
 
 from PIL import Image, ImageDraw, ImageFilter
 
@@ -76,6 +62,42 @@ def _merge_config(common_config, item):
 
 
 # ============================================================
+# 工具函数：智能解析文本
+# ============================================================
+
+def _resolve_text(text_or_callable, image_path):
+    """
+    解析文本内容：
+    - 如果是字符串，直接返回。
+    - 如果是函数，根据函数签名决定是否传入 image_path：
+        - 如果函数接收至少 1 个参数，调用 text(image_path)
+        - 如果不接收参数，调用 text()
+    """
+    if not callable(text_or_callable):
+        return str(text_or_callable)
+        
+    try:
+        # 检查函数签名，看能否接收参数
+        sig = inspect.signature(text_or_callable)
+        # 过滤掉 *args, **kwargs 的情况，如果有正常的 positional 参数
+        params = [
+            p for p in sig.parameters.values() 
+            if p.kind in (p.POSITIONAL_ONLY, p.POSITIONAL_OR_KEYWORD)
+        ]
+        if params or any(p.kind == p.VAR_POSITIONAL for p in sig.parameters.values()):
+            # 函数能接收参数，传入 image_path
+            result = text_or_callable(image_path)
+        else:
+            # 无参函数，直接调用
+            result = text_or_callable()
+    except Exception as e:
+        print(f"[warn] 执行文本函数失败 ({e})，回退到无参调用")
+        result = text_or_callable()
+
+    return str(result) if result is not None else ""
+
+
+# ============================================================
 # 阶段一：text → 文字图片（每个文本一张），存临时文件夹
 # ============================================================
 
@@ -99,8 +121,7 @@ def _render_one_text_image(text, cfg, work_dir, index):
     if bw <= 0:
         raise ValueError(f"文字宽度为 0（text={text!r}），请检查文本内容/字体")
 
-    # 3. 【关键修复】建立一个比实际需求大得多的安全画布
-    #    避免因为原工具的 dy 垂直居中逻辑导致上下被切掉
+    # 3. 建立安全画布，避免因为原工具的 dy 垂直居中逻辑导致上下被切掉
     SAFE_PAD = 50
     canvas_w = bw + SAFE_PAD * 2
     canvas_h = (bottom_max - top_min) + SAFE_PAD * 2
@@ -112,9 +133,7 @@ def _render_one_text_image(text, cfg, work_dir, index):
     first_seg_text = segments[0][0] if segments else ""
     first_b = segments[0][2].getbbox(first_seg_text, anchor="ls") if first_seg_text else (0, 0, 0, 0)
     
-    # x 轴向左偏移消除留白，并加上安全边距
     start_x = SAFE_PAD - first_b[0]
-    # y 轴直接把基线画在中心位置附近，给足上下空间
     baseline_y = SAFE_PAD + abs(top_min) 
 
     render_text_on_canvas(
@@ -123,7 +142,7 @@ def _render_one_text_image(text, cfg, work_dir, index):
         segments, text_color, target_h,
     )
 
-    # 5. 【关键修复】自动裁掉四周多余的透明边缘，获取最精准的文字图片
+    # 5. 自动裁掉四周多余的透明边缘，获取最精准的文字图片
     bbox = text_img.getbbox()
     if bbox:
         text_img = text_img.crop(bbox)
@@ -154,7 +173,7 @@ def _render_one_text_image(text, cfg, work_dir, index):
     return meta
 
 
-def generate_text_images(common_config, text_items, work_dir):
+def generate_text_images(image_path, common_config, text_items, work_dir):
     os.makedirs(work_dir, exist_ok=True)
     metas = []
     for i, item in enumerate(text_items):
@@ -163,11 +182,9 @@ def generate_text_images(common_config, text_items, work_dir):
         if "text" not in item:
             raise KeyError(f"text_items[{i}] 缺少 'text' 字段")
 
-        text = item["text"]
-        if callable(text):
-            text = text()
-        if not isinstance(text, str):
-            text = str(text)
+        # 【关键修改】解析文本时，把 image_path 传进去
+        text = _resolve_text(item["text"], image_path)
+        
         if not text.strip():
             print(f"[warn] text_items[{i}] 文本为空，跳过")
             continue
@@ -282,7 +299,8 @@ def draw_texts_on_image(
 
     try:
         print(f"[1/2] 生成文字图片 → {work_dir}")
-        metas = generate_text_images(common_config, text_items, work_dir)
+        # 【关键修改】把 image_path 传给生成函数
+        metas = generate_text_images(image_path, common_config, text_items, work_dir)
 
         print(f"[2/2] 合成到 {image_path}")
         output_path = compose_text_images(image_path, metas, output_config, output_dir=output_dir)
@@ -320,23 +338,23 @@ def draw_text_on_image(image_path, text, output_dir=None, config=None, **kwargs)
 
 
 # ============================================================
-# 示例
+# 示例：演示如何从图片地址中提取文字
 # ============================================================
 
 if __name__ == "__main__":
     from plugins.get_font_path import get_font_path
-    from tools.generate_random_time_str import generate_random_time_str
 
-    def gen_time_text():
-        return generate_random_time_str(
-            start_date_str="2026-08-12",
-            end_date_str="2026-08-25",
-            start_hour=9,
-            end_hour=17,
-        )
+    # 假设图片文件名是 "IMG_20260812_093000.jpg"
+    # 我们写一个能接收 image_path 的函数，从中提取日期
+    def extract_date_from_path(img_path):
+        import os
+        import re
+        filename = os.path.basename(img_path)
+        print(img_path)
+        return "未知日期"
 
-    image_path = "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/test/001/微信图片_20261028132018_1801_1.jpg"
-    output_dir = "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/test/001/test"
+    image_path = "/Volumes/西数4T外置/百度网盘默认下载/test/IMG_20260812_093000.jpg"
+    output_dir = "/Volumes/西数4T外置/百度网盘默认下载/test"
 
     common_config = {
         "font_path": get_font_path("苹方黑体-中粗-简.ttf"),
@@ -348,22 +366,25 @@ if __name__ == "__main__":
 
     text_items = [
         {
-            "text": gen_time_text,
+            # 这里传入接收 image_path 的函数，内部动态获取文字
+            "text": extract_date_from_path,
             "offset_left": 20,
             "offset_bottom": 20,
         },
         {
-            "text": "© MyBrand",
+            # 兼容以前无参函数的写法
+            "text": lambda: "© MyBrand",
             "offset_left": 600,
             "offset_bottom": 20,
             "font_size": 24,
             "text_color": "#FF0000",
         },
         {
+            # 静态文本依然支持
             "text": "Sample",
             "offset_left": 20,
             "offset_bottom": 200,
-            "font_path": get_font_path("Arial.ttf"),
+            # "font_path": get_font_path("Arial.ttf"),
             "font_size": 48,
             "blur_radius": 1.5,
         },

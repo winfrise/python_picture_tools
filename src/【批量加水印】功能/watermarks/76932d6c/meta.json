@@ -1,10 +1,10 @@
 [
   {
     "index": 0,
-    "text": "2026.08.18 星期二 14:14",
-    "text_image": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/【批量加水印】功能/watermarks/b6a18a72/text_000.png",
-    "width": 391,
-    "height": 29,
+    "text": "未知日期",
+    "text_image": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/【批量加水印】功能/watermarks/76932d6c/text_000.png",
+    "width": 141,
+    "height": 34,
     "font_path": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/assets/fonts/苹方黑体-中粗-简.ttf",
     "font_size": 36,
     "text_color": "#000000",
@@ -16,7 +16,7 @@
   {
     "index": 1,
     "text": "© MyBrand",
-    "text_image": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/【批量加水印】功能/watermarks/b6a18a72/text_001.png",
+    "text_image": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/【批量加水印】功能/watermarks/76932d6c/text_001.png",
     "width": 127,
     "height": 23,
     "font_path": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/assets/fonts/苹方黑体-中粗-简.ttf",
@@ -30,10 +30,10 @@
   {
     "index": 2,
     "text": "Sample",
-    "text_image": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/【批量加水印】功能/watermarks/b6a18a72/text_002.png",
-    "width": 35,
-    "height": 10,
-    "font_path": null,
+    "text_image": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/【批量加水印】功能/watermarks/76932d6c/text_002.png",
+    "width": 166,
+    "height": 45,
+    "font_path": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/assets/fonts/苹方黑体-中粗-简.ttf",
     "font_size": 48,
     "text_color": "#000000",
     "match_digit_height": true,

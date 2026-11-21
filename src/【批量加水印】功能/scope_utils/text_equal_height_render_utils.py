@@ -10,6 +10,9 @@ import re
 import uuid
 from PIL import Image, ImageDraw, ImageFont
 
+# ============ 🆕 新增：定义需要排除高度归一化的标点符号 ============
+# 包含中英文句号、逗号、点、中点、分号、冒号、下划线等
+EXCLUDE_PUNCTUATION = set(".,·_-~:;，。、；：·")
 
 # ============ 文本分段 ============
 def split_text_by_script(text):
@@ -67,8 +70,9 @@ def build_segment_fonts(text, font_path, base_size):
 
     target_h = measure_pixel_height(sample_digit, base_font)
 
-    # 找中文样本
-    sample_chars = [c for c in text if not c.isascii() and not c.isspace()]
+    # 找中文样本（🆕 修改：排除非 ASCII 的标点符号，只找真正的文字）
+    sample_chars = [c for c in text if not c.isascii() and not c.isspace() and c not in EXCLUDE_PUNCTUATION]
+    
     if not sample_chars:
         return [(t, typ, base_font) for t, typ in split_text_by_script(text)], base_font, target_h
 
@@ -116,16 +120,23 @@ def render_text_on_canvas(canvas, draw, origin_x, origin_y, segments, fill, targ
 
         dy = 0
         if target_h > 0:
-            seg_h = bbox[3] - bbox[1]
-            dy = (target_h - seg_h) / 2.0
-            if typ == 'digit':
-                dy = 0
+            # 检查当前片段是否全是标点符号
+            is_punctuation = all(c in EXCLUDE_PUNCTUATION for c in seg_text.strip())
+            
+            if typ != 'digit' and not is_punctuation:
+                # 中文字符：垂直居中
+                seg_h = bbox[3] - bbox[1]
+                dy = (target_h - seg_h) / 2.0
+            elif is_punctuation:
+                # 🆕 标点符号：强行往下压，让它和数字底部对齐
+                # target_h 是数字的高度，我们把标点向下偏移
+                # 0.7 是一个经验值，你可以微调这个数字（比如 0.6 到 0.8 之间）
+                dy = target_h * 0.8
 
         draw.text((x, origin_y + dy - bbox[1]), seg_text, font=font, fill=fill, anchor="ls")
         x += bbox[2] - bbox[0]
 
     return x
-
 
 # ============ 测量整体 bbox ============
 def measure_text_block(segments):

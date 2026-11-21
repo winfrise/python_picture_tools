@@ -7,6 +7,7 @@ import json
 import shutil
 import inspect
 from pathlib import Path
+from datetime import datetime
 
 from PIL import Image, ImageDraw, ImageFilter
 
@@ -374,8 +375,13 @@ if __name__ == "__main__":
     def extract_date_from_path(img_path):
         base_str = "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/"
         date_str = img_path.replace(base_str, "").split('/')[2]
-        result = date_str.replace("年", ".").replace("月", ".").replace("日", "")
-        return result
+
+        dt = datetime.strptime(date_str, "%Y年%m月%d日")
+
+        # 转换成 点分隔，并补零 (输出: 2026.09.14)
+        format_1 = dt.strftime("%Y.%m.%d")
+
+        return format_1
 
     input_dir = "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/001_output_改尺寸_output_图片覆盖"
     output_dir = f"{input_dir}_加文字"
@@ -394,14 +400,16 @@ if __name__ == "__main__":
         {
             "text": extract_name_from_path,
             "font_size": 50,
-            "offset_left": 20,
-            "offset_bottom": 20,
+            "text_color": "#ffffff",
+            "offset_left": 517,
+            "offset_bottom": 345,
         },
         {
             "text": extract_date_from_path,
-            "fong_size": 36,
-            "offset_left": 20,
-            "offset_bottom": 20,
+            "font_size": 42,
+            "offset_left": 902,
+            "offset_bottom": 66,
+            "blur_radius": 0.5,
         }
     ]
 

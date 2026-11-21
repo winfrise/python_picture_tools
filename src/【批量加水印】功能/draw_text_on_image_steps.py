@@ -27,11 +27,13 @@ from scope_utils.text_equal_height_render_utils import (
 _OVERRIDABLE_KEYS = (
     "font_path", "font_size", "text_color", "match_digit_height",
     "blur_radius", "offset_left", "offset_bottom",
+    "width_ratio", "height_ratio",  # ✨ 新增：允许覆盖缩放比例
 )
 
 _COMMON_DEFAULTS = {
     "font_path": "arial.ttf", "font_size": 40, "text_color": "black",
     "match_digit_height": True, "blur_radius": 0, "offset_left": 0, "offset_bottom": 0,
+    "width_ratio": 1.0, "height_ratio": 1.0,  # ✨ 新增：默认不缩放
 }
 
 def _merge_config(common_config, item):
@@ -77,6 +79,8 @@ def _render_one_text_image(text, cfg, work_dir, index):
     font_size          = cfg["font_size"]
     text_color         = cfg["text_color"]
     match_digit_height = cfg["match_digit_height"]
+    width_ratio        = cfg["width_ratio"]   # ✨ 新增
+    height_ratio       = cfg["height_ratio"]  # ✨ 新增
 
     resolved_font_path = resolve_font_path(font_path)
     if match_digit_height:
@@ -116,6 +120,22 @@ def _render_one_text_image(text, cfg, work_dir, index):
         raise ValueError(f"渲染后未获取到有效文字像素（text={text!r}）")
     
     real_w, real_h = text_img.size
+
+    # ========================================================
+    # ✨ 新增：根据 width_ratio 和 height_ratio 进行尺寸缩放
+    # ========================================================
+    if width_ratio != 1.0 or height_ratio != 1.0:
+        new_w = int(real_w * width_ratio)
+        new_h = int(real_h * height_ratio)
+        # 防止比例过小导致宽高变成 0
+        new_w = max(1, new_w)
+        new_h = max(1, new_h)
+        
+        # 使用 LANCZOS 保证缩放后文字依然清晰
+        text_img = text_img.resize((new_w, new_h), Image.LANCZOS)
+        real_w, real_h = text_img.size
+    # ========================================================
+
     text_image_path = os.path.join(work_dir, f"text_{index:03d}.png")
     text_img.save(text_image_path)
 
@@ -125,6 +145,8 @@ def _render_one_text_image(text, cfg, work_dir, index):
         "font_size": font_size, "text_color": text_color,
         "match_digit_height": match_digit_height, "blur_radius": cfg["blur_radius"],
         "offset_left": int(cfg["offset_left"]), "offset_bottom": int(cfg["offset_bottom"]),
+        "width_ratio": width_ratio,    # ✨ 可选：记录到 meta.json 里方便追溯
+        "height_ratio": height_ratio,  # ✨ 可选：记录到 meta.json 里方便追溯
     }
     print(f"  └─ 文字图 #{index:03d} 已生成: ({real_w}x{real_h}) text={text!r}")
     return meta
@@ -406,10 +428,12 @@ if __name__ == "__main__":
         },
         {
             "text": extract_date_from_path,
-            "font_size": 42,
+            "font_size": 44,
             "offset_left": 902,
             "offset_bottom": 66,
             "blur_radius": 0.5,
+            "width_ratio": 0.95,
+            "height_ratio": 1.0
         }
     ]
 

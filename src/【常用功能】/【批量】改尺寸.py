@@ -26,7 +26,8 @@ def get_target_size(img_width, img_height):
         standard_width = round(standard_height * ratio_w_h)
 
         target_height = 1280
-        target_width = round(target_height * ratio_w_h)
+        # target_width = round(target_height * ratio_w_h)
+        target_width = 1430
 
     else:
         # 竖版：宽度缩放到 1279
@@ -38,7 +39,8 @@ def get_target_size(img_width, img_height):
         standard_height = round(standard_width * ratio_h_w)
 
         target_width = 1279
-        target_height = round(target_width * ratio_h_w)
+        target_height = 2155
+        # target_height = round(target_width * ratio_h_w)
 
     return {
         'is_landscape': is_landscape,

@@ -84,7 +84,7 @@ if __name__ == "__main__":
 
 
 
-    image_path = "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/001"
+    image_path = "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/001_output_改尺寸"
     custom_overlay_image = "/Users/teacher/Desktop/mask.png"
 
     # overlay_image_path = custom_overlay_image

@@ -246,6 +246,7 @@ def draw_texts_on_image(
     common_config=None,
     output_dir=None,
     keep_work_dir=True,
+    try_run = True
 ):
     if common_config is None:
         common_config = {}
@@ -303,6 +304,10 @@ def draw_texts_on_image(
         print(f"[批量] 共找到 {len(tasks)} 张图片，开始处理...")
 
         results = []
+
+        if try_run:
+            tasks = tasks[:5]
+
         for p in tasks:
             rel_path = p.relative_to(image_path)
             
@@ -360,18 +365,22 @@ def draw_text_on_image(image_path, text, work_root, output_dir=None, config=None
 if __name__ == "__main__":
     from plugins.get_font_path import get_font_path
 
-    def extract_date_from_path(img_path):
-        import re
-        filename = os.path.basename(img_path)
-        match = re.search(r'(\d{8})', filename)
-        if match:
-            date_str = match.group(1)
-            return f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:8]}"
-        return "未知日期"
+    def extract_name_from_path(img_path):
+        base_str = "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/"
+        name = img_path.replace(base_str, "").split('/')[1]
+        return name
 
-    input_dir = "/Volumes/西数4T外置/百度网盘默认下载/test"
-    output_dir = "/Volumes/西数4T外置/百度网盘默认下载/test_output"
-    custom_work_root = "/Volumes/西数4T外置/百度网盘默认下载/temp_watermarks"
+
+    def extract_date_from_path(img_path):
+        base_str = "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/"
+        date_str = img_path.replace(base_str, "").split('/')[2]
+        result = date_str.replace("年", ".").replace("月", ".").replace("日", "")
+        return result
+
+    input_dir = "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/001_output_改尺寸_output_图片覆盖"
+    output_dir = f"{input_dir}_加文字"
+    custom_work_root = f"{input_dir}_temp_watermarks"
+    try_run = True
 
     common_config = {
         "font_path": get_font_path("苹方黑体-中粗-简.ttf"),
@@ -383,7 +392,14 @@ if __name__ == "__main__":
 
     text_items = [
         {
+            "text": extract_name_from_path,
+            "font_size": 50,
+            "offset_left": 20,
+            "offset_bottom": 20,
+        },
+        {
             "text": extract_date_from_path,
+            "fong_size": 36,
             "offset_left": 20,
             "offset_bottom": 20,
         }
@@ -396,4 +412,5 @@ if __name__ == "__main__":
         common_config=common_config,
         output_dir=output_dir,
         keep_work_dir=True, 
+        try_run = try_run
     )

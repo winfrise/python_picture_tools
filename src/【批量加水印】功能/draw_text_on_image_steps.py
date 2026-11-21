@@ -1,19 +1,13 @@
 # draw_text_on_image_steps.py
 """
-多文本分步式图片水印（支持从图片地址动态获取文本）：
-
-  阶段一 generate_text_images()
-      对每个文本项渲染成一张透明底文字图 → 存临时文件夹
-      （text_000.png / text_001.png / ... + meta.json）
-
-  阶段二 compose_text_images()
-      读取每张文字图，按各自的 offset_left/offset_bottom 贴到 image_path → 保存
+多文本分步式图片水印（支持文件夹批量处理、保持目录层级、跳过隐藏文件）：
 """
 import os
 import json
 import shutil
 import uuid
 import inspect
+from pathlib import Path
 
 from PIL import Image, ImageDraw, ImageFilter
 
@@ -32,23 +26,13 @@ from scope_utils.text_equal_height_render_utils import (
 # ============================================================
 
 _OVERRIDABLE_KEYS = (
-    "font_path",
-    "font_size",
-    "text_color",
-    "match_digit_height",
-    "blur_radius",
-    "offset_left",
-    "offset_bottom",
+    "font_path", "font_size", "text_color", "match_digit_height",
+    "blur_radius", "offset_left", "offset_bottom",
 )
 
 _COMMON_DEFAULTS = {
-    "font_path": "arial.ttf",
-    "font_size": 40,
-    "text_color": "black",
-    "match_digit_height": True,
-    "blur_radius": 0,
-    "offset_left": 0,
-    "offset_bottom": 0,
+    "font_path": "arial.ttf", "font_size": 40, "text_color": "black",
+    "match_digit_height": True, "blur_radius": 0, "offset_left": 0, "offset_bottom": 0,
 }
 
 def _merge_config(common_config, item):
@@ -66,29 +50,19 @@ def _merge_config(common_config, item):
 # ============================================================
 
 def _resolve_text(text_or_callable, image_path):
-    """
-    解析文本内容：
-    - 如果是字符串，直接返回。
-    - 如果是函数，根据函数签名决定是否传入 image_path：
-        - 如果函数接收至少 1 个参数，调用 text(image_path)
-        - 如果不接收参数，调用 text()
-    """
+    """解析文本内容，支持传入函数并自动判断是否传入 image_path。"""
     if not callable(text_or_callable):
         return str(text_or_callable)
         
     try:
-        # 检查函数签名，看能否接收参数
         sig = inspect.signature(text_or_callable)
-        # 过滤掉 *args, **kwargs 的情况，如果有正常的 positional 参数
         params = [
             p for p in sig.parameters.values() 
             if p.kind in (p.POSITIONAL_ONLY, p.POSITIONAL_OR_KEYWORD)
         ]
         if params or any(p.kind == p.VAR_POSITIONAL for p in sig.parameters.values()):
-            # 函数能接收参数，传入 image_path
             result = text_or_callable(image_path)
         else:
-            # 无参函数，直接调用
             result = text_or_callable()
     except Exception as e:
         print(f"[warn] 执行文本函数失败 ({e})，回退到无参调用")
@@ -107,7 +81,6 @@ def _render_one_text_image(text, cfg, work_dir, index):
     text_color         = cfg["text_color"]
     match_digit_height = cfg["match_digit_height"]
 
-    # 1. 构建分段字体
     resolved_font_path = resolve_font_path(font_path)
     if match_digit_height:
         segments, base_font, target_h = build_segment_fonts(text, resolved_font_path, font_size)
@@ -116,12 +89,10 @@ def _render_one_text_image(text, cfg, work_dir, index):
         segments = [(text, "other", base_font)]
         target_h = 0
 
-    # 2. 测量可视尺寸（用于参考）
     bw, top_min, bottom_max = measure_text_block(segments)
     if bw <= 0:
         raise ValueError(f"文字宽度为 0（text={text!r}），请检查文本内容/字体")
 
-    # 3. 建立安全画布，避免因为原工具的 dy 垂直居中逻辑导致上下被切掉
     SAFE_PAD = 50
     canvas_w = bw + SAFE_PAD * 2
     canvas_h = (bottom_max - top_min) + SAFE_PAD * 2
@@ -129,7 +100,6 @@ def _render_one_text_image(text, cfg, work_dir, index):
     text_img = Image.new("RGBA", (canvas_w, canvas_h), (0, 0, 0, 0))
     draw = ImageDraw.Draw(text_img)
 
-    # 4. 反算起点
     first_seg_text = segments[0][0] if segments else ""
     first_b = segments[0][2].getbbox(first_seg_text, anchor="ls") if first_seg_text else (0, 0, 0, 0)
     
@@ -137,12 +107,10 @@ def _render_one_text_image(text, cfg, work_dir, index):
     baseline_y = SAFE_PAD + abs(top_min) 
 
     render_text_on_canvas(
-        text_img, draw,
-        start_x, baseline_y,
+        text_img, draw, start_x, baseline_y,
         segments, text_color, target_h,
     )
 
-    # 5. 自动裁掉四周多余的透明边缘，获取最精准的文字图片
     bbox = text_img.getbbox()
     if bbox:
         text_img = text_img.crop(bbox)
@@ -150,26 +118,17 @@ def _render_one_text_image(text, cfg, work_dir, index):
         raise ValueError(f"渲染后未获取到有效文字像素（text={text!r}）")
     
     real_w, real_h = text_img.size
-
-    # 6. 保存
     text_image_path = os.path.join(work_dir, f"text_{index:03d}.png")
     text_img.save(text_image_path)
 
     meta = {
-        "index": index,
-        "text": text,
-        "text_image": text_image_path,
-        "width": real_w,
-        "height": real_h,
-        "font_path": font_path,
-        "font_size": font_size,
-        "text_color": text_color,
-        "match_digit_height": match_digit_height,
-        "blur_radius": cfg["blur_radius"],
-        "offset_left": int(cfg["offset_left"]),
-        "offset_bottom": int(cfg["offset_bottom"]),
+        "index": index, "text": text, "text_image": text_image_path,
+        "width": real_w, "height": real_h, "font_path": font_path,
+        "font_size": font_size, "text_color": text_color,
+        "match_digit_height": match_digit_height, "blur_radius": cfg["blur_radius"],
+        "offset_left": int(cfg["offset_left"]), "offset_bottom": int(cfg["offset_bottom"]),
     }
-    print(f"[1/2] 文字图 #{index:03d} 已生成: {text_image_path}  ({real_w}x{real_h})  text={text!r}")
+    print(f"  └─ 文字图 #{index:03d} 已生成: ({real_w}x{real_h}) text={text!r}")
     return meta
 
 
@@ -182,11 +141,10 @@ def generate_text_images(image_path, common_config, text_items, work_dir):
         if "text" not in item:
             raise KeyError(f"text_items[{i}] 缺少 'text' 字段")
 
-        # 【关键修改】解析文本时，把 image_path 传进去
         text = _resolve_text(item["text"], image_path)
         
         if not text.strip():
-            print(f"[warn] text_items[{i}] 文本为空，跳过")
+            print(f"  └─ [warn] text_items[{i}] 文本为空，跳过")
             continue
 
         cfg = _merge_config(common_config, item)
@@ -215,8 +173,7 @@ def _paste_one_text(base, meta):
     block_y = canvas_h - meta["offset_bottom"] - bh
 
     if block_x < 0 or block_y < 0 or block_x + bw > canvas_w or block_y + bh > canvas_h:
-        print(f"[warn] 文字 #{meta['index']:03d} 可能超出画布: "
-              f"pos=({block_x},{block_y}) size=({bw}x{bh}) canvas=({canvas_w}x{canvas_h})")
+        print(f"  └─ [warn] 文字 #{meta['index']:03d} 可能超出画布")
 
     blur_radius = meta.get("blur_radius", 0) or 0
     if blur_radius > 0:
@@ -227,7 +184,6 @@ def _paste_one_text(base, meta):
         text_layer = padded.crop((pad, pad, pad + bw, pad + bh))
 
     result = base.copy()
-    
     dst_x = max(block_x, 0)
     dst_y = max(block_y, 0)
     src_x = dst_x - block_x
@@ -242,27 +198,11 @@ def _paste_one_text(base, meta):
     return result
 
 
-def compose_text_images(image_path, metas, config, output_dir=None):
+def compose_text_images(image_path, metas, config, output_path):
     base = Image.open(image_path).convert("RGBA")
     result = base
     for meta in metas:
         result = _paste_one_text(result, meta)
-
-    output_path = config.get("output_path", None) if config else None
-    overwrite   = config.get("overwrite", True) if config else True
-
-    if output_path is None:
-        base_name, ext = os.path.splitext(os.path.basename(image_path))
-        ext = ext or ".png"
-        if output_dir is None:
-            output_dir = os.path.dirname(os.path.abspath(image_path))
-        os.makedirs(output_dir, exist_ok=True)
-        joined = "_".join(safe_filename(m["text"])[:10] for m in metas)[:60]
-        output_path = os.path.join(output_dir, f"{base_name}_{joined}{ext}")
-    else:
-        os.makedirs(os.path.dirname(os.path.abspath(output_path)), exist_ok=True)
-        if os.path.exists(output_path) and not overwrite:
-            raise FileExistsError(f"输出文件已存在: {output_path}")
 
     save_ext = os.path.splitext(output_path)[1].lower()
     if save_ext in (".jpg", ".jpeg"):
@@ -270,12 +210,33 @@ def compose_text_images(image_path, metas, config, output_dir=None):
     else:
         result.save(output_path)
 
-    print(f"[2/2] 图片已生成: {output_path}")
     return output_path
 
 
 # ============================================================
-# 主流程
+# 单个文件处理逻辑
+# ============================================================
+
+def _process_single_image(input_path, output_path, common_config, text_items, work_root, keep_work_dir):
+    """处理单张图片的完整流程"""
+    img_name = Path(input_path).stem
+    work_dir = os.path.join(work_root, f"{img_name}_{uuid.uuid4().hex[:6]}")
+
+    try:
+        metas = generate_text_images(input_path, common_config, text_items, work_dir)
+        compose_text_images(input_path, metas, {}, output_path)
+    finally:
+        if not keep_work_dir:
+            try:
+                shutil.rmtree(work_dir)
+            except Exception:
+                pass
+        else:
+            print(f"  └─ [keep] 临时文件夹保留: {work_dir}")
+
+
+# ============================================================
+# 主流程（支持单文件 / 文件夹批量）
 # ============================================================
 
 def draw_texts_on_image(
@@ -285,40 +246,95 @@ def draw_texts_on_image(
     output_dir=None,
     work_root=None,
     keep_work_dir=True,
-    output_config=None,
 ):
     if common_config is None:
         common_config = {}
-    if output_config is None:
-        output_config = {}
 
     if work_root is None:
         work_root = os.path.join(os.path.dirname(os.path.abspath(__file__)), "watermarks")
-    task_id  = uuid.uuid4().hex[:8]
-    work_dir = os.path.join(work_root, task_id)
+    
+    os.makedirs(work_root, exist_ok=True)
+    image_path = os.path.abspath(image_path)
+    
+    # ================= 单文件模式 =================
+    if os.path.isfile(image_path):
+        if os.path.basename(image_path).startswith("."):
+            print(f"[跳过] 这是一个隐藏文件: {image_path}")
+            return None
 
-    try:
-        print(f"[1/2] 生成文字图片 → {work_dir}")
-        # 【关键修改】把 image_path 传给生成函数
-        metas = generate_text_images(image_path, common_config, text_items, work_dir)
-
-        print(f"[2/2] 合成到 {image_path}")
-        output_path = compose_text_images(image_path, metas, output_config, output_dir=output_dir)
-
+        if output_dir is None:
+            output_dir = os.path.dirname(image_path)
+        os.makedirs(output_dir, exist_ok=True)
+        
+        base_name, ext = os.path.splitext(os.path.basename(image_path))
+        joined = "_".join(safe_filename(str(item.get("text", "")))[:10] for item in text_items)[:60]
+        output_name = f"{base_name}_{joined}{ext}" if joined else f"{base_name}_out{ext}"
+        output_path = os.path.join(output_dir, output_name)
+        
+        print(f"[单文件] 处理: {image_path}")
+        _process_single_image(image_path, output_path, common_config, text_items, work_root, keep_work_dir)
+        print(f"[完成] 保存至: {output_path}\n")
         return output_path
 
-    finally:
-        if not keep_work_dir:
+    # ================= 文件夹批量模式 =================
+    elif os.path.isdir(image_path):
+        if output_dir is None:
+            raise ValueError("批量处理文件夹时，必须指定 output_dir 参数")
+        
+        image_path = os.path.abspath(image_path)
+        output_dir = os.path.abspath(output_dir)
+        os.makedirs(output_dir, exist_ok=True)
+
+        exts = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
+        
+        print(f"[批量] 扫描文件夹: {image_path}")
+        
+        tasks = []
+        for p in Path(image_path).rglob("*"):
+            # 【核心修改】跳过隐藏文件及隐藏在文件夹里的文件
+            # 1. 检查当前文件名是否以 '.' 开头
+            # 2. 检查相对路径中的任何一级目录是否以 '.' 开头（防止进入隐藏目录）
+            if any(part.startswith(".") for part in p.relative_to(image_path).parts):
+                continue
+            
+            if p.is_file() and p.suffix.lower() in exts:
+                tasks.append(p)
+                
+        if not tasks:
+            print(f"[批量] 未找到任何有效图片文件。")
+            return []
+
+        print(f"[批量] 共找到 {len(tasks)} 张图片，开始处理...")
+
+        results = []
+        for p in tasks:
+            rel_path = p.relative_to(image_path)
+            out_p = Path(output_dir) / rel_path
+            os.makedirs(out_p.parent, exist_ok=True)
+
+            print(f"--> 正在处理: {rel_path}")
             try:
-                shutil.rmtree(work_dir)
-            except Exception:
-                pass
-        else:
-            print(f"[keep] 临时文件夹保留: {work_dir}")
+                _process_single_image(str(p), str(out_p), common_config, text_items, work_root, keep_work_dir)
+                print(f"  └─ 保存至: {out_p}")
+                results.append(str(out_p))
+            except Exception as e:
+                print(f"  └─ [error] 处理失败: {e}")
+                import traceback
+                traceback.print_exc()
+            
+            print("-" * 40)
+            
+        print(f"[批量] 全部处理完毕。成功: {len(results)}/{len(tasks)}\n")
+        return results
+
+    else:
+        raise FileNotFoundError(f"路径不存在: {image_path}")
 
 
+# ============================================================
+# 单文本兼容包装
+# ============================================================
 def draw_text_on_image(image_path, text, output_dir=None, config=None, **kwargs):
-    """单文本兼容包装"""
     config = config or {}
     common = {k: v for k, v in config.items() if k not in ("offset_left", "offset_bottom", "output_path", "overwrite")}
     item = {
@@ -326,35 +342,32 @@ def draw_text_on_image(image_path, text, output_dir=None, config=None, **kwargs)
         "offset_left": config.get("offset_left", 0),
         "offset_bottom": config.get("offset_bottom", 0)
     }
-    output_config = {"output_path": config.get("output_path"), "overwrite": config.get("overwrite", True)}
     return draw_texts_on_image(
         image_path=image_path,
         text_items=[item],
         common_config=common,
         output_dir=output_dir,
-        output_config=output_config,
         **kwargs,
     )
 
 
 # ============================================================
-# 示例：演示如何从图片地址中提取文字
+# 测试与示例
 # ============================================================
-
 if __name__ == "__main__":
     from plugins.get_font_path import get_font_path
 
-    # 假设图片文件名是 "IMG_20260812_093000.jpg"
-    # 我们写一个能接收 image_path 的函数，从中提取日期
     def extract_date_from_path(img_path):
-        import os
         import re
         filename = os.path.basename(img_path)
-        print(img_path)
+        match = re.search(r'(\d{8})', filename)
+        if match:
+            date_str = match.group(1)
+            return f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:8]}"
         return "未知日期"
 
-    image_path = "/Volumes/西数4T外置/百度网盘默认下载/test/IMG_20260812_093000.jpg"
-    output_dir = "/Volumes/西数4T外置/百度网盘默认下载/test"
+    input_dir = "/Volumes/西数4T外置/百度网盘默认下载/test"
+    output_dir = "/Volumes/西数4T外置/百度网盘默认下载/test_output"
 
     common_config = {
         "font_path": get_font_path("苹方黑体-中粗-简.ttf"),
@@ -366,34 +379,16 @@ if __name__ == "__main__":
 
     text_items = [
         {
-            # 这里传入接收 image_path 的函数，内部动态获取文字
             "text": extract_date_from_path,
             "offset_left": 20,
             "offset_bottom": 20,
-        },
-        {
-            # 兼容以前无参函数的写法
-            "text": lambda: "© MyBrand",
-            "offset_left": 600,
-            "offset_bottom": 20,
-            "font_size": 24,
-            "text_color": "#FF0000",
-        },
-        {
-            # 静态文本依然支持
-            "text": "Sample",
-            "offset_left": 20,
-            "offset_bottom": 200,
-            # "font_path": get_font_path("Arial.ttf"),
-            "font_size": 48,
-            "blur_radius": 1.5,
-        },
+        } 
     ]
 
     draw_texts_on_image(
-        image_path=image_path,
+        image_path=input_dir,
         text_items=text_items,
         common_config=common_config,
         output_dir=output_dir,
-        keep_work_dir=True,
+        keep_work_dir=False, 
     )

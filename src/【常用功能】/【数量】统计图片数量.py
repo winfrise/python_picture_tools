@@ -133,7 +133,7 @@ def count_files(
 
 
 if __name__ == "__main__":
-    folder_path = "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/001_横版_竖版_分类"
+    folder_path = "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/001_横版_竖版_分类/图片"
     formats = ['.jpg', '.png']
     recursive = True       # 是否递归
     return_detail = True   # 是否返回详细

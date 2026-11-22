@@ -43,8 +43,8 @@ def resize_image(input_path, output_path, size_func=get_target_size):
     # 2. 不符合则等比缩放（按 target 算比例，保证缩放后能完全覆盖目标框）
     if not already_standard:
         ratio_w = target_w / orig_w
-        ratio_h = target_h / orig_h
-        scale = max(ratio_w, ratio_h)
+        # ratio_h = target_h / orig_h
+        scale = ratio_w
 
         scaled_w = round(orig_w * scale)
         scaled_h = round(orig_h * scale)
@@ -91,7 +91,7 @@ def resize_image(input_path, output_path, size_func=get_target_size):
 
 
 if __name__ == '__main__':
-    input_path = "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/001"
+    input_path = "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/001_横版_竖版_分类/竖版图片"
 
     if os.path.isfile(input_path):
         base_name, ext = os.path.splitext(input_path)

@@ -78,13 +78,13 @@ if __name__ == "__main__":
         # 横版/竖版  
         if True:
             if (width > height): # 横版
-                return  "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/水印_横版.png"
+                return  "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/模板/水印_横版.png"
             else: # 竖版
-                return  "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/水印_竖版.png"
+                return  "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/模板/水印_竖版.png"
 
 
 
-    image_path = "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/001_output_改尺寸"
+    image_path = "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/001_横版_竖版_分类/竖版图片_output_改尺寸"
     custom_overlay_image = "/Users/teacher/Desktop/mask.png"
 
     # overlay_image_path = custom_overlay_image

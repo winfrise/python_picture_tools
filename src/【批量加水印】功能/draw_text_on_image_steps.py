@@ -408,7 +408,7 @@ if __name__ == "__main__":
     input_dir = "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/001_output_改尺寸_output_图片覆盖"
     output_dir = f"{input_dir}_加文字"
     custom_work_root = f"{input_dir}_temp_watermarks"
-    try_run = True
+    try_run = False
 
     common_config = {
         "font_path": get_font_path("苹方黑体-中粗-简.ttf"),

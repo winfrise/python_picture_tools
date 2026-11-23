@@ -1,6 +1,6 @@
 from datetime import datetime
 
-from .draw_text_on_image_steps import (
+from draw_text_on_image_steps import (
     draw_texts_on_image
 )
 # 测试与示例
@@ -9,7 +9,7 @@ if __name__ == "__main__":
     from plugins.get_font_path import get_font_path
 
 
-    input_dir = "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/001_横版_竖版_分类/竖版图片_output_改尺寸_output_图片覆盖"
+    input_dir = "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/001_横版_竖版_分类/竖版图片_统一尺寸_加水印模板"
     output_dir = f"{input_dir}_加文字"
     work_root = f"{input_dir}_temp_watermarks"
     try_run = False

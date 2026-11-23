@@ -55,7 +55,7 @@ if __name__ == "__main__":
             "text": extract_work_content_from_path,
             "font_size": 24,
             "offset_left": 843,
-            "offset_bottom": 94,
+            "offset_bottom": 92,
             "blur_radius": 0,
             "width_ratio": 0.9,
             "height_ratio": 1.0

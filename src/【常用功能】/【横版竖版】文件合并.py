@@ -103,11 +103,11 @@ def _resolve_conflict(dst_file: Path) -> Path:
 
 if __name__ == '__main__':
     source_folders = [
-        "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/001_横版_竖版_分类/横版图片",
-        "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/001_横版_竖版_分类/竖版图片"
+        "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/002_横版_竖版_分类/横版图片_统一尺寸_加水印模板_加文字",
+        "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/002_横版_竖版_分类/竖版图片_统一尺寸_加水印模板_加文字"
     ]
 
-    output_folder = "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/001_横版_竖版_分类/图片"
+    output_folder = "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/002_横版_竖版_分类/合并"
     operation = "copy" # 可选 copy move
     merge_folders(
         source_folders=source_folders,

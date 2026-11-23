@@ -89,7 +89,7 @@ if __name__ == "__main__":
     text_items = [
         { # 项目名称
             "text": "河北承德围场300MW风储氢一体化项目",
-            "font_size": 60,
+            "font_size": 44,
             "text_color": "#ffffff",
             "offset_left": 240,
             "offset_bottom": 345,

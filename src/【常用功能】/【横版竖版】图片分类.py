@@ -131,7 +131,7 @@ def _resolve_conflict(dst_file: Path) -> Path:
 
 
 if __name__ == '__main__':
-    input_folder = "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/001"
+    input_folder = "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/002"
     output_folder = f"{input_folder}_横版_竖版_分类"
     operation = "copy" # 可选copy , move
 

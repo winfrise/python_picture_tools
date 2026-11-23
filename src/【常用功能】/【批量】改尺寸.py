@@ -18,6 +18,22 @@ def resize_image(input_path, output_path, size_func):
     target_w = size_info['target_width']
     target_h = size_info['target_height']
 
+
+    # 计算原图比例
+    orig_aspect_ratio = orig_w / orig_h
+
+    # 情况 A: 只有宽，没有高 -> 根据宽算高
+    if target_w and not target_h:
+        target_h = round(target_w / orig_aspect_ratio)
+        
+    # 情况 B: 只有高，没有宽 -> 根据高算宽
+    elif target_h and not target_w:
+        target_w = round(target_h * orig_aspect_ratio)
+
+    # 情况 C: 都没有 -> 保持原图尺寸 (或者你可以选择抛出异常)
+    elif not target_w and not target_h:
+        target_w, target_h = orig_w, orig_h
+
     # 1. 判断原图是否符合目标尺寸
     already_standard = (orig_w == target_w) and (orig_h == target_h)
 

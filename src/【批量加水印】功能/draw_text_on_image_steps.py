@@ -385,76 +385,76 @@ def draw_text_on_image(image_path, text, work_root, output_dir=None, config=None
 # ============================================================
 # 测试与示例
 # ============================================================
-if __name__ == "__main__":
-    from plugins.get_font_path import get_font_path
+# if __name__ == "__main__":
+#     from plugins.get_font_path import get_font_path
 
 
-    input_dir = "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/001_横版_竖版_分类/竖版图片_output_改尺寸_output_图片覆盖"
-    output_dir = f"{input_dir}_加文字"
-    custom_work_root = f"{input_dir}_temp_watermarks"
-    try_run = False
+#     input_dir = "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/001_横版_竖版_分类/竖版图片_output_改尺寸_output_图片覆盖"
+#     output_dir = f"{input_dir}_加文字"
+#     custom_work_root = f"{input_dir}_temp_watermarks"
+#     try_run = False
 
 
-    def extract_work_content_from_path(img_path):
-        base_str = input_dir
-        name = img_path.replace(base_str, "").split('/')[1]
-        return name
+#     def extract_work_content_from_path(img_path):
+#         base_str = input_dir
+#         name = img_path.replace(base_str, "").split('/')[1]
+#         return name
 
 
-    def extract_date_from_path(img_path):
-        base_str = input_dir
-        date_str = img_path.replace(base_str, "").split('/')[2]
+#     def extract_date_from_path(img_path):
+#         base_str = input_dir
+#         date_str = img_path.replace(base_str, "").split('/')[2]
 
-        dt = datetime.strptime(date_str, "%Y年%m月%d日")
+#         dt = datetime.strptime(date_str, "%Y年%m月%d日")
 
-        # 转换成 点分隔，并补零 (输出: 2026.09.14)
-        format_1 = dt.strftime("%Y.%m.%d")
+#         # 转换成 点分隔，并补零 (输出: 2026.09.14)
+#         format_1 = dt.strftime("%Y.%m.%d")
 
-        return format_1
+#         return format_1
 
 
-    common_config = {
-        "font_path": get_font_path("苹方黑体-中粗-简.ttf"),
-        "font_size": 36,
-        "text_color": "#000000",
-        "match_digit_height": True,
-        "blur_radius": 0.0,
-    }
+#     common_config = {
+#         "font_path": get_font_path("苹方黑体-中粗-简.ttf"),
+#         "font_size": 36,
+#         "text_color": "#000000",
+#         "match_digit_height": True,
+#         "blur_radius": 0.0,
+#     }
 
-    text_items = [
-        {
-            "text": "河北承德围场300MW风储氢一体化项目",
-            "font_size": 60,
-            "text_color": "#ffffff",
-            "offset_left": 240,
-            "offset_bottom": 345,
-        },
-        {
-            "text": extract_work_content_from_path,
-            "font_size": 41,
-            "offset_left": 902,
-            "offset_bottom": 242,
-            "blur_radius": 0.5,
-            "width_ratio": 0.9,
-            "height_ratio": 1.0
-        },
-        {
-            "text": extract_date_from_path,
-            "font_size": 44,
-            "offset_left": 902,
-            "offset_bottom": 66,
-            "blur_radius": 0.5,
-            "width_ratio": 0.9,
-            "height_ratio": 1.0
-        }
-    ]
+#     text_items = [
+#         {
+#             "text": "河北承德围场300MW风储氢一体化项目",
+#             "font_size": 60,
+#             "text_color": "#ffffff",
+#             "offset_left": 240,
+#             "offset_bottom": 345,
+#         },
+#         {
+#             "text": extract_work_content_from_path,
+#             "font_size": 41,
+#             "offset_left": 902,
+#             "offset_bottom": 242,
+#             "blur_radius": 0.5,
+#             "width_ratio": 0.9,
+#             "height_ratio": 1.0
+#         },
+#         {
+#             "text": extract_date_from_path,
+#             "font_size": 44,
+#             "offset_left": 902,
+#             "offset_bottom": 66,
+#             "blur_radius": 0.5,
+#             "width_ratio": 0.9,
+#             "height_ratio": 1.0
+#         }
+#     ]
 
-    draw_texts_on_image(
-        image_path=input_dir,
-        text_items=text_items,
-        work_root=custom_work_root,
-        common_config=common_config,
-        output_dir=output_dir,
-        keep_work_dir=True, 
-        try_run = try_run
-    )
+#     draw_texts_on_image(
+#         image_path=input_dir,
+#         text_items=text_items,
+#         work_root=custom_work_root,
+#         common_config=common_config,
+#         output_dir=output_dir,
+#         keep_work_dir=True, 
+#         try_run = try_run
+#     )

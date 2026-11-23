@@ -6,27 +6,8 @@ sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 from utils import batch_process_file_with_callback
 
-def get_target_size(img_width, img_height):
-    """
-    图片大小函数：直接返回最终固定的目标尺寸
-    """
-    is_landscape = img_width >= img_height
 
-    if is_landscape:
-        target_width = 1430
-        target_height = 1280
-    else:
-        target_width = 1279
-        target_height = 2155
-
-    return {
-        'is_landscape': is_landscape,
-        'target_width': target_width,
-        'target_height': target_height,
-    }
-
-
-def resize_image(input_path, output_path, size_func=get_target_size):
+def resize_image(input_path, output_path, size_func):
     """
     主函数：改变图片尺寸
     """
@@ -92,6 +73,28 @@ def resize_image(input_path, output_path, size_func=get_target_size):
 
 if __name__ == '__main__':
     input_path = "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/001_横版_竖版_分类/竖版图片"
+
+
+    def get_target_size(img_width, img_height):
+        """
+        图片大小函数：直接返回最终固定的目标尺寸
+        """
+        is_landscape = img_width >= img_height
+
+        if is_landscape:
+            target_width = 1430
+            target_height = 1280
+        else:
+            target_width = 1279
+            target_height = 2155
+
+        return {
+            'is_landscape': is_landscape,
+            'target_width': target_width,
+            'target_height': target_height,
+        }
+
+
 
     if os.path.isfile(input_path):
         base_name, ext = os.path.splitext(input_path)

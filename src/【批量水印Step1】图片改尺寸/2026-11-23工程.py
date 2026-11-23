@@ -20,14 +20,14 @@ if __name__ == "__main__":
     # )
 
     # 批量
-    # input_dir = "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/002_横版_竖版_分类/横版图片"
-    # output_dir = f"{input_dir}_统一尺寸"
-    # target_size_func=get_target_size
-    # process_batch_images(
-    #     input_dir=input_dir,
-    #     output_dir=output_dir,
-    #     target_size_func=get_target_size,
-    # )
+    input_dir = "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/002_横版_竖版_分类/横版图片"
+    output_dir = f"{input_dir}_统一尺寸"
+    target_size_func=get_target_size
+    process_batch_images(
+        input_dir=input_dir,
+        output_dir=output_dir,
+        target_size_func=get_target_size,
+    )
 
     # 批量
     input_dir = "/Volumes/西数4T外置/百度网盘默认下载/1111111111111111111/002_横版_竖版_分类/竖版图片"

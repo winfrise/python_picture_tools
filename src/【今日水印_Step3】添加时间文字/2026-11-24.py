@@ -35,7 +35,7 @@ if __name__ == "__main__":
                 { 
                     "type": "text", 
                     "text_key": "time", 
-                    "width": 320,
+                    "width": 420,
                     # 时间和公共配置不同，单独指定
                     "font_path": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/assets/fonts/jinrishuiyin.ttf",
                     "font_size": 148
@@ -43,15 +43,15 @@ if __name__ == "__main__":
                 {
                     "type": "divider", 
                     "width": 8, 
-                    "color": (253, 205, 67, 255)
+                    "color": (253, 205, 67, 255),
+                    "space_left": 40,
+                    "space_right": 40,
                 },
                 {
                     "type": "group", 
                     "width": 450, 
                     "rows": [
                         {
-                            "align_y": "top", 
-                            "spacing": 0,
                             "cells": [
                                 {
                                     "type": "text", 
@@ -64,13 +64,12 @@ if __name__ == "__main__":
                             ]
                         },
                         {
-                            "align_y": "top", 
-                            "spacing": 0,
                             "cells": [
                                 {
                                     "type": "text", 
                                     "text_key": "weather_line", 
-                                    "width": 450
+                                    "width": 450,
+                                    "space_top": 18
                                 }
                             ]
                         }
@@ -83,7 +82,8 @@ if __name__ == "__main__":
             "cells": [
                 { 
                     "type": "text", 
-                    "text_key": "location" 
+                    "text_key": "location",
+                    "space_top": 40
                 }
             ]
         }

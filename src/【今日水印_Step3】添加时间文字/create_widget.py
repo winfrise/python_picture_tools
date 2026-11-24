@@ -248,9 +248,23 @@ def render_rows(rows_config, texts_dict, global_cfg, image_path=None, total_widt
 # ============================================================
 # 3. 对外暴露的 API (保持不变)
 # ============================================================
-def render_component_to_image(background_path, output_path, layout_config, texts, common_config=None, pos_x=50, pos_y=50):
+def render_component_to_image(
+        background_path, 
+        output_path, 
+        layout_config, 
+        texts, 
+        common_config=None, 
+        pos_x=50, 
+        pos_y=50
+    ):
     if common_config is None: common_config = {}
-    layer_img = render_rows(layout_config, texts, global_cfg=common_config, image_path=background_path)
+
+    layer_img = render_rows(
+        rows_config=layout_config,
+        texts_dict=texts, 
+        global_cfg=common_config, 
+        image_path=background_path
+    )
     if not layer_img: return
 
     if background_path and os.path.exists(background_path):
@@ -259,11 +273,13 @@ def render_component_to_image(background_path, output_path, layout_config, texts
         base_img = Image.new("RGBA", (1920, 1080), (40, 40, 45, 255))
 
     bg_w, bg_h = base_img.size
-    final_x = pos_x if pos_x >= 0 else bg_w - layer_img.width + pos_x
-    final_y = pos_y if pos_y >= 0 else bg_h - layer_img.height + pos_y
+    final_layer_x = pos_x if pos_x >= 0 else bg_w - layer_img.width + pos_x
+    final_layer_y = pos_y if pos_y >= 0 else bg_h - layer_img.height + pos_y
 
-    base_img.alpha_composite(layer_img, (final_x, final_y))
+    base_img.alpha_composite(layer_img, (final_layer_x, final_layer_y))
     
     ext = os.path.splitext(output_path)[1].lower()
-    if ext in (".jpg", ".jpeg"): base_img.convert("RGB").save(output_path, quality=95)
-    else: base_img.save(output_path)
+    if ext in (".jpg", ".jpeg"): 
+        base_img.convert("RGB").save(output_path, quality=95)
+    else: 
+        base_img.save(output_path)

@@ -1,48 +1,109 @@
-from create_widget import create_weather_widget_v2
+from create_widget import render_component_to_image
+from datetime import datetime
+import os
 
-
-# ================= 测试运行 =================
+# ================= 使用示例 =================
 if __name__ == "__main__":
     
-    # 定义 Layer（组件画布）的属性
-    my_layer = {
-        "width": 1200,   # Layer 宽度
-        "height": 550,   # Layer 高度
-        "pos_x": 100,    # 贴在背景图的 X 坐标
-        "pos_y": -80,     # 贴在背景图的 Y 坐标
-        "align": "left", # 文字在 Layer 内的对齐方式
-        "spacing": 20,   # 行距
-        "layout_padding": 20 # 文字距离 Layer 边缘的留白
+    # --- 1. 准备数据字典 ---
+    date_val = "2026-11-03"
+    def get_week(d):
+        try: return ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"][datetime.strptime(d, "%Y-%m-%d").weekday()]
+        except: return "未知"
+        
+    my_texts = {
+        "time": "12:47",
+        "date": date_val,
+        "weather": "阴",
+        "temp": "15℃",
+        "week": lambda: get_week(date_val),
+        "weather_line": "{week} {weather} {temp}",
+        "location": "漳州市龙海区·福建华夏高级技工学校(龙江校区)"
     }
 
-    # 如果你想微调某一行
-    my_custom_rows = [
+    # --- 2. 准备布局 (请确保完全复制这部分，不要把 [ ] 和 { } 漏掉) ---
+    my_layout = [
         {
-            "text": "09:51", 
-            "font_size": 280, 
-            "text_color": (255, 255, 255, 255),
-            "shadow_offset": (5, 5), "shadow_blur": 4, "texture_mask": True
+            "align_y": "center",
+            "font_path": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/assets/fonts/苹方黑体-中黑-简.ttf",
+            "font_size": 47,
+            "text_color": (255,255,255,255),
+            "shadow_offset": (4,4), 
+            "shadow_blur": 3, 
+            "align_x": "left", 
+            "cells": [
+                { # 时间
+                    "type": "text", 
+                    "text_key": "time", 
+                    "width": 320,
+                    "font_path": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/assets/fonts/jinrishuiyin.ttf",
+                    "font_size": 148, 
+                    "texture_mask": False
+                },
+                {
+                    "type": "divider", 
+                    "width": 8, 
+                    "color": (255, 165, 0, 255)
+                },
+                {
+                    "type": "group", 
+                    "width": 450, 
+                    "align_x": "left",
+                    "rows": [
+                        {
+                            "align_y": "bottom", 
+                            "spacing": 0,
+                            "cells": [
+                                {
+                                    "type": "text", 
+                                    "text_key": "date", 
+                                    "font_path": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/assets/fonts/jinrishuiyin.ttf",
+                                    "font_size": 56,
+                                }
+                            ]
+                        },
+                        {
+                            "align_y": "top", 
+                            "spacing": 0,
+                            "cells": [
+                                {
+                                    "type": "text", 
+                                    "text_key": "weather_line", 
+                                    "font_path": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/assets/fonts/苹方黑体-中黑-简.ttf",
+                                    "width": 450,
+                                }
+                            ]
+                        }
+                    ]
+                }
+            ]
         },
         {
-            "text": "2026-11-20  星期五  阴  15℃",
-            "font_size": 80, 
-            "text_color": (200, 200, 200, 255) # 稍微变灰一点
-        },
-        {
-            "text": "漳州市龙海区·福建华夏高级技工学校(龙江校区)",
-            "font_size": 60,
-            "font_path": "simhei.ttf" # 单独指定黑体
+            "align_y": "center",
+            "font_path": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/assets/fonts/苹方黑体-中粗-简.ttf",
+            "font_size": 47,
+            "text_color": (255,255,255,255),
+            "shadow_offset": (4,4), 
+            "shadow_blur": 3, 
+            "align_x": "left", 
+            "cells": [
+                { # 时间
+                    "type": "text", 
+                    "text_key": "location", 
+                }
+            ]
         }
     ]
 
-    create_weather_widget_v2(
-        input_image_path="/Volumes/西数4T外置/Chrome下载目录/美图设计室_11_24_2026/001_output2/02.jpg", # 换成 "bg.jpg" 即可
-        output_image_path="layer_output.png",
-        date_str="2026-11-20",
-        time_str="09:51",
-        weather_str="阴",
-        temp_str="15℃",
-        location_str="漳州市龙海区·福建华夏高级技工学校(龙江校区)",
-        layer_config=my_layer,
-        rows_config=my_custom_rows
+    background_path = "/Users/teacher/Desktop/5张/01.png"
+    base_name, ext = os.path.splitext(background_path)
+    output_path = f"{base_name}_加水印{ext}"
+    # --- 3. 开始渲染 ---
+    render_component_to_image(
+        background_path=background_path, # 这里可以替换成实际的背景图片路径
+        output_path=output_path,
+        layout_config=my_layout,
+        texts=my_texts,
+        pos_x=44,
+        pos_y=-44
     )

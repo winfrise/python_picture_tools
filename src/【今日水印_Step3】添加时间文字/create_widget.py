@@ -1,7 +1,6 @@
 import os
 import re
 import random
-from datetime import datetime
 from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 # ============================================================
@@ -147,7 +146,7 @@ def render_rows(rows_config, texts_dict, image_path=None, total_width=None):
             cell_w = cfg.get("width", img.width if img else 0)
             
             if img:
-                align_x = cfg.get("align_x", "center")
+                align_x = cfg.get("align_x", "left")
                 x_offset = 0 if align_x == "left" else (cell_w - img.width) if align_x == "right" else (cell_w - img.width) // 2
                 y_offset = 0 if row_align_y == "top" else (row_h - img.height) if row_align_y == "bottom" else (row_h - img.height) // 2
                 canvas.alpha_composite(img, (current_x + max(0, x_offset), current_y + max(0, y_offset)))
@@ -191,134 +190,3 @@ def render_component_to_image(background_path, output_path, layout_config, texts
     else:
         base_img.save(output_path)
     print(f"✅ 渲染成功: {output_path}")
-
-
-# ================= 使用示例 =================
-if __name__ == "__main__":
-    
-    # --- 1. 准备数据字典 ---
-    date_val = "2026-11-03"
-    def get_week(d):
-        try: return ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"][datetime.strptime(d, "%Y-%m-%d").weekday()]
-        except: return "未知"
-        
-    my_texts = {
-        "time": "13:40",
-        "date": date_val,
-        "weather": "阴",
-        "temp": "15℃",
-        "week": lambda: get_week(date_val),
-        "weather_line": "{week} {weather} {temp}" 
-    }
-
-    # --- 2. 准备布局 (请确保完全复制这部分，不要把 [ ] 和 { } 漏掉) ---
-    my_layout = [
-        {
-            "align_y": "center",
-            "cells": [
-                {
-                    "type": "text", 
-                    "text_key": "time", 
-                    "width": 400,
-                    "align_x": "center", 
-                    "font_size": 60, 
-                    "text_color": (255,255,255,255),
-                    "shadow_offset": (4,4), 
-                    "shadow_blur": 3, 
-                    "texture_mask": True
-                },
-                {
-                    "type": "divider", 
-                    "width": 8, 
-                    "color": (255, 165, 0, 255)
-                },
-                {
-                    "type": "group", "width": 450, 
-                    "align_x": "left",
-                    "rows": [
-                        {
-                            "align_y": "bottom", "spacing": 15,
-                            "cells": [
-                                {
-                                    "type": "text", "text_key": "date", "width": 450,
-                                    "align_x": "left", 
-                                    "font_size": 80, "text_color": (255,255,255,255),
-                                    "shadow_offset": (3,3), "shadow_blur": 2
-                                }
-                            ]
-                        },
-                        {
-                            "align_y": "top", "spacing": 0,
-                            "cells": [
-                                {
-                                    "type": "text", "text_key": "weather_line", "width": 450,
-                                    "align_x": "left",
-                                    "font_size": 80, "text_color": (255,255,255,255),
-                                    "shadow_offset": (3,3), "shadow_blur": 2
-                                }
-                            ]
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "align_y": "center",
-                    "cells": [
-                        {
-                            "type": "text", 
-                            "text_key": "time", 
-                            "width": 400,
-                            "align_x": "center", 
-                            "font_size": 60, 
-                            "text_color": (255,255,255,255),
-                            "shadow_offset": (4,4), 
-                            "shadow_blur": 3, 
-                            "texture_mask": True
-                        },
-                        {
-                            "type": "divider", 
-                            "width": 8, 
-                            "color": (255, 165, 0, 255)
-                        },
-                        {
-                            "type": "group", "width": 450, 
-                            "align_x": "left",
-                            "rows": [
-                                {
-                                    "align_y": "bottom", "spacing": 15,
-                                    "cells": [
-                                        {
-                                            "type": "text", "text_key": "date", "width": 450,
-                                            "align_x": "left", 
-                                            "font_size": 80, "text_color": (255,255,255,255),
-                                            "shadow_offset": (3,3), "shadow_blur": 2
-                                        }
-                                    ]
-                                },
-                                {
-                                    "align_y": "top", "spacing": 0,
-                                    "cells": [
-                                        {
-                                            "type": "text", "text_key": "weather_line", "width": 450,
-                                            "align_x": "left",
-                                            "font_size": 80, "text_color": (255,255,255,255),
-                                            "shadow_offset": (3,3), "shadow_blur": 2
-                                        }
-                                    ]
-                                }
-                            ]
-                        }
-                    ]
-                }
-    ]
-
-    # --- 3. 开始渲染 ---
-    render_component_to_image(
-        background_path=None, # 这里可以替换成实际的背景图片路径
-        output_path="final_rendered_image.png",
-        layout_config=my_layout,
-        texts=my_texts,
-        pos_x=-50,
-        pos_y=-50
-    )

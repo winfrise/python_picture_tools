@@ -5,11 +5,16 @@ image_list = [
     # 左上角 (0, 0) 开始
     {
         "path": "/Users/teacher/Desktop/jinrishuiyin.png", 
-        "x": -1, "y": -1
+        "x": -1, 
+        "y": -1
     },
 
-    # # 距右边 50 像素, 距上边 200 像素
-    # {"path": "watermark.png", "x": -50, "y": 200},
+    # 距右边 50 像素, 距上边 200 像素
+    {
+        "path": "/Users/teacher/Desktop/line_yellow.png", 
+        "x": 356, 
+        "y": -306
+    },
 
     # # 距左下角 30, 40 像素
     # {"path": "stamp.png", "x": 30, "y": -40},

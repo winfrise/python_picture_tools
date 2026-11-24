@@ -114,9 +114,6 @@ def batch_draw_text_with_shadow(
     shadow_blur=6,
     anchor=None,
     exts=(".jpg", ".jpeg", ".png", ".bmp", ".webp"),
-    use_filename_as_text=False,
-    text_prefix="",
-    text_suffix=""
 ):
     """
     批量给文件夹内的图片绘制文字。
@@ -142,10 +139,6 @@ def batch_draw_text_with_shadow(
 
         # 决定当前图片的文字内容
         current_text = text
-        if use_filename_as_text:
-            name_without_ext = os.path.splitext(filename)[0]
-            current_text = f"{text_prefix}{name_without_ext}{text_suffix}"
-
         try:
             draw_text_with_shadow(
                 image=src_path,
@@ -161,7 +154,7 @@ def batch_draw_text_with_shadow(
                 anchor=anchor
             )
             success_files.append(dst_path)
-            print(f"[OK] 处理完成: {filename} -> 文字: '{current_text}'")
+            print(f"[OK] 处理完成: {filename}")
         except Exception as e:
             print(f"[FAIL] 处理失败: {filename} | 错误: {e}")
 

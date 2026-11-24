@@ -60,11 +60,9 @@ batch_draw_text_with_shadow(
     input_dir="/Volumes/西数4T外置/Chrome下载目录/美图设计室_11_24_2026/001_output",
     output_dir="/Volumes/西数4T外置/Chrome下载目录/美图设计室_11_24_2026/001_output2",
     text=text,                      # 此时该参数忽略
-    use_filename_as_text=False,    # 开启将文件名作为文字
-    text_prefix="",           # 在文件名前加 "SN: "
     x=-20, y=-10,                   # 左上角
     font_size=25,
     font_color="white",
     font_path=font_path,         # 微软雅黑
-    shadow_color=(0, 0, 0, 200)
+    shadow_color=(0, 0, 0, 150)
 )

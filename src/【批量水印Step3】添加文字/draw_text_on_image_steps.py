@@ -3,38 +3,78 @@
 多文本分步式图片水印（支持文件夹批量处理、保持原图目录层级、自定义临时目录、保留 meta.json）：
 """
 import os
+import re
+import uuid
 import json
 import shutil
 import inspect
 from pathlib import Path
 from datetime import datetime
 
-from PIL import Image, ImageDraw, ImageFilter
-
-from scope_utils.text_equal_height_render_utils import (
-    build_segment_fonts,
-    render_text_on_canvas,
-    measure_text_block,
-    resolve_font_path,
-    load_base_font,
-    safe_filename,
-)
-
+from PIL import Image, ImageDraw, ImageFilter, ImageFont
 
 # ============================================================
 # 配置合并
 # ============================================================
 _OVERRIDABLE_KEYS = (
-    "font_path", "font_size", "text_color", "match_digit_height",
-    "blur_radius", "offset_left", "offset_bottom",
-    "width_ratio", "height_ratio",  # ✨ 新增：允许覆盖缩放比例
+    "font_path", 
+    "font_size", 
+    "text_color", 
+    "blur_radius", 
+    "offset_left", 
+    "offset_bottom",
+    "width_ratio", 
+    "height_ratio", 
 )
 
 _COMMON_DEFAULTS = {
-    "font_path": "arial.ttf", "font_size": 40, "text_color": "black",
-    "match_digit_height": True, "blur_radius": 0, "offset_left": 0, "offset_bottom": 0,
-    "width_ratio": 1.0, "height_ratio": 1.0,  # ✨ 新增：默认不缩放
+    "font_path": "arial.ttf", 
+    "font_size": 40, 
+    "text_color": "black",
+    "blur_radius": 0, 
+    "offset_left": 0, 
+    "offset_bottom": 0,
+    "width_ratio": 1.0, 
+    "height_ratio": 1.0,
 }
+
+def _resolve_font_path(font_path):
+    """如果字体文件不存在，返回 None 并使用默认字体。"""
+    resolved = font_path if (font_path and os.path.exists(font_path)) else None
+    if resolved is None:
+        print("警告: 未找到指定字体文件，正在使用默认字体。")
+    return resolved
+
+def _safe_filename(text):
+    s = re.sub(r'[\\/*?:"<>|]', "", text).strip()
+    return s or uuid.uuid4().hex[:8]
+
+def _load_base_font(font_path, size):
+    """直接加载基础字体（不做高度归一化时使用）。"""
+    try:
+        if font_path and os.path.exists(font_path):
+            return ImageFont.truetype(font_path, size)
+    except Exception:
+        pass
+    return ImageFont.load_default()
+
+# ============ 测量整体 bbox ============
+def _measure_text_block(segments):
+    """
+    测量整体文本块的宽度和高度。
+    返回 (total_w, top_min, bottom_max)，其中 top_min 通常 <= 0，bottom_max 通常 > 0。
+    """
+    total_w = 0
+    top_min = 0
+    bottom_max = 0
+    for seg_text, font in segments:
+        if not seg_text:
+            continue
+        b = font.getbbox(seg_text, anchor="ls")
+        total_w += (b[2] - b[0])
+        top_min = min(top_min, b[1])
+        bottom_max = max(bottom_max, b[3])
+    return total_w, top_min, bottom_max
 
 def _merge_config(common_config, item):
     merged = dict(_COMMON_DEFAULTS)
@@ -54,22 +94,32 @@ def _resolve_text(text_or_callable, image_path):
     if not callable(text_or_callable):
         return str(text_or_callable)
         
-    try:
-        sig = inspect.signature(text_or_callable)
-        params = [
-            p for p in sig.parameters.values() 
-            if p.kind in (p.POSITIONAL_ONLY, p.POSITIONAL_OR_KEYWORD)
-        ]
-        if params or any(p.kind == p.VAR_POSITIONAL for p in sig.parameters.values()):
-            result = text_or_callable(image_path)
-        else:
-            result = text_or_callable()
-    except Exception as e:
-        print(f"[warn] 执行文本函数失败 ({e})，回退到无参调用")
-        result = text_or_callable()
+    result = text_or_callable(image_path)
+    return str(result) if result is not None else "######"
 
-    return str(result) if result is not None else ""
 
+def _render_text_on_canvas(canvas, draw, origin_x, origin_y, segments, fill, target_h):
+    """
+    逐段绘制。
+    origin_y 为整体文本的“顶部对齐线”。
+    数字正常绘制，中文根据实际高度计算垂直偏移 dy，使其与数字在垂直方向完全居中对齐。
+    """
+    x = origin_x
+    for seg_text, font in segments:
+        if not seg_text:
+            continue
+
+        bbox = font.getbbox(seg_text, anchor="ls")
+
+        dy = 0
+        if target_h > 0:
+            seg_h = bbox[3] - bbox[1]
+            dy = (target_h - seg_h) / 2.0
+
+        draw.text((x, origin_y + dy - bbox[1]), seg_text, font=font, fill=fill, anchor="ls")
+        x += bbox[2] - bbox[0]
+
+    return x
 
 # ============================================================
 # 阶段一：text → 文字图片，存临时文件夹
@@ -78,19 +128,16 @@ def _render_one_text_image(text, cfg, work_dir, index):
     font_path          = cfg["font_path"]
     font_size          = cfg["font_size"]
     text_color         = cfg["text_color"]
-    match_digit_height = cfg["match_digit_height"]
     width_ratio        = cfg["width_ratio"]   # ✨ 新增
     height_ratio       = cfg["height_ratio"]  # ✨ 新增
 
-    resolved_font_path = resolve_font_path(font_path)
-    if match_digit_height:
-        segments, base_font, target_h = build_segment_fonts(text, resolved_font_path, font_size)
-    else:
-        base_font = load_base_font(resolved_font_path, font_size)
-        segments = [(text, "other", base_font)]
-        target_h = 0
+    resolved_font_path = _resolve_font_path(font_path)
 
-    bw, top_min, bottom_max = measure_text_block(segments)
+    base_font = _load_base_font(resolved_font_path, font_size)
+    segments = [(text, base_font)]
+    target_h = 0
+
+    bw, top_min, bottom_max = _measure_text_block(segments)
     if bw <= 0:
         raise ValueError(f"文字宽度为 0（text={text!r}），请检查文本内容/字体")
 
@@ -102,12 +149,12 @@ def _render_one_text_image(text, cfg, work_dir, index):
     draw = ImageDraw.Draw(text_img)
 
     first_seg_text = segments[0][0] if segments else ""
-    first_b = segments[0][2].getbbox(first_seg_text, anchor="ls") if first_seg_text else (0, 0, 0, 0)
+    first_b = segments[0][1].getbbox(first_seg_text, anchor="ls") if first_seg_text else (0, 0, 0, 0)
     
     start_x = SAFE_PAD - first_b[0]
     baseline_y = SAFE_PAD + abs(top_min) 
 
-    render_text_on_canvas(
+    _render_text_on_canvas(
         text_img, draw, start_x, baseline_y,
         segments, text_color, target_h,
     )
@@ -143,7 +190,7 @@ def _render_one_text_image(text, cfg, work_dir, index):
         "index": index, "text": text, "text_image": text_image_path,
         "width": real_w, "height": real_h, "font_path": font_path,
         "font_size": font_size, "text_color": text_color,
-        "match_digit_height": match_digit_height, "blur_radius": cfg["blur_radius"],
+        "blur_radius": cfg["blur_radius"],
         "offset_left": int(cfg["offset_left"]), "offset_bottom": int(cfg["offset_bottom"]),
         "width_ratio": width_ratio,    # ✨ 可选：记录到 meta.json 里方便追溯
         "height_ratio": height_ratio,  # ✨ 可选：记录到 meta.json 里方便追溯
@@ -157,7 +204,7 @@ def generate_text_images(image_path, common_config, text_items, work_dir):
     metas = []
     for i, item in enumerate(text_items):
         if not isinstance(item, dict):
-            raise TypeError(f"text_items[{i}] 必须是 dict，实际为 {type(item)}")
+            raise TypeError(f"text_items[{i}] 必须是 dict,实际为 {type(item)}")
         if "text" not in item:
             raise KeyError(f"text_items[{i}] 缺少 'text' 字段")
 
@@ -289,7 +336,7 @@ def draw_texts_on_image(
         os.makedirs(output_dir, exist_ok=True)
         
         base_name, ext = os.path.splitext(os.path.basename(image_path))
-        joined = "_".join(safe_filename(str(item.get("text", "")))[:10] for item in text_items)[:60]
+        joined = "_".join(_safe_filename(str(item.get("text", "")))[:10] for item in text_items)[:60]
         output_name = f"{base_name}_{joined}{ext}" if joined else f"{base_name}_out{ext}"
         output_path = os.path.join(output_dir, output_name)
         
@@ -417,7 +464,6 @@ def draw_text_on_image(image_path, text, work_root, output_dir=None, config=None
 #         "font_path": get_font_path("苹方黑体-中粗-简.ttf"),
 #         "font_size": 36,
 #         "text_color": "#000000",
-#         "match_digit_height": True,
 #         "blur_radius": 0.0,
 #     }
 

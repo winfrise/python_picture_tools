@@ -159,9 +159,10 @@ def render_rows(rows_config, texts_dict, global_cfg, image_path=None, total_widt
                 cell_w = img.width + s_left + s_right
                 cell_h = img.height + s_top + s_bottom
             elif c_type == "divider":
-                # ✨ 核心修复：divider 的宽度 = 自身画出来的宽度 + 左侧边距 + 右侧边距
                 cell_w = final_cfg.get("width", 6) + s_left + s_right
-                cell_h = 0 # 高度稍后由整行撑开
+                # 若显式指定 height，则参与行高计算；否则置 0，仍由整行撑开
+                custom_h = final_cfg.get("height", None)
+                cell_h = (custom_h + s_top + s_bottom) if custom_h is not None else 0
             else:
                 cell_w = final_cfg.get("width", 0) + s_left + s_right
                 cell_h = 0
@@ -186,9 +187,14 @@ def render_rows(rows_config, texts_dict, global_cfg, image_path=None, total_widt
     for r_idx, r in enumerate(rows_data):
         for item in r["cells"]:
             if item["cfg"].get("type") == "divider":
-                # 此时真实画出来的分割线，宽高单独生成
                 line_w = item["cfg"].get("width", 6)
-                item["img"] = Image.new("RGBA", (line_w, row_heights[r_idx]), item["cfg"].get("color", (255, 165, 0, 255)))
+                custom_h = item["cfg"].get("height", None)
+                line_h = custom_h if custom_h is not None else row_heights[r_idx]
+                item["img"] = Image.new(
+                    "RGBA",
+                    (line_w, line_h),
+                    item["cfg"].get("color", (255, 165, 0, 255))
+                )
 
     # 4. 计算画布整体尺寸
     row_spacings = [r["spacing"] for r in rows_data]

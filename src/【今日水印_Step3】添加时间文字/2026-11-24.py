@@ -23,7 +23,8 @@ if __name__ == "__main__":
         "font_path": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/assets/fonts/苹方黑体-中粗-简.ttf",
         "font_size": 47,
         "text_color": (255, 255, 255, 255),
-        "shadow_offset": (4, 4), 
+        "shadow_color": (0, 0, 0, 100),
+        "shadow_offset": (2, 2), 
         "shadow_blur": 3, 
         "align_x": "left"
     }
@@ -43,6 +44,7 @@ if __name__ == "__main__":
                 {
                     "type": "divider", 
                     "width": 8, 
+                    # "height": 20,
                     "color": (253, 205, 67, 255),
                     "space_left": 40,
                     "space_right": 40,
@@ -68,8 +70,7 @@ if __name__ == "__main__":
                                 {
                                     "type": "text", 
                                     "text_key": "weather_line", 
-                                    "width": 450,
-                                    "space_top": 18
+                                    "space_top": 0
                                 }
                             ]
                         }

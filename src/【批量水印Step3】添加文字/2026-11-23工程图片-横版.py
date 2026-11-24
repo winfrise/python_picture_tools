@@ -119,6 +119,5 @@ if __name__ == "__main__":
         work_root=work_root,
         common_config=common_config,
         output_dir=output_dir,
-        keep_work_dir=True, 
         try_run = try_run
     )

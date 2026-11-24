@@ -38,24 +38,18 @@ _COMMON_DEFAULTS = {
     "height_ratio": 1.0,
 }
 
-def _resolve_font_path(font_path):
-    """如果字体文件不存在，返回 None 并使用默认字体。"""
-    resolved = font_path if (font_path and os.path.exists(font_path)) else None
-    if resolved is None:
-        print("警告: 未找到指定字体文件，正在使用默认字体。")
-    return resolved
-
 def _safe_filename(text):
     s = re.sub(r'[\\/*?:"<>|]', "", text).strip()
     return s or uuid.uuid4().hex[:8]
 
 def _load_base_font(font_path, size):
-    """直接加载基础字体（不做高度归一化时使用）。"""
-    try:
-        if font_path and os.path.exists(font_path):
+    if font_path and os.path.exists(font_path):
+        try:
             return ImageFont.truetype(font_path, size)
-    except Exception:
-        pass
+        except Exception as e:
+            print(f"警告: 加载字体失败 ({font_path}): {e}，使用默认字体")
+    else:
+        print("警告: 未找到指定字体文件，使用默认字体。")
     return ImageFont.load_default()
 
 # ============ 测量整体 bbox ============
@@ -98,11 +92,10 @@ def _resolve_text(text_or_callable, image_path):
     return str(result) if result is not None else "######"
 
 
-def _render_text_on_canvas(canvas, draw, origin_x, origin_y, segments, fill, target_h):
+def _render_text_on_canvas(draw, origin_x, origin_y, segments, fill):
     """
     逐段绘制。
     origin_y 为整体文本的“顶部对齐线”。
-    数字正常绘制，中文根据实际高度计算垂直偏移 dy，使其与数字在垂直方向完全居中对齐。
     """
     x = origin_x
     for seg_text, font in segments:
@@ -111,12 +104,8 @@ def _render_text_on_canvas(canvas, draw, origin_x, origin_y, segments, fill, tar
 
         bbox = font.getbbox(seg_text, anchor="ls")
 
-        dy = 0
-        if target_h > 0:
-            seg_h = bbox[3] - bbox[1]
-            dy = (target_h - seg_h) / 2.0
 
-        draw.text((x, origin_y + dy - bbox[1]), seg_text, font=font, fill=fill, anchor="ls")
+        draw.text((x, origin_y - bbox[1]), seg_text, font=font, fill=fill, anchor="ls")
         x += bbox[2] - bbox[0]
 
     return x
@@ -131,11 +120,8 @@ def _render_one_text_image(text, cfg, work_dir, index):
     width_ratio        = cfg["width_ratio"]   # ✨ 新增
     height_ratio       = cfg["height_ratio"]  # ✨ 新增
 
-    resolved_font_path = _resolve_font_path(font_path)
-
-    base_font = _load_base_font(resolved_font_path, font_size)
+    base_font = _load_base_font(font_path, font_size)
     segments = [(text, base_font)]
-    target_h = 0
 
     bw, top_min, bottom_max = _measure_text_block(segments)
     if bw <= 0:
@@ -155,8 +141,11 @@ def _render_one_text_image(text, cfg, work_dir, index):
     baseline_y = SAFE_PAD + abs(top_min) 
 
     _render_text_on_canvas(
-        text_img, draw, start_x, baseline_y,
-        segments, text_color, target_h,
+        draw, 
+        start_x, 
+        baseline_y,
+        segments,
+        text_color
     )
 
     # 自动裁掉多余透明边距
@@ -199,7 +188,7 @@ def _render_one_text_image(text, cfg, work_dir, index):
     return meta
 
 
-def generate_text_images(image_path, common_config, text_items, work_dir):
+def _render_text_images_and_meta(image_path, common_config, text_items, work_dir):
     os.makedirs(work_dir, exist_ok=True)
     metas = []
     for i, item in enumerate(text_items):
@@ -265,7 +254,7 @@ def _paste_one_text(base, meta):
     return result
 
 
-def compose_text_images(image_path, metas, config, output_path):
+def compose_text_images(image_path, metas, output_path):
     base = Image.open(image_path).convert("RGBA")
     result = base
     for meta in metas:
@@ -283,27 +272,17 @@ def compose_text_images(image_path, metas, config, output_path):
 # ============================================================
 # 单个文件处理逻辑
 # ============================================================
-def _process_single_image(input_path, output_path, common_config, text_items, temp_image_dir, keep_work_dir):
+def process_single_image(input_path, output_path, common_config, text_items, temp_image_dir):
     """
     处理单张图片。
     temp_image_dir: 当前原图对应的专属临时文件夹
     """
     os.makedirs(temp_image_dir, exist_ok=True)
-    
-    try:
-        # 生成文字图（存入 temp_image_dir，包含 meta.json）
-        metas = generate_text_images(input_path, common_config, text_items, temp_image_dir)
-        # 合成到输出
-        compose_text_images(input_path, metas, {}, output_path)
-    finally:
-        if not keep_work_dir:
-            # 处理完直接删掉当前图片专属的临时文件夹
-            try:
-                shutil.rmtree(temp_image_dir)
-            except Exception:
-                pass
-        else:
-            print(f"  └─ [keep] 临时文件夹保留: {temp_image_dir}")
+
+    # 生成文字图（存入 temp_image_dir，包含 meta.json）
+    metas = _render_text_images_and_meta(input_path, common_config, text_items, temp_image_dir)
+    # 合成到输出
+    compose_text_images(input_path, metas, output_path)
 
 
 # ============================================================
@@ -344,7 +323,7 @@ def draw_texts_on_image(
         temp_image_dir = os.path.join(work_root, base_name)
         
         print(f"[单文件] 处理: {image_path}")
-        _process_single_image(image_path, output_path, common_config, text_items, temp_image_dir, keep_work_dir)
+        process_single_image(image_path, output_path, common_config, text_items, temp_image_dir, keep_work_dir)
         print(f"[完成] 保存至: {output_path}\n")
         return output_path
 
@@ -391,7 +370,7 @@ def draw_texts_on_image(
 
             print(f"--> 正在处理: {rel_path}")
             try:
-                _process_single_image(str(p), str(out_p), common_config, text_items, temp_image_dir, keep_work_dir)
+                process_single_image(str(p), str(out_p), common_config, text_items, temp_image_dir, keep_work_dir)
                 print(f"  └─ 保存至: {out_p}")
                 results.append(str(out_p))
             except Exception as e:

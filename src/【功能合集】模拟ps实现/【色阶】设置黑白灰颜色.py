@@ -64,18 +64,28 @@ def adjust_levels(
     # 灰度图只需 256 长度；RGB 图需要 256 * 3
     lut_applied = lut * channels
     new_img = img.point(lut_applied)
-    new_img.save(output_path)
+
+
+    ext = os.path.splitext(output_path)[1].lower()
+    if ext in (".jpg", ".jpeg"):
+        new_img.save(output_path, quality=95, subsampling=0)  # 95 高质量，subsampling=0 避免色度抽样
+    elif ext == ".webp":
+        new_img.save(output_path, quality=95)
+    elif ext == ".png":
+        new_img.save(output_path, compress_level=6)
+    else:
+        new_img.save(output_path)
 
     print(f"处理完成！灰度:{to_grayscale}, 黑场:{black_point}, 白场:{white_point}, Gamma:{gamma}")
 
 
 if __name__ == "__main__":
     # 你可以传入一个图片的路径，也可以传入一个文件夹的路径
-    input_path = "/Volumes/西数4T外置/百度网盘默认下载/第二+三阶段 数学卷/第二+三阶段 数学卷__合成的图片_DPI_300_调色阶"
-    white_point = 255   # 默认值: 255
-    black_point = 165     # 默认值: 0
+    input_path = "/Volumes/西数4T外置/Chrome下载目录/用所选项目新建的文件夹 2/001"
+    white_point = 230   # 默认值: 255
+    black_point = 0     # 默认值: 0
     gamma = 1.0         # 默认值: 1.0
-    to_grayscale = True # 新增：True 先转灰度，False 保留彩色
+    to_grayscale = False # 新增：True 先转灰度，False 保留彩色
 
     if os.path.isfile(input_path):
         base_name, ext = os.path.splitext(input_path)   # 修正原代码的笔误

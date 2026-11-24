@@ -70,7 +70,8 @@ if __name__ == "__main__":
                                 {
                                     "type": "text", 
                                     "text_key": "weather_line", 
-                                    "space_top": 0
+                                    "space_top": 0,
+                                    "width_ratio": 0.9
                                 }
                             ]
                         }

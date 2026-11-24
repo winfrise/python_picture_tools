@@ -150,7 +150,17 @@ def render_rows(rows_config, texts_dict, global_cfg, image_path=None, total_widt
             img = None
             if c_type == "text":
                 text_val = _resolve_text_value(cell.get("text_key", ""), texts_dict, image_path)
-                img = _render_text(text_val, final_cfg) 
+                img = _render_text(text_val, final_cfg)
+
+                # ✨ 文字按比例缩放 width_ratio / height_ratio
+                if img:
+                    wr = final_cfg.get("width_ratio", 1.0)
+                    hr = final_cfg.get("height_ratio", 1.0)
+                    if wr != 1.0 or hr != 1.0:
+                        new_w = max(1, int(round(img.width * wr)))
+                        new_h = max(1, int(round(img.height * hr)))
+                        img = img.resize((new_w, new_h), Image.LANCZOS)
+
             elif c_type == "group":
                 img = render_rows(cell["rows"], texts_dict, global_cfg, image_path, total_width=cell.get("width", None))
                 

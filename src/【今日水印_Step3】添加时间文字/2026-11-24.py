@@ -16,7 +16,7 @@ if __name__ == "__main__":
         "week": lambda: get_week(date_val),
         "weather_line": "{week} {weather} {temp}",
         "location": "漳州市龙海区·福建华夏高级技工学校(龙江校区)",
-        "logo": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/【今日水印_Step3】添加时间文字/assets/jinrishuiyin.png",
+        "logo": "/Users/teacher/Desktop/今日水印_2.png",
         "sn_code": "KTHAN1E3Y3X3BP"
     }
 
@@ -36,6 +36,7 @@ if __name__ == "__main__":
         {
             "pos_x":44,
             "pos_y": -544,
+            "scale": 1.5,
             "layout_config":[
                 {
                     "align_y": "center",
@@ -107,6 +108,7 @@ if __name__ == "__main__":
         {
             "pos_x": -44,
             "pos_y": -544,
+            "scale": 1,
             "layout_config":[
                 {
                     "align_x": "right",
@@ -115,7 +117,7 @@ if __name__ == "__main__":
                         {
                             "type": "image",
                             "text_key": "logo",
-                            "height": 100
+                            "width": 270
                         }
                     ]
                 },
@@ -133,7 +135,7 @@ if __name__ == "__main__":
                             "font_path": "/Users/teacher/Library/Fonts/FZDHTJW.TTF"
                         },
                         {
-                            "space_right": -10,
+                            "space_right": 10,
                             "type": "text",
                             "text_key": "sn_code",
                             "shadow_color": (0, 0, 0, 180),

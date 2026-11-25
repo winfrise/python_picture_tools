@@ -371,9 +371,10 @@ def render_component_to_image(
 
         pos_x = block.get("pos_x", 0)
         pos_y = block.get("pos_y", 0)
+        scale = block.get("scale", 1.0)  # ✨ 获取缩放比例，默认 1.0
         layout_config = block.get("layout_config", [])
 
-        # 针对当前的块，生成其相对排版图层
+        # 1. 针对当前的块，生成其相对排版图层
         layer_img = render_rows(
             rows_config=layout_config,
             texts_dict=texts, 
@@ -384,12 +385,19 @@ def render_component_to_image(
         if not layer_img: 
             continue
 
-        # 计算绝对坐标（支持负数从右/下对齐）
+        # 2. ✨ 如果配置了 scale，对排版图层进行整体缩放
+        if scale != 1.0:
+            new_w = max(1, int(layer_img.width * scale))
+            new_h = max(1, int(layer_img.height * scale))
+            # 使用 LANCZOS 保证缩放质量
+            layer_img = layer_img.resize((new_w, new_h), Image.LANCZOS)
+
+        # 3. 计算绝对坐标（支持负数从右/下对齐，且基于缩放后的 layer_img.width 计算）
         final_layer_x = pos_x if pos_x >= 0 else bg_w - layer_img.width + pos_x
         final_layer_y = pos_y if pos_y >= 0 else bg_h - layer_img.height + pos_y
 
-        # 将当前块合成到背景上
-        base_img.alpha_composite(layer_img, (final_layer_x, final_layer_y))
+        # 4. 将缩放后的当前块合成到背景上
+        base_img.alpha_composite(layer_img, (int(final_layer_x), int(final_layer_y)))
     
     # 统一保存
     ext = os.path.splitext(output_path)[1].lower()

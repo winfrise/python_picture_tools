@@ -114,12 +114,29 @@ def _render_text(text, cfg):
 
     # ---- ✨ 图片直接替换文字轮廓（局部生效，完美消除黑边）----
     # ---- ✨ 图片直接替换文字轮廓（保留文字底色，只替换波浪线区域）----
+    # ---- ✨ 图片替换文字（精准避开阴影，只贴文字本体）----
     mask_cfg = cfg.get("image_mask")
     if isinstance(mask_cfg, dict):
         mask_path = mask_cfg.get("path")
         if mask_path and os.path.exists(mask_path):
-            # 1. 提取文字轮廓
-            text_alpha = final_img.split()[3]
+            
+            # 1. 重新生成一个【纯文字（无阴影）】的透明图层
+            # 这是为了排除阴影的干扰，确保波浪图只贴在文字本身上
+            text_only_img = Image.new("RGBA", final_img.size, (0,0,0,0))
+            draw_text = ImageDraw.Draw(text_only_img)
+            
+            # 因为前面生成文字时有 pad=100 和坐标计算，我们直接从当前配置里取回坐标
+            # 重新画一遍纯文字
+            if not check_glyphs:
+                draw_text.text((draw_x, draw_y), text, font=primary_font, fill=text_color)
+            else:
+                cur_x = start_x
+                for seg_text, f in merged_segments:
+                    draw_text.text((cur_x, baseline_y), seg_text, font=f, fill=text_color, anchor="ls")
+                    cur_x += f.getlength(seg_text)
+            
+            # 提取纯文字的 Alpha 轮廓
+            text_alpha = text_only_img.split()[3]
             bbox = text_alpha.getbbox()
             if not bbox:
                 return None
@@ -133,22 +150,28 @@ def _render_text(text, cfg):
             if (new_w, new_h) != mask_img.size:
                 mask_img = mask_img.resize((new_w, new_h), Image.LANCZOS)
 
-            # 3. 创建与文字一样大的透明画布，把波浪图贴上去
+            # 3. 创建画布并贴合波浪图
             target_w, target_h = final_img.size
             wave_img = Image.new("RGBA", (target_w, target_h), (0, 0, 0, 0))
             pos_x, pos_y = mask_cfg.get("pos", (0, 0))
             wave_img.alpha_composite(mask_img, (pos_x, pos_y))
 
-            # 4. 将波浪图的轮廓套用上文字的形状（此时的 wave_img 只在文字笔画处有图案）
+            # 4. ✨ 核心：让纯文字蒙版向内收缩像素
+            shrink_px = mask_cfg.get("shrink", 2)
+            if shrink_px > 0:
+                filter_size = shrink_px * 2 + 1
+                text_alpha = text_alpha.filter(ImageFilter.MinFilter(filter_size))
+
+            # 5. 将收缩后的纯文字轮廓，套用到波浪图上
             wave_img.putalpha(ImageChops.multiply(wave_img.split()[3], text_alpha))
 
-            # 5. 【核心】将原文字和波浪图叠加。
-            # 这样文字作为底色（不会有透明缝隙），波浪图作为高亮覆盖在上面
+            # 6. 叠加原图（带阴影的文字）和波浪图
             result_img = Image.alpha_composite(final_img, wave_img)
 
-            # 6. 裁剪返回
+            # 7. 裁剪返回
             final_bbox = result_img.getbbox()
             return result_img.crop(final_bbox) if final_bbox else None
+        
     # 如果没有配置 image_mask，正常返回原本的文字
     final_bbox = final_img.getbbox()
     return final_img.crop(final_bbox) if final_bbox else None

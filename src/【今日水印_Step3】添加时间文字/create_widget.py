@@ -204,6 +204,34 @@ def render_rows(rows_config, texts_dict, global_cfg, image_path=None, total_widt
                         new_h = max(1, int(round(img.height * hr)))
                         img = img.resize((new_w, new_h), Image.LANCZOS)
 
+            elif c_type == "image":  # ✨ 新增图片处理逻辑
+                # 从 texts_dict 中取出对应的图片路径（支持动态解析）
+                img_path = _resolve_text_value(cell.get("text_key", ""), texts_dict, image_path)
+                if img_path and os.path.exists(img_path):
+                    img = Image.open(img_path).convert("RGBA")
+                    
+                    target_w = cell.get("width")
+                    target_h = cell.get("height")
+                    
+                    # 情况 1：都有值，直接按宽高缩放（或者你可以改成强制适配）
+                    if target_w is not None and target_h is not None:
+                        img = img.resize((int(target_w), int(target_h)), Image.LANCZOS)
+                    # 情况 2：只有宽，等比缩放高度
+                    elif target_w is not None:
+                        ratio = target_w / img.width
+                        new_h = max(1, int(round(img.height * ratio)))
+                        img = img.resize((int(target_w), new_h), Image.LANCZOS)
+                    # 情况 3：只有高，等比缩放宽度
+                    elif target_h is not None:
+                        ratio = target_h / img.height
+                        new_w = max(1, int(round(img.width * ratio)))
+                        img = img.resize((new_w, int(target_h)), Image.LANCZOS)
+                    # 情况 4：都没有，保持原尺寸（什么都不做）
+                    else:
+                        pass
+                else:
+                    img = None # 路径不存在或者未提供，画布留空
+
             elif c_type == "group":
                 img = render_rows(cell["rows"], texts_dict, global_cfg, image_path, total_width=cell.get("width", None))
                 

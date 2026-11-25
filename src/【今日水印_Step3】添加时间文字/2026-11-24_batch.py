@@ -1,6 +1,7 @@
 from create_widget import batch_process_folder
 from datetime import datetime
 import os
+import copy
 from config.jrsy_config import common_config,layout_data
 
 if __name__ == "__main__":
@@ -22,6 +23,27 @@ if __name__ == "__main__":
         "防伪": "防伪码" # ⚠️ 你的原代码里似乎漏了这个 key，这里补上
     }
 
+    my_layout_data = copy.deepcopy(layout_data)
+    standard_width = 2160
+    layer_data = [
+        {
+            "pos_x":44,
+            "pos_y": -544,
+            "scale": 1,
+            "standard_width": standard_width
+        },
+        {
+            "pos_x": -44,
+            "pos_y": -544,
+            "scale": 1,
+            "standard_width": standard_width
+        }
+    ]
+
+    my_layout_data[0].update(layer_data[0]) 
+    my_layout_data[1].update(layer_data[1]) 
+
+
     # ✨ 修改这里：输入文件夹 和 输出文件夹
     input_directory = "/Users/teacher/Desktop/5张" 
     output_directory = "/Users/teacher/Desktop/5张_加水印" 
@@ -30,7 +52,7 @@ if __name__ == "__main__":
     batch_process_folder(
         input_dir=input_directory,
         output_dir=output_directory,
-        layout_data=layout_data,
+        layout_data=my_layout_data,
         texts=my_texts,
         common_config=common_config,
     )

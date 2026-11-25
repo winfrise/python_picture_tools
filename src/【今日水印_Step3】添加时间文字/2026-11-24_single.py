@@ -1,6 +1,7 @@
 from create_widget import render_component_to_image
 from datetime import datetime
 import os
+import copy
 from config.jrsy_config import common_config,layout_data
 
 if __name__ == "__main__":
@@ -21,6 +22,23 @@ if __name__ == "__main__":
         "sn_code": "KTHAN1E3Y3X3BP"
     }
 
+
+    my_layout_data = copy.deepcopy(layout_data)
+    layer_data = [
+        {
+            "pos_x":44,
+            "pos_y": -544,
+            "scale": 1.5,
+        },
+        {
+            "pos_x": -44,
+            "pos_y": -544,
+            "scale": 1,
+        }
+    ]
+
+    my_layout_data[0].update(layer_data[0]) 
+    my_layout_data[1].update(layer_data[1]) 
 
     background_path = "/Users/teacher/Desktop/5张/图片.png"
     base_name, ext = os.path.splitext(background_path)

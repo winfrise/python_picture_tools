@@ -26,11 +26,10 @@ layout_data = [
                         "font_path": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/assets/fonts/jinrishuiyin.ttf",
                         "font_size": 148,
                         "image_mask": {
-                            "path": "/Users/teacher/Desktop/111.png", 
-                            # "path": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/【今日水印_Step3】添加时间文字/assets/time_mask.png",
-                            "pos": (0, 0),                # 蒙版相对文字左上角的偏移，默认 (0, 0)
-                            "scale_width": 0.5,           # 宽度缩放比例，默认 1.0
-                            "scale_height": 0.5,          # 高度缩放比例，默认 1.0
+                            "path": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/【今日水印_Step3】添加时间文字/assets/111.png", 
+                            "pos": (100, 0),                # 蒙版相对文字左上角的偏移，默认 (0, 0)
+                            "scale_width": 0.3,           # 宽度缩放比例，默认 1.0
+                            "scale_height": 0.3,          # 高度缩放比例，默认 1.0
                         },
                     },
                     {
@@ -95,7 +94,7 @@ layout_data = [
                     {
                         "type": "image",
                         "text_key": "logo",
-                        "width": 270
+                        "width": 210
                     }
                 ]
             },

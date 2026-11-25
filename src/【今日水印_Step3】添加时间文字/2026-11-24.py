@@ -32,7 +32,7 @@ if __name__ == "__main__":
     layout_data = [
         {
             "pos_x":44,
-            "pos_y":-44,
+            "pos_y": -44,
             "layout_config":[
                 {
                     "align_y": "center",

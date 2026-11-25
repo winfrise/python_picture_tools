@@ -1,7 +1,7 @@
 import os
 import re
 import random
-from PIL import Image, ImageDraw, ImageFilter, ImageFont
+from PIL import Image, ImageDraw, ImageFilter, ImageFont, ImageChops
 
 # ============================================================
 # 1. 基础工具函数 (保持不变)
@@ -113,6 +113,7 @@ def _render_text(text, cfg):
         final_img = img
 
     # ---- ✨ 图片直接替换文字轮廓（局部生效，完美消除黑边）----
+    # ---- ✨ 图片直接替换文字轮廓（保留文字底色，只替换波浪线区域）----
     mask_cfg = cfg.get("image_mask")
     if isinstance(mask_cfg, dict):
         mask_path = mask_cfg.get("path")
@@ -123,7 +124,7 @@ def _render_text(text, cfg):
             if not bbox:
                 return None
 
-            # 2. 加载波浪图（保留它原本的透明通道 RGBA）
+            # 2. 加载波浪图
             mask_img = Image.open(mask_path).convert("RGBA")
             sw = mask_cfg.get("scale_width", 1.0)
             sh = mask_cfg.get("scale_height", 1.0)
@@ -132,26 +133,22 @@ def _render_text(text, cfg):
             if (new_w, new_h) != mask_img.size:
                 mask_img = mask_img.resize((new_w, new_h), Image.LANCZOS)
 
-            # 3. 创建与文字一样大的透明画布
+            # 3. 创建与文字一样大的透明画布，把波浪图贴上去
             target_w, target_h = final_img.size
-            result_img = Image.new("RGBA", (target_w, target_h), (0, 0, 0, 0))
-            
-            # 4. 将波浪图按位置贴上去（使用 alpha_composite 完美融合透明度）
+            wave_img = Image.new("RGBA", (target_w, target_h), (0, 0, 0, 0))
             pos_x, pos_y = mask_cfg.get("pos", (0, 0))
-            result_img.alpha_composite(mask_img, (pos_x, pos_y))
+            wave_img.alpha_composite(mask_img, (pos_x, pos_y))
 
-            # 5. 【核心】获取图片自身的透明度，并与文字轮廓取交集
-            wave_alpha = result_img.split()[3]
-            from PIL import ImageChops
-            final_alpha = ImageChops.multiply(wave_alpha, text_alpha)
+            # 4. 将波浪图的轮廓套用上文字的形状（此时的 wave_img 只在文字笔画处有图案）
+            wave_img.putalpha(ImageChops.multiply(wave_img.split()[3], text_alpha))
 
-            # 6. 将最终透明度赋给图像
-            result_img.putalpha(final_alpha)
+            # 5. 【核心】将原文字和波浪图叠加。
+            # 这样文字作为底色（不会有透明缝隙），波浪图作为高亮覆盖在上面
+            result_img = Image.alpha_composite(final_img, wave_img)
 
-            # 7. 裁剪返回
+            # 6. 裁剪返回
             final_bbox = result_img.getbbox()
             return result_img.crop(final_bbox) if final_bbox else None
-
     # 如果没有配置 image_mask，正常返回原本的文字
     final_bbox = final_img.getbbox()
     return final_img.crop(final_bbox) if final_bbox else None

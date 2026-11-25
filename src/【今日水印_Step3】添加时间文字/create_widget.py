@@ -181,6 +181,7 @@ def _render_text(text, cfg):
 def render_rows(rows_config, texts_dict, global_cfg, image_path=None, total_width=None):
     rows_data = []
     
+    # 1. 解析所有单元格
     for row in rows_config:
         row_cells = []
         for cell in row.get("cells", []):
@@ -203,9 +204,8 @@ def render_rows(rows_config, texts_dict, global_cfg, image_path=None, total_widt
                         new_w = max(1, int(round(img.width * wr)))
                         new_h = max(1, int(round(img.height * hr)))
                         img = img.resize((new_w, new_h), Image.LANCZOS)
-
-            elif c_type == "image":  # ✨ 新增图片处理逻辑
-                # 从 texts_dict 中取出对应的图片路径（支持动态解析）
+                        
+            elif c_type == "image":  # ✨ 图片处理逻辑
                 img_path = _resolve_text_value(cell.get("text_key", ""), texts_dict, image_path)
                 if img_path and os.path.exists(img_path):
                     img = Image.open(img_path).convert("RGBA")
@@ -213,24 +213,16 @@ def render_rows(rows_config, texts_dict, global_cfg, image_path=None, total_widt
                     target_w = cell.get("width")
                     target_h = cell.get("height")
                     
-                    # 情况 1：都有值，直接按宽高缩放（或者你可以改成强制适配）
                     if target_w is not None and target_h is not None:
                         img = img.resize((int(target_w), int(target_h)), Image.LANCZOS)
-                    # 情况 2：只有宽，等比缩放高度
                     elif target_w is not None:
                         ratio = target_w / img.width
                         new_h = max(1, int(round(img.height * ratio)))
                         img = img.resize((int(target_w), new_h), Image.LANCZOS)
-                    # 情况 3：只有高，等比缩放宽度
                     elif target_h is not None:
                         ratio = target_h / img.height
                         new_w = max(1, int(round(img.width * ratio)))
                         img = img.resize((new_w, int(target_h)), Image.LANCZOS)
-                    # 情况 4：都没有，保持原尺寸（什么都不做）
-                    else:
-                        pass
-                else:
-                    img = None # 路径不存在或者未提供，画布留空
 
             elif c_type == "group":
                 img = render_rows(cell["rows"], texts_dict, global_cfg, image_path, total_width=cell.get("width", None))
@@ -252,15 +244,26 @@ def render_rows(rows_config, texts_dict, global_cfg, image_path=None, total_widt
                 "cell_w": cell_w,
                 "cell_h": cell_h
             })
-        rows_data.append({"cells": row_cells, "spacing": row.get("spacing", 15)})
+        # ✨ 记录每行的对齐方式，默认 left
+        rows_data.append({
+            "cells": row_cells, 
+            "spacing": row.get("spacing", 15),
+            "align_x": row.get("align_x", "left") 
+        })
         
+    # 2. 计算每行的实际高度和实际总宽度
     row_heights = []
+    row_widths = []  # ✨ 记录每行内容的真实宽度，用于对齐计算
     for r in rows_data:
         max_h = 0
+        row_w = 0
         for item in r["cells"]:
             max_h = max(max_h, item["cell_h"])
+            row_w += item["cell_w"]
         row_heights.append(max_h)
+        row_widths.append(row_w)
 
+    # 3. 渲染分割线
     for r_idx, r in enumerate(rows_data):
         for item in r["cells"]:
             if item["cfg"].get("type") == "divider":
@@ -273,17 +276,16 @@ def render_rows(rows_config, texts_dict, global_cfg, image_path=None, total_widt
                     item["cfg"].get("color", (255, 165, 0, 255))
                 )
 
+    # 4. 计算画布整体尺寸
     row_spacings = [r["spacing"] for r in rows_data]
     total_height = sum(row_heights) + sum(row_spacings[:-1]) if row_heights else 0
     if total_height <= 0: return None
 
+    # ✨ 如果未指定 total_width，则取所有行中最宽的一行作为画布宽度
     if total_width is None:
-        max_row_w = 0
-        for r in rows_data:
-            row_w = sum(item["cell_w"] for item in r["cells"])
-            max_row_w = max(max_row_w, row_w)
-        total_width = max_row_w
+        total_width = max(row_widths) if row_widths else 0
 
+    # 补偿逻辑 (处理负数偏移)
     min_x, min_y = 0, 0
     for r_idx, r in enumerate(rows_data):
         for item in r["cells"]:
@@ -300,10 +302,22 @@ def render_rows(rows_config, texts_dict, global_cfg, image_path=None, total_widt
     canvas_h = total_height + shift_y
     canvas = Image.new("RGBA", (canvas_w, canvas_h), (0,0,0,0))
 
+    # 5. 绘制到画布
     current_y = shift_y
     for r_idx, r in enumerate(rows_data):
         row_h = row_heights[r_idx]
-        current_x = shift_x
+        actual_row_w = row_widths[r_idx]
+        
+        # ✨ 核心新增：根据 align_x 计算当前行的起始 X 坐标
+        align_x = r["align_x"]
+        if align_x == "right":
+            start_x = shift_x + (total_width - actual_row_w)
+        elif align_x == "center":
+            start_x = shift_x + (total_width - actual_row_w) // 2
+        else: # 默认 left
+            start_x = shift_x
+            
+        current_x = start_x
         
         for item in r["cells"]:
             cfg = item["cfg"]
@@ -322,7 +336,6 @@ def render_rows(rows_config, texts_dict, global_cfg, image_path=None, total_widt
         current_y += row_h + (r["spacing"] if r_idx < len(row_spacings) else 0)
 
     return canvas
-
 
 # ============================================================
 # 3. 对外暴露的 API (支持数组，绘制多个独立的块)

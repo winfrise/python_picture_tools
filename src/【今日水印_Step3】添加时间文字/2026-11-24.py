@@ -34,7 +34,7 @@ if __name__ == "__main__":
     layout_data = [
         {
             "pos_x":44,
-            "pos_y": -44,
+            "pos_y": -544,
             "layout_config":[
                 {
                     "align_y": "center",
@@ -105,7 +105,7 @@ if __name__ == "__main__":
         },
         {
             "pos_x": -44,
-            "pos_y": -44,
+            "pos_y": -544,
             "layout_config":[
                 {
                     "align_x": "right",
@@ -113,21 +113,24 @@ if __name__ == "__main__":
                         {
                             "type": "image",
                             "text_key": "logo",
-                            "height": 200
+                            "height": 100
                         }
                     ]
                 },
                 {
+                    "align_x": "right",
                     "cells": [
                         {
                             "type": "text",
                             "text_key": "防伪",
-                            "font_size": 20
+                            "font_size": 20,
+                            "font_path": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/assets/fonts/苹方黑体-中粗-简.ttf"
                         },
                         {
                             "type": "text",
                             "text_key": "sn_code",
-                            "font_size": 22
+                            "font_size": 22,
+                            "font_path": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/assets/fonts/苹方黑体-中粗-简.ttf"
                         }
                     ]
                 }
@@ -136,7 +139,7 @@ if __name__ == "__main__":
         }
     ]
 
-    background_path = "/Volumes/西数4T外置/Chrome下载目录/美图设计室_11_24_2026/001/02.jpg"
+    background_path = "/Users/teacher/Desktop/5张/01.png"
     base_name, ext = os.path.splitext(background_path)
     output_path = f"{base_name}_加水印{ext}"
     

@@ -205,7 +205,7 @@ def render_rows(rows_config, texts_dict, global_cfg, image_path=None, total_widt
                         new_h = max(1, int(round(img.height * hr)))
                         img = img.resize((new_w, new_h), Image.LANCZOS)
                         
-            elif c_type == "image":  # ✨ 图片处理逻辑
+            elif c_type == "image":
                 img_path = _resolve_text_value(cell.get("text_key", ""), texts_dict, image_path)
                 if img_path and os.path.exists(img_path):
                     img = Image.open(img_path).convert("RGBA")
@@ -244,16 +244,16 @@ def render_rows(rows_config, texts_dict, global_cfg, image_path=None, total_widt
                 "cell_w": cell_w,
                 "cell_h": cell_h
             })
-        # ✨ 记录每行的对齐方式，默认 left
+            
         rows_data.append({
             "cells": row_cells, 
-            "spacing": row.get("spacing", 15),
+            "spacing": row.get("spacing", 0),
             "align_x": row.get("align_x", "left") 
         })
         
     # 2. 计算每行的实际高度和实际总宽度
     row_heights = []
-    row_widths = []  # ✨ 记录每行内容的真实宽度，用于对齐计算
+    row_widths = []
     for r in rows_data:
         max_h = 0
         row_w = 0
@@ -278,10 +278,10 @@ def render_rows(rows_config, texts_dict, global_cfg, image_path=None, total_widt
 
     # 4. 计算画布整体尺寸
     row_spacings = [r["spacing"] for r in rows_data]
+    # ✨ 修正 1：计算总高度时，忽略最后一行的 spacing
     total_height = sum(row_heights) + sum(row_spacings[:-1]) if row_heights else 0
     if total_height <= 0: return None
 
-    # ✨ 如果未指定 total_width，则取所有行中最宽的一行作为画布宽度
     if total_width is None:
         total_width = max(row_widths) if row_widths else 0
 
@@ -308,7 +308,7 @@ def render_rows(rows_config, texts_dict, global_cfg, image_path=None, total_widt
         row_h = row_heights[r_idx]
         actual_row_w = row_widths[r_idx]
         
-        # ✨ 核心新增：根据 align_x 计算当前行的起始 X 坐标
+        # ✨ 核心：根据 align_x 计算当前行的起始 X 坐标
         align_x = r["align_x"]
         if align_x == "right":
             start_x = shift_x + (total_width - actual_row_w)
@@ -333,10 +333,13 @@ def render_rows(rows_config, texts_dict, global_cfg, image_path=None, total_widt
                 
             current_x += item["cell_w"]
             
-        current_y += row_h + (r["spacing"] if r_idx < len(row_spacings) else 0)
+        # ✨ 修正 2：只有当不是最后一行时，才追加 spacing
+        if r_idx < len(rows_data) - 1:
+            current_y += row_h + r["spacing"]
+        else:
+            current_y += row_h
 
     return canvas
-
 # ============================================================
 # 3. 对外暴露的 API (支持数组，绘制多个独立的块)
 # ============================================================

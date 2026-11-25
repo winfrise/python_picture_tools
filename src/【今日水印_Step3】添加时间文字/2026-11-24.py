@@ -28,7 +28,8 @@ if __name__ == "__main__":
         "shadow_color": (0, 0, 0, 100),
         "shadow_offset": (2, 2), 
         "shadow_blur": 3, 
-        "align_x": "left"
+        "align_x": "left",
+        "spacing": 0
     }
 
     layout_data = [
@@ -109,6 +110,7 @@ if __name__ == "__main__":
             "layout_config":[
                 {
                     "align_x": "right",
+                    "spacing": 0,
                     "cells": [
                         {
                             "type": "image",
@@ -131,7 +133,7 @@ if __name__ == "__main__":
                             "font_path": "/Users/teacher/Library/Fonts/FZDHTJW.TTF"
                         },
                         {
-                            "space_top": -10,
+                            "space_right": -10,
                             "type": "text",
                             "text_key": "sn_code",
                             "shadow_color": (0, 0, 0, 180),
@@ -147,7 +149,7 @@ if __name__ == "__main__":
         }
     ]
 
-    background_path = "/Users/teacher/Desktop/5张/01.png"
+    background_path = "/Users/teacher/Desktop/5张/图片.png"
     base_name, ext = os.path.splitext(background_path)
     output_path = f"{base_name}_加水印{ext}"
     

@@ -15,7 +15,8 @@ if __name__ == "__main__":
         "temp": "15℃",
         "week": lambda: get_week(date_val),
         "weather_line": "{week} {weather} {temp}",
-        "location": "漳州市龙海区·福建华夏高级技工学校(龙江校区)"
+        "location": "漳州市龙海区·福建华夏高级技工学校(龙江校区)",
+        "sn_code": "ZNDIEMKFIDESSE"
     }
 
     # ✨ 公共配置（相当于 CSS 的 body 选择器）
@@ -99,6 +100,33 @@ if __name__ == "__main__":
                         }
                     ]
                 }
+            ]
+        },
+        {
+            "pos_x": -44,
+            "pos_y": -44,
+            "layout_config":[
+                {
+                    "cells": [
+                        {
+                            "type": "image",
+                            "text_key": "logo",
+                        }
+                    ]
+                },
+                {
+                    "cells": [
+                        {
+                            "type": "text",
+                            "text_key": "防伪"
+                        },
+                        {
+                            "type": "text",
+                            "text_key": "sn_code"
+                        }
+                    ]
+                }
+
             ]
         }
     ]

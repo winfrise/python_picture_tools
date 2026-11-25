@@ -36,10 +36,16 @@ if __name__ == "__main__":
                 { 
                     "type": "text", 
                     "text_key": "time", 
-                    "width": 420,
                     # 时间和公共配置不同，单独指定
                     "font_path": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/assets/fonts/jinrishuiyin.ttf",
-                    "font_size": 148
+                    "font_size": 148,
+                    "image_mask": {
+                        "path": "/Users/teacher/Desktop/111.png", 
+                        # "path": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/【今日水印_Step3】添加时间文字/assets/time_mask.png",
+                        "pos": (0, 0),                # 蒙版相对文字左上角的偏移，默认 (0, 0)
+                        "scale_width": 0.5,           # 宽度缩放比例，默认 1.0
+                        "scale_height": 0.5,          # 高度缩放比例，默认 1.0
+                    },
                 },
                 {
                     "type": "divider", 
@@ -91,7 +97,7 @@ if __name__ == "__main__":
         }
     ]
 
-    background_path = "/Users/teacher/Desktop/5张/01.png"
+    background_path = "/Volumes/西数4T外置/Chrome下载目录/美图设计室_11_24_2026/001/02.jpg"
     base_name, ext = os.path.splitext(background_path)
     output_path = f"{base_name}_加水印{ext}"
     
@@ -102,5 +108,5 @@ if __name__ == "__main__":
         texts=my_texts,
         common_config=my_common_config, # ✨ 传入公共配置
         pos_x=44,
-        pos_y=-454
+        pos_y=-44
     )

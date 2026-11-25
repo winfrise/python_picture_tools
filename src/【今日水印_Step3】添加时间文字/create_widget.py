@@ -35,7 +35,7 @@ def _resolve_text_value(text_key, texts_dict, image_path=None):
     return re.sub(r'\{([a-zA-Z0-9_]+)\}', _replace, text)
 
 # ============================================================
-# 核心渲染逻辑 (保持不变)
+# 核心渲染逻辑 (支持图片直接替换文字)
 # ============================================================
 def _is_char_supported(char, font):
     if not char.strip(): return True
@@ -112,36 +112,61 @@ def _render_text(text, cfg):
             cur_x += f.getlength(seg_text)
         final_img = img
 
-    if cfg.get("texture_mask", False):
-        mask = Image.new("L", final_img.size, 255); m_draw = ImageDraw.Draw(mask)
-        tx1, ty1, tx2, ty2 = final_img.getbbox()
-        if tx1 is not None:
-            for _ in range(40):
-                x0 = random.randint(tx1, tx2); y0 = random.randint(ty1, ty2)
-                m_draw.rectangle([x0, y0, x0 + random.randint(20, 80), y0 + random.randint(20, 80)], fill=random.randint(80, 200))
-            r,g,b,a = final_img.split()
-            final_img = Image.merge("RGBA", (r,g,b, Image.composite(a, Image.new("L", a.size, 0), mask)))
+    # ---- ✨ 图片直接替换文字轮廓（局部生效，完美消除黑边）----
+    mask_cfg = cfg.get("image_mask")
+    if isinstance(mask_cfg, dict):
+        mask_path = mask_cfg.get("path")
+        if mask_path and os.path.exists(mask_path):
+            # 1. 提取文字轮廓
+            text_alpha = final_img.split()[3]
+            bbox = text_alpha.getbbox()
+            if not bbox:
+                return None
+
+            # 2. 加载波浪图（保留它原本的透明通道 RGBA）
+            mask_img = Image.open(mask_path).convert("RGBA")
+            sw = mask_cfg.get("scale_width", 1.0)
+            sh = mask_cfg.get("scale_height", 1.0)
+            new_w = max(1, int(round(mask_img.width * sw)))
+            new_h = max(1, int(round(mask_img.height * sh)))
+            if (new_w, new_h) != mask_img.size:
+                mask_img = mask_img.resize((new_w, new_h), Image.LANCZOS)
+
+            # 3. 创建与文字一样大的透明画布
+            target_w, target_h = final_img.size
+            result_img = Image.new("RGBA", (target_w, target_h), (0, 0, 0, 0))
+            
+            # 4. 将波浪图按位置贴上去（使用 alpha_composite 完美融合透明度）
+            pos_x, pos_y = mask_cfg.get("pos", (0, 0))
+            result_img.alpha_composite(mask_img, (pos_x, pos_y))
+
+            # 5. 【核心】获取图片自身的透明度，并与文字轮廓取交集
+            wave_alpha = result_img.split()[3]
+            from PIL import ImageChops
+            final_alpha = ImageChops.multiply(wave_alpha, text_alpha)
+
+            # 6. 将最终透明度赋给图像
+            result_img.putalpha(final_alpha)
+
+            # 7. 裁剪返回
+            final_bbox = result_img.getbbox()
+            return result_img.crop(final_bbox) if final_bbox else None
+
+    # 如果没有配置 image_mask，正常返回原本的文字
     final_bbox = final_img.getbbox()
     return final_img.crop(final_bbox) if final_bbox else None
-
-
 # ============================================================
-# 2. 网格布局引擎 (✨ 改造为绝对坐标 + Padding 模型)
-# ============================================================
-# ============================================================
-# 2. 网格布局引擎 (✨ 修正 space_right 不生效的问题)
+# 2. 网格布局引擎 (保持不变)
 # ============================================================
 def render_rows(rows_config, texts_dict, global_cfg, image_path=None, total_width=None):
     rows_data = []
     
-    # 1. 解析所有单元格并计算其“外部占位框（包含 Padding）”的宽高
     for row in rows_config:
         row_cells = []
         for cell in row.get("cells", []):
             c_type = cell.get("type", "text")
             final_cfg = {**global_cfg, **cell}
             
-            # 获取四周的留白间距
             s_left = final_cfg.get("space_left", 0)
             s_right = final_cfg.get("space_right", 0)
             s_top = final_cfg.get("space_top", 0)
@@ -151,8 +176,6 @@ def render_rows(rows_config, texts_dict, global_cfg, image_path=None, total_widt
             if c_type == "text":
                 text_val = _resolve_text_value(cell.get("text_key", ""), texts_dict, image_path)
                 img = _render_text(text_val, final_cfg)
-
-                # ✨ 文字按比例缩放 width_ratio / height_ratio
                 if img:
                     wr = final_cfg.get("width_ratio", 1.0)
                     hr = final_cfg.get("height_ratio", 1.0)
@@ -164,13 +187,11 @@ def render_rows(rows_config, texts_dict, global_cfg, image_path=None, total_widt
             elif c_type == "group":
                 img = render_rows(cell["rows"], texts_dict, global_cfg, image_path, total_width=cell.get("width", None))
                 
-            # ✨ 计算 Cell 的总占位宽高（包含四周 margin）
             if img:
                 cell_w = img.width + s_left + s_right
                 cell_h = img.height + s_top + s_bottom
             elif c_type == "divider":
                 cell_w = final_cfg.get("width", 6) + s_left + s_right
-                # 若显式指定 height，则参与行高计算；否则置 0，仍由整行撑开
                 custom_h = final_cfg.get("height", None)
                 cell_h = (custom_h + s_top + s_bottom) if custom_h is not None else 0
             else:
@@ -185,7 +206,6 @@ def render_rows(rows_config, texts_dict, global_cfg, image_path=None, total_widt
             })
         rows_data.append({"cells": row_cells, "spacing": row.get("spacing", 15)})
         
-    # 2. 计算每行的实际高度
     row_heights = []
     for r in rows_data:
         max_h = 0
@@ -193,7 +213,6 @@ def render_rows(rows_config, texts_dict, global_cfg, image_path=None, total_widt
             max_h = max(max_h, item["cell_h"])
         row_heights.append(max_h)
 
-    # 3. 渲染分割线（撑满整行高度）
     for r_idx, r in enumerate(rows_data):
         for item in r["cells"]:
             if item["cfg"].get("type") == "divider":
@@ -206,7 +225,6 @@ def render_rows(rows_config, texts_dict, global_cfg, image_path=None, total_widt
                     item["cfg"].get("color", (255, 165, 0, 255))
                 )
 
-    # 4. 计算画布整体尺寸
     row_spacings = [r["spacing"] for r in rows_data]
     total_height = sum(row_heights) + sum(row_spacings[:-1]) if row_heights else 0
     if total_height <= 0: return None
@@ -218,7 +236,6 @@ def render_rows(rows_config, texts_dict, global_cfg, image_path=None, total_widt
             max_row_w = max(max_row_w, row_w)
         total_width = max_row_w
 
-    # 补偿逻辑 (处理负数偏移)
     min_x, min_y = 0, 0
     for r_idx, r in enumerate(rows_data):
         for item in r["cells"]:
@@ -235,7 +252,6 @@ def render_rows(rows_config, texts_dict, global_cfg, image_path=None, total_widt
     canvas_h = total_height + shift_y
     canvas = Image.new("RGBA", (canvas_w, canvas_h), (0,0,0,0))
 
-    # 5. 绘制到画布
     current_y = shift_y
     for r_idx, r in enumerate(rows_data):
         row_h = row_heights[r_idx]
@@ -249,51 +265,69 @@ def render_rows(rows_config, texts_dict, global_cfg, image_path=None, total_widt
             off_y = cfg.get("offset_y", 0)
             
             if img:
-                # ✨ 核心修复：实际渲染坐标 = 当前起点 + 左侧间距(space_left) + 偏移量(offset_x)
                 draw_x = current_x + cfg.get("space_left", 0) + off_x
                 draw_y = current_y + cfg.get("space_top", 0) + off_y
-                
                 canvas.alpha_composite(img, (draw_x, draw_y))
                 
-            # 累加当前格子的宽度（包含它的 space_right）
             current_x += item["cell_w"]
             
         current_y += row_h + (r["spacing"] if r_idx < len(row_spacings) else 0)
 
     return canvas
+
+
 # ============================================================
-# 3. 对外暴露的 API (保持不变)
+# 3. 对外暴露的 API (支持数组，绘制多个独立的块)
 # ============================================================
 def render_component_to_image(
         background_path, 
         output_path, 
-        layout_config, 
+        layout_data,  # 必须是 List[Dict]，每个 Dict 包含 pos_x, pos_y, layout_config
         texts, 
         common_config=None, 
-        pos_x=50, 
-        pos_y=50
     ):
     if common_config is None: common_config = {}
 
-    layer_img = render_rows(
-        rows_config=layout_config,
-        texts_dict=texts, 
-        global_cfg=common_config, 
-        image_path=background_path
-    )
-    if not layer_img: return
+    # ✨ 严格校验：必须传入数组
+    if not isinstance(layout_data, list):
+        raise TypeError("layout_data 必须是一个列表（Array），即使只有一个块也要包在 [] 里！")
 
+    # 加载背景
     if background_path and os.path.exists(background_path):
         base_img = Image.open(background_path).convert("RGBA")
     else:
         base_img = Image.new("RGBA", (1920, 1080), (40, 40, 45, 255))
 
     bg_w, bg_h = base_img.size
-    final_layer_x = pos_x if pos_x >= 0 else bg_w - layer_img.width + pos_x
-    final_layer_y = pos_y if pos_y >= 0 else bg_h - layer_img.height + pos_y
 
-    base_img.alpha_composite(layer_img, (final_layer_x, final_layer_y))
+    # ✨ 遍历数组，依次绘制每一个独立的块
+    for block in layout_data:
+        if not isinstance(block, dict):
+            continue
+
+        pos_x = block.get("pos_x", 0)
+        pos_y = block.get("pos_y", 0)
+        layout_config = block.get("layout_config", [])
+
+        # 针对当前的块，生成其相对排版图层
+        layer_img = render_rows(
+            rows_config=layout_config,
+            texts_dict=texts, 
+            global_cfg=common_config, 
+            image_path=background_path
+        )
+        
+        if not layer_img: 
+            continue
+
+        # 计算绝对坐标（支持负数从右/下对齐）
+        final_layer_x = pos_x if pos_x >= 0 else bg_w - layer_img.width + pos_x
+        final_layer_y = pos_y if pos_y >= 0 else bg_h - layer_img.height + pos_y
+
+        # 将当前块合成到背景上
+        base_img.alpha_composite(layer_img, (final_layer_x, final_layer_y))
     
+    # 统一保存
     ext = os.path.splitext(output_path)[1].lower()
     if ext in (".jpg", ".jpeg"): 
         base_img.convert("RGB").save(output_path, quality=95)

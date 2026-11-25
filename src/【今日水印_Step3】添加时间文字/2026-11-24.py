@@ -29,69 +29,75 @@ if __name__ == "__main__":
         "align_x": "left"
     }
 
-    my_layout = [
+    layout_data = [
         {
-            "align_y": "center",
-            "cells": [
-                { 
-                    "type": "text", 
-                    "text_key": "time", 
-                    # 时间和公共配置不同，单独指定
-                    "font_path": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/assets/fonts/jinrishuiyin.ttf",
-                    "font_size": 148,
-                    "image_mask": {
-                        "path": "/Users/teacher/Desktop/111.png", 
-                        # "path": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/【今日水印_Step3】添加时间文字/assets/time_mask.png",
-                        "pos": (0, 0),                # 蒙版相对文字左上角的偏移，默认 (0, 0)
-                        "scale_width": 0.5,           # 宽度缩放比例，默认 1.0
-                        "scale_height": 0.5,          # 高度缩放比例，默认 1.0
-                    },
-                },
+            "pos_x":44,
+            "pos_y":-44,
+            "layout_config":[
                 {
-                    "type": "divider", 
-                    "width": 8, 
-                    # "height": 20,
-                    "color": (253, 205, 67, 255),
-                    "space_left": 40,
-                    "space_right": 40,
-                },
-                {
-                    "type": "group", 
-                    "width": 450, 
-                    "rows": [
-                        {
-                            "cells": [
-                                {
-                                    "type": "text", 
-                                    "text_key": "date", 
-                                    "font_path": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/assets/fonts/jinrishuiyin.ttf",
-                                    "font_size": 56,
-                                    "check_glyphs": True,
-                                    "fallback_font": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/assets/fonts/苹方黑体-中黑-简.ttf" 
-                                }
-                            ]
+                    "align_y": "center",
+                    "cells": [
+                        { 
+                            "type": "text", 
+                            "text_key": "time", 
+                            # 时间和公共配置不同，单独指定
+                            "font_path": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/assets/fonts/jinrishuiyin.ttf",
+                            "font_size": 148,
+                            "image_mask": {
+                                "path": "/Users/teacher/Desktop/111.png", 
+                                # "path": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/【今日水印_Step3】添加时间文字/assets/time_mask.png",
+                                "pos": (0, 0),                # 蒙版相对文字左上角的偏移，默认 (0, 0)
+                                "scale_width": 0.5,           # 宽度缩放比例，默认 1.0
+                                "scale_height": 0.5,          # 高度缩放比例，默认 1.0
+                            },
                         },
                         {
-                            "cells": [
+                            "type": "divider", 
+                            "width": 8, 
+                            # "height": 20,
+                            "color": (253, 205, 67, 255),
+                            "space_left": 40,
+                            "space_right": 40,
+                        },
+                        {
+                            "type": "group", 
+                            "width": 450, 
+                            "rows": [
                                 {
-                                    "type": "text", 
-                                    "text_key": "weather_line", 
-                                    "space_top": 0,
-                                    "width_ratio": 0.9
+                                    "cells": [
+                                        {
+                                            "type": "text", 
+                                            "text_key": "date", 
+                                            "font_path": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/assets/fonts/jinrishuiyin.ttf",
+                                            "font_size": 56,
+                                            "check_glyphs": True,
+                                            "fallback_font": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/assets/fonts/苹方黑体-中黑-简.ttf" 
+                                        }
+                                    ]
+                                },
+                                {
+                                    "cells": [
+                                        {
+                                            "type": "text", 
+                                            "text_key": "weather_line", 
+                                            "space_top": 0,
+                                            "width_ratio": 0.9
+                                        }
+                                    ]
                                 }
                             ]
                         }
                     ]
-                }
-            ]
-        },
-        {
-            "align_y": "center",
-            "cells": [
-                { 
-                    "type": "text", 
-                    "text_key": "location",
-                    "space_top": 40
+                },
+                {
+                    "align_y": "center",
+                    "cells": [
+                        { 
+                            "type": "text", 
+                            "text_key": "location",
+                            "space_top": 40
+                        }
+                    ]
                 }
             ]
         }
@@ -104,9 +110,7 @@ if __name__ == "__main__":
     render_component_to_image(
         background_path=background_path,
         output_path=output_path,
-        layout_config=my_layout,
+        layout_data=layout_data,
         texts=my_texts,
-        common_config=my_common_config, # ✨ 传入公共配置
-        pos_x=44,
-        pos_y=-44
+        common_config=my_common_config,
     )

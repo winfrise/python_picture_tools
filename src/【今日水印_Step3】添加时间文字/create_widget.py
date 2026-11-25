@@ -405,3 +405,65 @@ def render_component_to_image(
         base_img.convert("RGB").save(output_path, quality=95)
     else: 
         base_img.save(output_path)
+
+
+# ============================================================
+# 4. 批量处理文件夹 (新增)
+# ============================================================
+def batch_process_folder(
+        input_dir, 
+        output_dir, 
+        layout_data, 
+        texts, 
+        common_config=None
+    ):
+    """
+    遍历 input_dir 下的所有图片，应用水印，并按相同的目录结构输出到 output_dir。
+    """
+    if common_config is None: common_config = {}
+    
+    # 支持的图片后缀
+    valid_exts = {".jpg", ".jpeg", ".png", ".bmp", ".webp"}
+    
+    count = 0
+    for root, dirs, files in os.walk(input_dir):
+        # 跳过以 . 开头的隐藏文件夹（如 .git, .DS_Store 所在文件夹等）
+        dirs[:] = [d for d in dirs if not d.startswith('.')]
+        
+        for file in files:
+            # 跳过隐藏文件
+            if file.startswith('.'):
+                continue
+                
+            ext = os.path.splitext(file)[1].lower()
+            if ext not in valid_exts:
+                continue
+                
+            input_path = os.path.join(root, file)
+            
+            # 计算相对路径，维持原目录结构
+            rel_path = os.path.relpath(root, input_dir)
+            # 如果有子文件夹，在输出目录中创建对应结构
+            target_dir = os.path.join(output_dir, rel_path) if rel_path != "." else output_dir
+            os.makedirs(target_dir, exist_ok=True)
+            
+            output_path = os.path.join(target_dir, file)
+            
+            print(f"[{count+1}] 处理中: {input_path} -> {output_path}")
+            try:
+                # 如果 layout_data 是函数，则可以根据不同的背景图动态生成排版（可选高级功能）
+                current_layout = layout_data(input_path) if callable(layout_data) else layout_data
+                current_texts = texts(input_path) if callable(texts) else texts
+                
+                render_component_to_image(
+                    background_path=input_path,
+                    output_path=output_path,
+                    layout_data=current_layout,
+                    texts=current_texts,
+                    common_config=common_config
+                )
+                count += 1
+            except Exception as e:
+                print(f"❌ 处理失败: {input_path}, 错误信息: {e}")
+
+    print(f"\n🎉 批量处理完成！共处理 {count} 张图片。输出目录: {output_dir}")

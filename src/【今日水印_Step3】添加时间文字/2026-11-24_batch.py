@@ -28,14 +28,14 @@ if __name__ == "__main__":
     layer_data = [
         {
             "pos_x":44,
-            "pos_y": -544,
-            "scale": 1,
+            "pos_y": -44,
+            "scale": None,
             "standard_width": standard_width
         },
         {
             "pos_x": -44,
-            "pos_y": -544,
-            "scale": 1,
+            "pos_y": -24,
+            "scale": None,
             "standard_width": standard_width
         }
     ]
@@ -45,8 +45,8 @@ if __name__ == "__main__":
 
 
     # ✨ 修改这里：输入文件夹 和 输出文件夹
-    input_directory = "/Users/teacher/Desktop/5张" 
-    output_directory = "/Users/teacher/Desktop/5张_加水印" 
+    input_directory = "/Volumes/西数4T外置/Chrome下载目录/美图设计室_11_24_2026/001" 
+    output_directory = f"{input_directory}_加水印"
     
     # 执行批量处理
     batch_process_folder(

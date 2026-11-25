@@ -371,7 +371,22 @@ def render_component_to_image(
 
         pos_x = block.get("pos_x", 0)
         pos_y = block.get("pos_y", 0)
-        scale = block.get("scale", 1.0)  # ✨ 获取缩放比例，默认 1.0
+
+
+        user_scale = block.get("scale") 
+        standard_width = block.get('standard_width')
+
+        # 2. 逻辑判断
+        if user_scale:
+            # 用户明确指定了缩放
+            scale = user_scale
+        elif standard_width and standard_width > 0:
+            # 用户没指定，但有基准宽度 -> 自动计算填满背景
+            scale = bg_w / standard_width
+        else:
+            # 既没指定缩放，也没基准宽度 -> 兜底默认 1.0
+            scale = 1.0
+
         layout_config = block.get("layout_config", [])
 
         # 1. 针对当前的块，生成其相对排版图层

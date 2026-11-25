@@ -13,8 +13,9 @@ common_config = {
 layout_data = [
     {
         "pos_x":44,
-        "pos_y": -544,
-        "scale": 1.5,
+        "pos_y": -44,
+        "scale": 1,
+        "standard_width": 2160,
         "layout_config":[
             {
                 "align_y": "center",
@@ -84,8 +85,9 @@ layout_data = [
     },
     {
         "pos_x": -44,
-        "pos_y": -544,
+        "pos_y": -44,
         "scale": 1,
+        "standard_width": 2160,
         "layout_config":[
             {
                 "align_x": "right",

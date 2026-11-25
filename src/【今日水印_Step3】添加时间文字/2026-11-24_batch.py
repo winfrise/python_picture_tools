@@ -1,6 +1,7 @@
 from create_widget import batch_process_folder
 from datetime import datetime
 import os
+from config.jrsy_config import common_config,layout_data
 
 if __name__ == "__main__":
     date_val = "2026-11-03"
@@ -21,22 +22,6 @@ if __name__ == "__main__":
         "防伪": "防伪码" # ⚠️ 你的原代码里似乎漏了这个 key，这里补上
     }
 
-    # ✨ 公共配置
-    my_common_config = {
-        "font_path": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/assets/fonts/苹方黑体-中粗-简.ttf",
-        "font_size": 47,
-        "text_color": (255, 255, 255, 255),
-        "shadow_color": (0, 0, 0, 100),
-        "shadow_offset": (2, 2), 
-        "shadow_blur": 3, 
-        "align_x": "left",
-        "spacing": 0
-    }
-
-    layout_data = [
-        # ... 这里保留你原来的 layout_data 配置，没有任何变化 ...
-    ]
-
     # ✨ 修改这里：输入文件夹 和 输出文件夹
     input_directory = "/Users/teacher/Desktop/5张" 
     output_directory = "/Users/teacher/Desktop/5张_加水印" 
@@ -47,5 +32,5 @@ if __name__ == "__main__":
         output_dir=output_directory,
         layout_data=layout_data,
         texts=my_texts,
-        common_config=my_common_config,
+        common_config=common_config,
     )

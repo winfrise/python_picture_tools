@@ -17,7 +17,7 @@ if __name__ == "__main__":
         "weather_line": "{week} {weather} {temp}",
         "location": "漳州市龙海区·福建华夏高级技工学校(龙江校区)",
         "logo": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/【今日水印_Step3】添加时间文字/assets/jinrishuiyin.png",
-        "sn_code": "ZNDIEMKFIDESSE"
+        "sn_code": "KTHAN1E3Y3X3BP"
     }
 
     # ✨ 公共配置（相当于 CSS 的 body 选择器）
@@ -123,14 +123,22 @@ if __name__ == "__main__":
                         {
                             "type": "text",
                             "text_key": "防伪",
-                            "font_size": 20,
-                            "font_path": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/assets/fonts/苹方黑体-中粗-简.ttf"
+                            "font_size": 24,
+                            "width_ratio": 0.95,
+                            "shadow_color": (0, 0, 0, 200),
+                            "shadow_offset": (2, 2), 
+                            "shadow_blur": 3, 
+                            "font_path": "/Users/teacher/Library/Fonts/FZDHTJW.TTF"
                         },
                         {
+                            "space_top": -10,
                             "type": "text",
                             "text_key": "sn_code",
-                            "font_size": 22,
-                            "font_path": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/assets/fonts/苹方黑体-中粗-简.ttf"
+                            "shadow_color": (0, 0, 0, 180),
+                            "shadow_offset": (2, 2), 
+                            "shadow_blur": 3, 
+                            "font_size": 26,
+                            "font_path": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/assets/fonts/typopro-ptmono-bold.ttf",
                         }
                     ]
                 }

@@ -24,23 +24,26 @@ if __name__ == "__main__":
 
 
     my_layout_data = copy.deepcopy(layout_data)
+    standard_width = 2160
     layer_data = [
         {
             "pos_x":44,
-            "pos_y": -544,
-            "scale": 1.5,
+            "pos_y": -44,
+            "scale": None,
+            "standard_width": standard_width
         },
         {
             "pos_x": -44,
-            "pos_y": -544,
-            "scale": 1,
+            "pos_y": -24,
+            "scale": None,
+            "standard_width": standard_width
         }
     ]
 
     my_layout_data[0].update(layer_data[0]) 
     my_layout_data[1].update(layer_data[1]) 
 
-    background_path = "/Users/teacher/Desktop/5张/图片.png"
+    background_path = "/Users/teacher/Desktop/未命名文件夹/2.jpeg"
     base_name, ext = os.path.splitext(background_path)
     output_path = f"{base_name}_加水印{ext}"
     

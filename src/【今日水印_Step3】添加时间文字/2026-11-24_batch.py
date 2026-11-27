@@ -5,11 +5,12 @@ import copy
 from config.jrsy_config import common_config,layout_data
 
 if __name__ == "__main__":
-    date_val = "2026-11-03"
+
     def get_week(d):
         try: return ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"][datetime.strptime(d, "%Y-%m-%d").weekday()]
         except: return "未知"
-        
+
+    date_val = "2026-11-03"
     my_texts = {
         "time": "12:47",
         "date": date_val,

@@ -30,13 +30,13 @@ if __name__ == "__main__":
         {
             "pos_x":44,
             "pos_y": -44,
-            "scale": None,
+            "scale": 1.2,
             "standard_width": standard_width
         },
         {
             "pos_x": -44,
             "pos_y": -24,
-            "scale": None,
+            "scale": 1.2,
             "standard_width": standard_width
         }
     ]
@@ -44,9 +44,10 @@ if __name__ == "__main__":
     my_layout_data[0].update(layer_data[0]) 
     my_layout_data[1].update(layer_data[1]) 
 
-    background_path = "/Volumes/西数4T外置/Chrome下载目录/美图设计室_11_24_2026/001/01.jpg"
+    background_path = "/Users/teacher/Desktop/未命名文件夹/图片.png"
     base_name, ext = os.path.splitext(background_path)
     output_path = f"{base_name}_加水印{ext}"
+    temp_work_dir = f"{base_name}_temp"
     
     render_component_to_image(
         background_path=background_path,
@@ -54,4 +55,5 @@ if __name__ == "__main__":
         layout_data=layout_data,
         texts=my_texts,
         common_config=common_config,
+        temp_work_dir=temp_work_dir
     )

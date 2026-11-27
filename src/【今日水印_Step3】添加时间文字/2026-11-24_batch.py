@@ -18,9 +18,9 @@ if __name__ == "__main__":
         "week": lambda: get_week(date_val),
         "weather_line": "{week} {weather} {temp}",
         "location": "漳州市龙海区·福建华夏高级技工学校(龙江校区)",
-        "logo": "/Users/teacher/Desktop/今日水印_2.png",
+        "logo": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/【今日水印_Step3】添加时间文字/assets/图片.png",
         "sn_code": "KTHAN1E3Y3X3BP",
-        "防伪": "防伪码" # ⚠️ 你的原代码里似乎漏了这个 key，这里补上
+        "防伪": "防伪" # ⚠️ 你的原代码里似乎漏了这个 key，这里补上
     }
 
     my_layout_data = copy.deepcopy(layout_data)
@@ -28,14 +28,14 @@ if __name__ == "__main__":
     layer_data = [
         {
             "pos_x":44,
-            "pos_y": -44,
-            "scale": None,
+            "pos_y": -544,
+            "scale": 1.2,
             "standard_width": standard_width
         },
         {
             "pos_x": -44,
-            "pos_y": -24,
-            "scale": None,
+            "pos_y": -524,
+            "scale": 1.2,
             "standard_width": standard_width
         }
     ]
@@ -45,8 +45,9 @@ if __name__ == "__main__":
 
 
     # ✨ 修改这里：输入文件夹 和 输出文件夹
-    input_directory = "/Volumes/西数4T外置/Chrome下载目录/美图设计室_11_24_2026/001" 
+    input_directory = "/Users/teacher/Desktop/未命名文件夹/001" 
     output_directory = f"{input_directory}_加水印"
+    temp_work_dir = f"{input_directory}_temp"
     
     # 执行批量处理
     batch_process_folder(
@@ -55,4 +56,5 @@ if __name__ == "__main__":
         layout_data=my_layout_data,
         texts=my_texts,
         common_config=common_config,
+        temp_work_dir=temp_work_dir
     )

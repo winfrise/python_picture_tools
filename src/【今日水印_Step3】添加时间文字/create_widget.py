@@ -452,6 +452,7 @@ def render_component_to_image(
         layout_data,  # 必须是 List[Dict]，每个 Dict 包含 pos_x, pos_y, layout_config
         texts, 
         common_config=None, 
+        temp_work_dir=None
     ):
     if common_config is None: common_config = {}
 
@@ -468,7 +469,7 @@ def render_component_to_image(
     bg_w, bg_h = base_img.size
 
     # ✨ 遍历数组，依次绘制每一个独立的块
-    for block in layout_data:
+    for idx, block in enumerate(layout_data):
         if not isinstance(block, dict):
             continue
 
@@ -503,6 +504,23 @@ def render_component_to_image(
         if not layer_img: 
             continue
 
+        # ✨ 保存 layer_img 到临时目录（利用 output_path 保持目录结构）
+        if temp_work_dir:
+            # 把 output_path 变成相对于当前工作目录的相对路径，替换斜杠防止路径报错
+            # 这里更安全的做法是用原文件名，毕竟已经在同一个输入文件循环里了
+            # 如果确实要分文件夹，可以利用 input_path 的目录名
+            bg_dir_name = os.path.basename(os.path.dirname(background_path))
+            base_name = os.path.splitext(os.path.basename(output_path))[0]
+            
+            # 如果想平铺：
+            # save_name = f"{base_name}_layer_{idx}.png"
+            # 如果想按原图所在的文件夹分类：
+            save_name = os.path.join(bg_dir_name, f"{base_name}_layer_{idx}.png")
+            
+            save_path = os.path.join(temp_work_dir, save_name)
+            os.makedirs(os.path.dirname(save_path), exist_ok=True)
+            layer_img.save(save_path)
+
         # 2. ✨ 如果配置了 scale，对排版图层进行整体缩放
         if scale != 1.0:
             new_w = max(1, int(layer_img.width * scale))
@@ -533,7 +551,8 @@ def batch_process_folder(
         output_dir, 
         layout_data, 
         texts, 
-        common_config=None
+        common_config=None,
+        temp_work_dir=None
     ):
     """
     遍历 input_dir 下的所有图片，应用水印，并按相同的目录结构输出到 output_dir。
@@ -578,7 +597,8 @@ def batch_process_folder(
                     output_path=output_path,
                     layout_data=current_layout,
                     texts=current_texts,
-                    common_config=common_config
+                    common_config=common_config,
+                    temp_work_dir=temp_work_dir
                 )
                 count += 1
             except Exception as e:

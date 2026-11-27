@@ -81,21 +81,21 @@ layout_data = [
                     }
                 ]
             },
-            {
-                "align_x": "center",
-                "cells": [
-                    {
-                        "type": "multiline_text",
-                        "text_key": "title",
-                        "line_height": 1,        # 行高倍数
-                        "align": "left",          # 行内居中
-                        "wrap_width": 1200,          # 超过 900px 自动换行（也可不填只靠 \n）
-                        "shadow_color": (0, 0, 0, 180),
-                        "shadow_offset": (3, 3),
-                        "shadow_blur": 4,
-                    }
-                ]
-            }
+            # {
+            #     "align_x": "center",
+            #     "cells": [
+            #         {
+            #             "type": "multiline_text",
+            #             "text_key": "title",
+            #             "line_height": 1,        # 行高倍数
+            #             "align": "left",          # 行内居中
+            #             "wrap_width": 1200,          # 超过 900px 自动换行（也可不填只靠 \n）
+            #             "shadow_color": (0, 0, 0, 180),
+            #             "shadow_offset": (3, 3),
+            #             "shadow_blur": 4,
+            #         }
+            #     ]
+            # }
         ]
     },
     {
@@ -129,12 +129,13 @@ layout_data = [
                         "font_path": "/Users/teacher/Library/Fonts/FZDHTJW.TTF"
                     },
                     {
-                        "space_right": 10,
+                        "space_right": 0,
                         "type": "text",
                         "text_key": "sn_code",
                         "shadow_color": (0, 0, 0, 180),
                         "shadow_offset": (2, 2), 
                         "shadow_blur": 3, 
+                        "width_ratio": 0.9,
                         "font_size": 26,
                         "font_path": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/assets/fonts/typopro-ptmono-bold.ttf",
                     }

@@ -506,19 +506,10 @@ def render_component_to_image(
 
         # ✨ 保存 layer_img 到临时目录（利用 output_path 保持目录结构）
         if temp_work_dir:
-            # 把 output_path 变成相对于当前工作目录的相对路径，替换斜杠防止路径报错
-            # 这里更安全的做法是用原文件名，毕竟已经在同一个输入文件循环里了
-            # 如果确实要分文件夹，可以利用 input_path 的目录名
-            bg_dir_name = os.path.basename(os.path.dirname(background_path))
+            os.makedirs(temp_work_dir, exist_ok=True)
             base_name = os.path.splitext(os.path.basename(output_path))[0]
-            
-            # 如果想平铺：
-            # save_name = f"{base_name}_layer_{idx}.png"
-            # 如果想按原图所在的文件夹分类：
-            save_name = os.path.join(bg_dir_name, f"{base_name}_layer_{idx}.png")
-            
-            save_path = os.path.join(temp_work_dir, save_name)
-            os.makedirs(os.path.dirname(save_path), exist_ok=True)
+            save_path = os.path.join(temp_work_dir, f"{base_name}_layer_{idx}.png")
+            print(save_path)
             layer_img.save(save_path)
 
         # 2. ✨ 如果配置了 scale，对排版图层进行整体缩放
@@ -583,22 +574,23 @@ def batch_process_folder(
             # 如果有子文件夹，在输出目录中创建对应结构
             target_dir = os.path.join(output_dir, rel_path) if rel_path != "." else output_dir
             os.makedirs(target_dir, exist_ok=True)
-            
             output_path = os.path.join(target_dir, file)
-            
             print(f"[{count+1}] 处理中: {input_path} -> {output_path}")
+
+            curr_temp_work_dir = os.path.join(temp_work_dir, rel_path) if rel_path != "." else temp_work_dir
+            
             try:
                 # 如果 layout_data 是函数，则可以根据不同的背景图动态生成排版（可选高级功能）
                 current_layout = layout_data(input_path) if callable(layout_data) else layout_data
                 current_texts = texts(input_path) if callable(texts) else texts
-                
+
                 render_component_to_image(
                     background_path=input_path,
                     output_path=output_path,
                     layout_data=current_layout,
                     texts=current_texts,
                     common_config=common_config,
-                    temp_work_dir=temp_work_dir
+                    temp_work_dir=curr_temp_work_dir
                 )
                 count += 1
             except Exception as e:

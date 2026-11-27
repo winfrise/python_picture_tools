@@ -3,6 +3,7 @@ from datetime import datetime
 import os
 import copy
 from config.jrsy_config import common_config,layout_data
+from tools.generate_code import generate_custom_code
 
 if __name__ == "__main__":
 
@@ -10,17 +11,17 @@ if __name__ == "__main__":
         try: return ["星期一", "星期二", "星期三", "星期四", "星期五", "星期六", "星期日"][datetime.strptime(d, "%Y-%m-%d").weekday()]
         except: return "未知"
 
-    date_val = "2026-11-03"
+    date_val = "2026-11-07"
     my_texts = {
-        "time": "12:47",
+        "time": "09:40",
         "date": date_val,
         "weather": "阴",
-        "temp": "15℃",
+        "temp": "6℃",
         "week": lambda: get_week(date_val),
         "weather_line": "{week} {weather} {temp}",
         "location": "漳州市龙海区·福建华夏高级技工学校(龙江校区)",
-        "logo": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/【今日水印_Step3】添加时间文字/assets/图片.png",
-        "sn_code": "KTHAN1E3Y3X3BP",
+        "logo": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/【今日水印_Step3】添加时间文字/assets/jr_logo.png",
+        "sn_code": generate_custom_code,
         "防伪": "防伪" # ⚠️ 你的原代码里似乎漏了这个 key，这里补上
     }
 

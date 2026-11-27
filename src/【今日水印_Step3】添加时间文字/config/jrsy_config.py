@@ -36,7 +36,7 @@ layout_data = [
                     {
                         "type": "divider", 
                         "width": 8, 
-                        # "height": 20,
+                        "height": 120,
                         "color": (253, 205, 67, 255),
                         "space_left": 40,
                         "space_right": 40,
@@ -46,6 +46,7 @@ layout_data = [
                         "width": 450, 
                         "rows": [
                             {
+                                "spacing": 15,
                                 "cells": [
                                     {
                                         "type": "text", 
@@ -60,6 +61,7 @@ layout_data = [
                             {
                                 "cells": [
                                     {
+                                        "font_path": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/assets/fonts/苹方黑体-中粗-简.ttf",
                                         "type": "text", 
                                         "text_key": "weather_line", 
                                         "space_top": 0,

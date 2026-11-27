@@ -175,6 +175,96 @@ def _render_text(text, cfg):
     # 如果没有配置 image_mask，正常返回原本的文字
     final_bbox = final_img.getbbox()
     return final_img.crop(final_bbox) if final_bbox else None
+
+def _render_multiline_text(text, cfg):
+    # 1. 基础配置
+    font_path = cfg.get("font_path")
+    font_size = cfg.get("font_size", 40)
+    primary_font = _load_font(font_path, font_size)
+    wrap_width = cfg.get("wrap_width")
+    
+    def _measure(s, f):
+        try: return f.getlength(s)
+        except: 
+            bbox = f.getbbox(s)
+            return bbox[2] - bbox[0] if bbox else 0
+
+    # 2. 自动换行 + 清理每行首尾多余空格
+    raw_lines = text.split("\n")
+    lines = []
+    for raw in raw_lines:
+        if wrap_width is None or _measure(raw, primary_font) <= wrap_width:
+            lines.append(raw.strip())  # 去掉首尾空格
+            continue
+        
+        cur = ""
+        for ch in raw:
+            if _measure(cur + ch, primary_font) <= wrap_width or not cur:
+                cur += ch
+            else:
+                lines.append(cur.strip())
+                cur = ch
+        if cur:
+            lines.append(cur.strip())
+
+    if not lines:
+        lines = [""]
+
+    # 3. 逐行渲染并裁切
+    line_imgs = []
+    for line in lines:
+        if line:
+            img = _render_text(line, cfg)
+            if img:
+                bbox = img.getbbox()
+                if bbox:
+                    img = img.crop(bbox)
+                line_imgs.append(img)
+            else:
+                line_imgs.append(None)
+        else:
+            line_imgs.append(None)
+
+    # 4. 计算统一的行高
+    line_height_ratio = cfg.get("line_height", 1.2)
+    ref_img = next((im for im in line_imgs if im), None)
+    base_line_h = int(ref_img.height * line_height_ratio) if ref_img else int(font_size * line_height_ratio)
+    
+    line_step = base_line_h + cfg.get("default_line_spacing", 0)
+
+    # 5. ✨ 核心修复：按【行】真实文字宽度计算画布总宽，而不是用图片宽度
+    # 这样即便因为阴影或标点导致图片有透明边距，也不影响整体对齐
+    valid_widths = [_measure(l, primary_font) for l in lines if l]
+    total_w = max(valid_widths) if valid_widths else 1
+
+    # 为了防止阴影或波浪图超出了测量宽度，留一点点安全边距
+    total_w = int(total_w + cfg.get("font_size", 40) * 0.5) 
+
+    total_h = line_step * (len(line_imgs) - 1) + base_line_h
+    canvas = Image.new("RGBA", (total_w, total_h), (0, 0, 0, 0))
+    
+    align = cfg.get("align", "left")
+    
+    # 6. 绘制到画布
+    for i, im in enumerate(line_imgs):
+        if not im:
+            continue
+        
+        # 因为 im 已经去除了透明边距，直接用图片宽度计算坐标即可
+        if align == "center":
+            x = (total_w - im.width) // 2
+        elif align == "right":
+            x = total_w - im.width
+        else:
+            x = 0
+            
+        y = i * line_step + (base_line_h - im.height) // 2
+        canvas.alpha_composite(im, (int(x), int(y)))
+
+    # 7. 最终裁切返回
+    final_bbox = canvas.getbbox()
+    return canvas.crop(final_bbox) if final_bbox else None
+
 # ============================================================
 # 2. 网格布局引擎 (保持不变)
 # ============================================================
@@ -223,6 +313,17 @@ def render_rows(rows_config, texts_dict, global_cfg, image_path=None, total_widt
                         ratio = target_h / img.height
                         new_w = max(1, int(round(img.width * ratio)))
                         img = img.resize((new_w, int(target_h)), Image.LANCZOS)
+
+            elif c_type == "multiline_text":
+                text_val = _resolve_text_value(cell.get("text_key", ""), texts_dict, image_path)
+                img = _render_multiline_text(text_val, final_cfg)
+                if img:
+                    wr = final_cfg.get("width_ratio", 1.0)
+                    hr = final_cfg.get("height_ratio", 1.0)
+                    if wr != 1.0 or hr != 1.0:
+                        new_w = max(1, int(round(img.width * wr)))
+                        new_h = max(1, int(round(img.height * hr)))
+                        img = img.resize((new_w, new_h), Image.LANCZOS)
 
             elif c_type == "group":
                 img = render_rows(cell["rows"], texts_dict, global_cfg, image_path, total_width=cell.get("width", None))
@@ -340,6 +441,8 @@ def render_rows(rows_config, texts_dict, global_cfg, image_path=None, total_widt
             current_y += row_h
 
     return canvas
+
+
 # ============================================================
 # 3. 对外暴露的 API (支持数组，绘制多个独立的块)
 # ============================================================

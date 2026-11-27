@@ -18,8 +18,9 @@ if __name__ == "__main__":
         "week": lambda: get_week(date_val),
         "weather_line": "{week} {weather} {temp}",
         "location": "漳州市龙海区·福建华夏高级技工学校(龙江校区)",
-        "logo": "/Users/teacher/Desktop/今日水印_2.png",
-        "sn_code": "KTHAN1E3Y3X3BP"
+        "logo": "/Users/teacher/Desktop/pdf_command/python_picture_tools/src/【今日水印_Step3】添加时间文字/assets/jinrishuiyin.png",
+        "sn_code": "KTHAN1E3Y3X3BP",
+        "title": "单行单独配置字体/颜色：可让 text_key 对应 list，每项是 dict，覆盖 final_cfg 后再渲染——需要把 _resolve_text_value 的结果判断类型。"
     }
 
 
@@ -43,7 +44,7 @@ if __name__ == "__main__":
     my_layout_data[0].update(layer_data[0]) 
     my_layout_data[1].update(layer_data[1]) 
 
-    background_path = "/Users/teacher/Desktop/未命名文件夹/2.jpeg"
+    background_path = "/Volumes/西数4T外置/Chrome下载目录/美图设计室_11_24_2026/001/01.jpg"
     base_name, ext = os.path.splitext(background_path)
     output_path = f"{base_name}_加水印{ext}"
     

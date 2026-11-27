@@ -80,6 +80,21 @@ layout_data = [
                         "space_top": 40
                     }
                 ]
+            },
+            {
+                "align_x": "center",
+                "cells": [
+                    {
+                        "type": "multiline_text",
+                        "text_key": "title",
+                        "line_height": 1,        # 行高倍数
+                        "align": "left",          # 行内居中
+                        "wrap_width": 1200,          # 超过 900px 自动换行（也可不填只靠 \n）
+                        "shadow_color": (0, 0, 0, 180),
+                        "shadow_offset": (3, 3),
+                        "shadow_blur": 4,
+                    }
+                ]
             }
         ]
     },
